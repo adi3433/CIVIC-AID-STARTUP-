@@ -1,0 +1,61 @@
+{
+    "sample_calls": [
+        {
+            "call_id": "call_001",
+            "from": "+919876543210",
+            "primary_busy": true,
+            "metadata": {
+                "region": "kerala",
+                "priority": "high",
+                "emergency_type": "police"
+            },
+            "expected_response": {
+                "action": "fallback_ai",
+                "classification": "police",
+                "forward_to": "101"
+            }
+        },
+        {
+            "call_id": "call_002",
+            "from": "+919876543211",
+            "primary_busy": false,
+            "metadata": {
+                "region": "kerala",
+                "priority": "normal"
+            },
+            "expected_response": {
+                "action": "connect_primary"
+            }
+        },
+        {
+            "call_id": "call_003",
+            "from": "+919876543212",
+            "primary_busy": true,
+            "metadata": {
+                "region": "kerala",
+                "priority": "critical",
+                "emergency_type": "medical"
+            },
+            "expected_response": {
+                "action": "fallback_ai",
+                "classification": "medical",
+                "forward_to": "102"
+            }
+        },
+        {
+            "call_id": "call_004",
+            "from": "+919876543213",
+            "primary_busy": true,
+            "metadata": {
+                "region": "kerala",
+                "priority": "critical",
+                "emergency_type": "fire"
+            },
+            "expected_response": {
+                "action": "fallback_ai",
+                "classification": "fire",
+                "forward_to": "101"
+            }
+        }
+    ]
+}

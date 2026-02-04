@@ -1,0 +1,178 @@
+{
+  "phone_repair_basic": {
+    "name": "Phone Repair Bot",
+    "description": "Handle phone repair inquiries and bookings",
+    "steps": [
+      {
+        "id": "welcome",
+        "type": "message",
+        "content": "Hello! Welcome to Phone Repair Service. How can I help you today?"
+      },
+      {
+        "id": "collect_issue",
+        "type": "input",
+        "content": "Please describe the issue with your phone.",
+        "variable": "issue_description"
+      },
+      {
+        "id": "ask_model",
+        "type": "input",
+        "content": "{prompt_model}",
+        "variable": "phone_model",
+        "default_prompt": "Which model is it?"
+      },
+      {
+        "id": "provide_quote",
+        "type": "conditional",
+        "content": "Based on your {phone_model}, the repair cost is {repair_cost}.",
+        "conditions": [
+          {
+            "match": "iPhone*",
+            "repair_cost": "₹8,500"
+          },
+          {
+            "match": "Samsung*",
+            "repair_cost": "₹6,500"
+          },
+          {
+            "match": "*",
+            "repair_cost": "₹5,000"
+          }
+        ]
+      },
+      {
+        "id": "book_slot",
+        "type": "action",
+        "content": "Would you like to book a repair slot?",
+        "actions": [
+          "book_appointment",
+          "send_confirmation"
+        ]
+      }
+    ],
+    "metadata": {
+      "category": "service",
+      "language": "en",
+      "version": "1.0"
+    }
+  },
+  "complaint_basic": {
+    "name": "Civic Complaints Bot",
+    "description": "Register and track civic complaints",
+    "steps": [
+      {
+        "id": "welcome",
+        "type": "message",
+        "content": "Welcome to Civic Complaints Portal. Please describe your issue."
+      },
+      {
+        "id": "collect_complaint",
+        "type": "input",
+        "content": "What would you like to report?",
+        "variable": "complaint_text"
+      },
+      {
+        "id": "collect_location",
+        "type": "input",
+        "content": "Can you share the exact location or nearby landmark?",
+        "variable": "location"
+      },
+      {
+        "id": "confirm",
+        "type": "message",
+        "content": "Your complaint has been registered with ID: {complaint_id}. The team will inspect within 48 hours."
+      }
+    ],
+    "metadata": {
+      "category": "civic",
+      "language": "en",
+      "version": "1.0"
+    }
+  },
+  "emergency_basic": {
+    "name": "Emergency Response Bot",
+    "description": "Handle emergency situations with quick routing",
+    "steps": [
+      {
+        "id": "welcome",
+        "type": "message",
+        "content": "🚨 Emergency Services Bot. What is your emergency?"
+      },
+      {
+        "id": "classify",
+        "type": "classifier",
+        "content": "Analyzing emergency type...",
+        "classifications": [
+          "police",
+          "fire",
+          "medical",
+          "other"
+        ]
+      },
+      {
+        "id": "collect_location",
+        "type": "location",
+        "content": "Please share your location for emergency dispatch."
+      },
+      {
+        "id": "dispatch",
+        "type": "action",
+        "content": "Dispatching {service_type} to your location. Stay on the line.",
+        "actions": [
+          "dispatch_emergency",
+          "notify_contacts"
+        ]
+      }
+    ],
+    "metadata": {
+      "category": "emergency",
+      "language": "en",
+      "version": "1.0",
+      "priority": "high"
+    }
+  },
+  "restaurant_booking": {
+    "name": "Restaurant Booking Bot",
+    "description": "Book a table at our restaurant",
+    "steps": [
+      {
+        "id": "step1",
+        "type": "message",
+        "content": "Welcome to our restaurant! How can I assist you today?"
+      },
+      {
+        "id": "step2",
+        "type": "input",
+        "content": "Would you like to book a table?",
+        "variable": "booking_intent"
+      },
+      {
+        "id": "step3",
+        "type": "input",
+        "content": "How many people are in your party?",
+        "variable": "party_size"
+      },
+      {
+        "id": "step4",
+        "type": "input",
+        "content": "What date and time would you like to book?",
+        "variable": "booking_time"
+      },
+      {
+        "id": "step5",
+        "type": "action",
+        "content": "Book the table",
+        "trigger": "create_booking"
+      },
+      {
+        "id": "step6",
+        "type": "message",
+        "content": "Your table is booked! We look forward to seeing you."
+      }
+    ],
+    "metadata": {
+      "ai_generated": true,
+      "model": "qwen3-235b-a22b-instruct"
+    }
+  }
+}

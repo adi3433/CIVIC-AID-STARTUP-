@@ -1,0 +1,28 @@
+{
+    "sample_cases": [
+        {
+            "case_id": "CASE-2026-001",
+            "case_text": "Vehicle theft reported near MG Road at 10:30 PM. Witness saw blue sedan, license plate partially visible as KL-XX.",
+            "type": "theft",
+            "priority": "high"
+        },
+        {
+            "case_id": "CASE-2026-002",
+            "case_text": "Physical assault reported at Central Market. Victim sustained minor injuries. Suspect fled on foot wearing black jacket.",
+            "type": "assault",
+            "priority": "high"
+        },
+        {
+            "case_id": "CASE-2026-003",
+            "case_text": "Online fraud complaint. Victim transferred Rs. 50,000 to fake investment scheme. Bank account traced to different state.",
+            "type": "fraud",
+            "priority": "medium"
+        },
+        {
+            "case_id": "CASE-2026-004",
+            "case_text": "Noise complaint from residential area. Loud music from neighboring apartment past midnight.",
+            "type": "nuisance",
+            "priority": "low"
+        }
+    ]
+}

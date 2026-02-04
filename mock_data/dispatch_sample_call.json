@@ -1,0 +1,9 @@
+{
+    "call_id": "call_12345",
+    "from": "+919876543210",
+    "primary_busy": true,
+    "metadata": {
+        "region": "kerala",
+        "priority": "high"
+    }
+}

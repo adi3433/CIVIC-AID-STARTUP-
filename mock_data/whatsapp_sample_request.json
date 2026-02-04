@@ -1,0 +1,7 @@
+{
+    "template_id": "phone_repair_basic",
+    "overrides": {
+        "prompt_model": "Which model is it?"
+    },
+    "dry_run": true
+}
