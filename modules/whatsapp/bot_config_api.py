@@ -33,100 +33,51 @@ WHATSAPP_NUMBER = os.getenv('TWILIO_WHATSAPP_NUMBER', '+14155238886')
 app = Flask(__name__)
 CORS(app)  # Allow n8n to call this API
 
-# Supabase Config
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
-# Fallback in-memory storage for local dev without DB
-local_configs = {}
-
-# Determine config file path (use /tmp/ for Vercel/Serverless if needed)
+# File-Based Config (Ephemeral on Vercel)
+# On Vercel, the project root is read-only, but /tmp is writable.
 if os.access("modules/whatsapp", os.W_OK):
-    CONFIG_FILE = "modules/whatsapp/business_configs.json"
+    BASE_DIR = "modules/whatsapp"
 else:
-    CONFIG_FILE = "/tmp/business_configs.json"
+    BASE_DIR = "/tmp"
 
-def get_supabase_headers():
-    return {
-        "apikey": SUPABASE_KEY,
-        "Authorization": f"Bearer {SUPABASE_KEY}",
-        "Content-Type": "application/json",
-        "Prefer": "return=minimal"
-    }
+CONFIG_FILE = os.path.join(BASE_DIR, "business_configs.json")
+SESSION_FILE = os.path.join(BASE_DIR, "active_chats.json")
+
+print(f"⚠️ Using File Storage at: {BASE_DIR}")
+
+def load_json_file(filepath):
+    """Helper to safely load JSON"""
+    if os.path.exists(filepath):
+        try:
+            with open(filepath, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading {filepath}: {e}")
+    return {}
+
+def save_json_file(filepath, data):
+    """Helper to safely save JSON"""
+    try:
+        with open(filepath, "w") as f:
+            json.dump(data, f, indent=4)
+    except Exception as e:
+        print(f"Error saving {filepath}: {e}")
 
 def load_configs():
-    """Load configs from Supabase (HTTP) or fallback to local"""
-    if SUPABASE_URL and SUPABASE_KEY:
-        try:
-            url = f"{SUPABASE_URL}/rest/v1/bot_configs?select=*"
-            response = requests.get(url, headers=get_supabase_headers(), timeout=5)
-            if response.status_code == 200:
-                data = response.json()
-                return {row['business_id']: row['config'] for row in data}
-            else:
-                print(f"⚠️ Supabase Error {response.status_code}: {response.text}")
-        except Exception as e:
-            print(f"Error loading from Supabase HTTP: {e}")
-            
-    # Fallback to local JSON file
-    if os.path.exists(CONFIG_FILE):
-        try:
-            with open(CONFIG_FILE, "r") as f:
-                return json.load(f)
-        except:
-            return local_configs
-    return local_configs
+    """Load configs from local JSON file"""
+    return load_json_file(CONFIG_FILE)
 
 def save_single_config(business_id, config_data):
-    """Save a single config to Supabase (HTTP)"""
-    # 1. Try Supabase REST API
-    if SUPABASE_URL and SUPABASE_KEY:
-        try:
-            url = f"{SUPABASE_URL}/rest/v1/bot_configs"
-            slug = config_data.get('slug')
-            payload = {
-                "business_id": business_id,
-                "slug": slug,
-                "config": config_data,
-                "updated_at": datetime.now().isoformat()
-            }
-            # Upsert via merge
-            headers = get_supabase_headers()
-            headers["Prefer"] = "resolution=merge-duplicates"
-            
-            response = requests.post(url, json=payload, headers=headers, timeout=5)
-            if response.status_code in [200, 201, 204]:
-                print(f"✅ Saved to Supabase (HTTP): {business_id}")
-                return
-            else:
-                print(f"⚠️ Supabase Save Error {response.status_code}: {response.text}")
-        except Exception as e:
-            print(f"Error saving to Supabase HTTP: {e}")
-
-    # 2. Fallback to File System
-    try:
-        # Load existing first to merge (concurrency unsafe, but best effort)
-        current = {}
-        if os.path.exists(CONFIG_FILE):
-            try:
-                with open(CONFIG_FILE, "r") as f:
-                    current = json.load(f)
-            except: pass
-        
-        current[business_id] = config_data
-        
-        with open(CONFIG_FILE, "w") as f:
-            json.dump(current, f, indent=4)
-        print(f"⚠️ Saved to Local File (Fallback): {business_id} at {CONFIG_FILE}")
-            
-    except OSError as e:
-        print(f"CRITICAL: Failed to write to {CONFIG_FILE}: {e}")
+    """Save a single config to local JSON file"""
+    configs = load_configs()
+    configs[business_id] = config_data
+    save_json_file(CONFIG_FILE, configs)
+    print(f"✅ Saved config locally: {business_id}")
 
 def save_configs(configs):
-    """Legacy helper - No-op for DB, provided for backward compatibility"""
-    # In new model, we just save individual items. 
-    # If forced to save bulk, we'd loop. For now, ignoring to prevent overwrites.
-    pass
+    """Save all configs"""
+    save_json_file(CONFIG_FILE, configs)
+
 
 def generate_system_prompt(config):
     """Convert business config into AI system prompt"""
@@ -630,27 +581,17 @@ def update_session():
     if not phone or not business_id:
         return jsonify({"error": "Missing phone or business_id"}), 400
 
-    # Upsert to Supabase
-    if SUPABASE_URL and SUPABASE_KEY:
-        try:
-            url = f"{SUPABASE_URL}/rest/v1/active_chats"
-            payload = {
-                "phone_number": phone, 
-                "business_id": business_id,
-                "updated_at": datetime.now().isoformat()
-            }
-            headers = get_supabase_headers()
-            headers["Prefer"] = "resolution=merge-duplicates"
-            
-            res = requests.post(url, json=payload, headers=headers, timeout=5)
-            if res.status_code in [200, 201, 204]:
-                return jsonify({"success": True})
-            else:
-                return jsonify({"error": f"Supabase Error: {res.text}"}), 500
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
-    
-    return jsonify({"error": "Database not configured"}), 503
+    # Save to ephemeral file storage
+    try:
+        sessions = load_json_file(SESSION_FILE)
+        sessions[phone] = {
+            "business_id": business_id,
+            "updated_at": datetime.now().isoformat()
+        }
+        save_json_file(SESSION_FILE, sessions)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/chats/session', methods=['GET'])
 def get_session():
@@ -662,22 +603,17 @@ def get_session():
     if not phone:
         return jsonify({"error": "Missing phone"}), 400
 
-    if SUPABASE_URL and SUPABASE_KEY:
-        try:
-            url = f"{SUPABASE_URL}/rest/v1/active_chats?phone_number=eq.{phone}&select=business_id"
-            res = requests.get(url, headers=get_supabase_headers(), timeout=5)
-            if res.status_code == 200:
-                data = res.json()
-                if data:
-                     return jsonify({"business_id": data[0]['business_id']})
-                else:
-                    return jsonify({"business_id": None}) # No active session
-            else:
-                return jsonify({"error": res.text}), 500
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
-
-    return jsonify({"error": "Database not configured"}), 503
+    # Read from ephemeral file storage
+    try:
+        sessions = load_json_file(SESSION_FILE)
+        session = sessions.get(phone)
+        
+        if session:
+             return jsonify({"business_id": session['business_id']})
+        else:
+            return jsonify({"business_id": None}) # No active session
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 def list_bots():
     """List all configured bots"""
     configs = load_configs()
