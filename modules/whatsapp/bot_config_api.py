@@ -603,6 +603,82 @@ def get_bot_prompt():
 
 @app.route('/api/bots/list', methods=['GET'])
 def list_bots():
+    """List all created bots"""
+    configs = load_configs()
+    bot_list = []
+    
+    for bid, conf in configs.items():
+        bot_list.append({
+            "business_id": bid,
+            "bot_name": conf.get('bot_name', 'Unknown'),
+            "slug": conf.get('slug', ''),
+            "created_at": conf.get('created_at', '')
+        })
+        
+    return jsonify(bot_list)
+
+@app.route('/api/chats/session', methods=['POST'])
+def update_session():
+    """
+    Update the active bot for a phone number.
+    Request: { "phone": "+12345", "business_id": "abc" }
+    """
+    data = request.json
+    phone = data.get('phone')
+    business_id = data.get('business_id')
+
+    if not phone or not business_id:
+        return jsonify({"error": "Missing phone or business_id"}), 400
+
+    # Upsert to Supabase
+    if SUPABASE_URL and SUPABASE_KEY:
+        try:
+            url = f"{SUPABASE_URL}/rest/v1/active_chats"
+            payload = {
+                "phone_number": phone, 
+                "business_id": business_id,
+                "updated_at": datetime.now().isoformat()
+            }
+            headers = get_supabase_headers()
+            headers["Prefer"] = "resolution=merge-duplicates"
+            
+            res = requests.post(url, json=payload, headers=headers, timeout=5)
+            if res.status_code in [200, 201, 204]:
+                return jsonify({"success": True})
+            else:
+                return jsonify({"error": f"Supabase Error: {res.text}"}), 500
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+    
+    return jsonify({"error": "Database not configured"}), 503
+
+@app.route('/api/chats/session', methods=['GET'])
+def get_session():
+    """
+    Get the active bot for a phone number.
+    Query: ?phone=+12345
+    """
+    phone = request.args.get('phone')
+    if not phone:
+        return jsonify({"error": "Missing phone"}), 400
+
+    if SUPABASE_URL and SUPABASE_KEY:
+        try:
+            url = f"{SUPABASE_URL}/rest/v1/active_chats?phone_number=eq.{phone}&select=business_id"
+            res = requests.get(url, headers=get_supabase_headers(), timeout=5)
+            if res.status_code == 200:
+                data = res.json()
+                if data:
+                     return jsonify({"business_id": data[0]['business_id']})
+                else:
+                    return jsonify({"business_id": None}) # No active session
+            else:
+                return jsonify({"error": res.text}), 500
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    return jsonify({"error": "Database not configured"}), 503
+def list_bots():
     """List all configured bots"""
     configs = load_configs()
     

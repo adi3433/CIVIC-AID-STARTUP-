@@ -25,3 +25,17 @@ ALTER TABLE bot_configs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Enable read access for all users" ON bot_configs FOR SELECT USING (true);
 CREATE POLICY "Enable insert access for all users" ON bot_configs FOR INSERT WITH CHECK (true);
 CREATE POLICY "Enable update access for all users" ON bot_configs FOR UPDATE USING (true);
+
+-- Create active_chats table for session management
+-- This stores which bot a phone number is currently talking to
+CREATE TABLE IF NOT EXISTS active_chats (
+    phone_number TEXT PRIMARY KEY,
+    business_id TEXT NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS for active_chats
+ALTER TABLE active_chats ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read active_chats" ON active_chats FOR SELECT USING (true);
+CREATE POLICY "Public insert active_chats" ON active_chats FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public update active_chats" ON active_chats FOR UPDATE USING (true);
