@@ -1,0 +1,28 @@
+{
+  "name": "dispatch-service",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 5002",
+    "dev:default": "next dev",
+    "build": "next build",
+    "start": "next start -p 5002",
+    "start:default": "next start",
+    "lint": "eslint",
+    "start:with-backend": "concurrently \"npm run dev\" \"cd .. && python dispatcher_stub.py\""
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.6.0",
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "concurrently": "^8.2.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "tailwindcss": "^4"
+  }
+}
