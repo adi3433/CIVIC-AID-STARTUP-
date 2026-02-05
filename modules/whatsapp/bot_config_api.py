@@ -55,33 +55,46 @@ except Exception as e:
 # Fallback in-memory storage for local dev without DB
 local_configs = {}
 
+# Determine config file path (use /tmp/ for Vercel/Serverless if needed)
+# On Vercel, the project root is read-only, but /tmp is writable.
+if os.access("modules/whatsapp", os.W_OK):
+    CONFIG_FILE = "modules/whatsapp/business_configs.json"
+else:
+    # Use /tmp for read-only environments (Vercel)
+    CONFIG_FILE = "/tmp/business_configs.json"
+    print(f"⚠️ Read-only file system detected. Using ephemeral storage at {CONFIG_FILE}")
+
 def load_configs():
     """Load configs from Supabase or fallback to local"""
     if supabase:
         try:
             response = supabase.table("bot_configs").select("*").execute()
-            # Convert list of rows to dict {business_id: config}
             return {row['business_id']: row['config'] for row in response.data}
         except Exception as e:
             print(f"Error loading from Supabase: {e}")
-            return {}
+            # If DB fails, fall through to local
     
     # Fallback to local JSON file if exists
-    if os.path.exists("modules/whatsapp/business_configs.json"):
-        with open("modules/whatsapp/business_configs.json", "r") as f:
-            return json.load(f)
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r") as f:
+                return json.load(f)
+        except:
+            return local_configs
     return local_configs
 
 def save_configs(configs):
     """Save configs - strictly writes to DB if available"""
-    # In Supabase model, we usually save individual records, not the whole blob.
-    # But for compatibility with existing code structure that passes the whole dict,
-    # we'll implementing saving the *modified* item in the caller functions instead.
-    # This function is now deprecated for bulk saves, but we keep it for fallback.
-    
+    # This is the fallback path when Supabase is not available
     if not supabase:
-        with open("modules/whatsapp/business_configs.json", "w") as f:
-            json.dump(configs, f, indent=4)
+        try:
+            with open(CONFIG_FILE, "w") as f:
+                json.dump(configs, f, indent=4)
+        except OSError as e:
+            print(f"CRITICAL: Failed to write to {CONFIG_FILE}: {e}")
+            # Identify if this is a Read-Only FS error despite our check
+            if e.errno == 30: 
+                print("Suggestion: Set SUPABASE_URL to use database instead of file system.")
 
 def save_single_config(business_id, config_data):
     """Save a single config to Supabase"""
