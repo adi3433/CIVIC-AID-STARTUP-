@@ -7,7 +7,7 @@ A modular civic-technology platform enabling streamlined citizen services throug
 ## 🚀 Quick Start
 
 ```bash
-# Install dependencies
+# Install Python dependencies
 pip install -r requirements.txt
 
 # Run all demos
@@ -16,27 +16,40 @@ bash scripts/run_all_demos.sh
 
 ## 📦 Modules
 
-| Module | Port | Owner | Description |
-|--------|------|-------|-------------|
-| WhatsApp | 5001 | Adithyan | Modular WhatsApp Bot Generator |
-| Dispatch | 5002 | Lestlin | Twilio-style webhook + failover |
-| LeadGen | 5003 | Lestlin | RAG-based case analysis |
-| Education | 5004 | Basil | PPT/PDF generator |
-| Web UI | - | Amal & Anita | Landing page & demos |
+| Module | Port | Owner | Description | Tech Stack |
+|--------|------|-------|-------------|------------|
+| WhatsApp | 5001 | Adithyan | Modular WhatsApp Bot Generator | Python/Flask |
+| Dispatch | 5002 | Lestlin | AI-powered emergency dispatch | Next.js + Python |
+| LeadGen | 5003 | Lestlin | RAG-based case analysis | Python/Flask |
+| Education | 5004 | Basil | PPT/PDF generator | Python/Flask |
+| Web UI | - | Amal & Anita | Landing page & demos | HTML/CSS |
 
 ## 🔧 Running Individual Modules
 
+### WhatsApp (Adithyan)
 ```bash
-# WhatsApp (Adithyan)
 python -m modules.whatsapp.app
+```
 
-# Dispatch (Lestlin)
+### Dispatch (Lestlin)
+```bash
+# Option 1: Run Next.js Frontend (Recommended)
+cd modules/dispatch/dispatch-service
+npm install
+npm run dev
+# Opens at http://localhost:5002
+
+# Option 2: Run Flask Backend Only
 python -m modules.dispatch.dispatcher_stub
+```
 
-# LeadGen (Lestlin)
+### LeadGen (Lestlin)
+```bash
 python -m modules.leadgen.leadgen_stub
+```
 
-# Education (Basil)
+### Education (Basil)
+```bash
 python -m modules.education.ppt_generator_stub
 ```
 

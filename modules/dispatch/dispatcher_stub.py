@@ -5,7 +5,7 @@ Owner: Lestlin
 Port: 5002
 
 This module handles call dispatch with Twilio-style webhook integration
-and failover simulation.
+and failover simulation. Also serves the Next.js dispatch UI.
 
 TODO: Production Integration
 1. Integrate with Twilio Voice API
@@ -15,13 +15,20 @@ TODO: Production Integration
 5. Set up monitoring and alerting
 
 API Endpoints:
+- GET /              - Dispatch UI (Next.js)
 - POST /dispatch/webhook - Handle call dispatch
 - GET /health - Health check
 """
 
-from flask import Flask, request, jsonify
+import os
+from flask import Flask, request, jsonify, send_from_directory, send_file
 
-app = Flask(__name__)
+# Get the directory where this script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# Path to Next.js static export
+STATIC_DIR = os.path.join(SCRIPT_DIR, 'dispatch-service', 'out')
+
+app = Flask(__name__, static_folder=STATIC_DIR)
 
 
 # Deterministic responses for demos
@@ -50,7 +57,13 @@ DEMO_FALLBACK_RESPONSES = {
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint."""
-    return jsonify({"status": "healthy", "module": "dispatch", "port": 5002})
+    ui_available = os.path.exists(os.path.join(STATIC_DIR, 'index.html'))
+    return jsonify({
+        "status": "healthy", 
+        "module": "dispatch", 
+        "port": 5002,
+        "ui_available": ui_available
+    })
 
 
 @app.route('/dispatch/webhook', methods=['POST'])
@@ -133,6 +146,58 @@ def dispatch_webhook():
     return jsonify(response)
 
 
+# ============================================
+# Static File Serving for Next.js UI
+# ============================================
+
+@app.route('/')
+def serve_index():
+    """Serve the main dispatch UI."""
+    index_path = os.path.join(STATIC_DIR, 'index.html')
+    if os.path.exists(index_path):
+        return send_file(index_path)
+    else:
+        return jsonify({
+            "error": "ui_not_built",
+            "message": "Next.js UI not built. Run: cd dispatch-service && npm run build",
+            "api_available": True,
+            "endpoints": ["/dispatch/webhook", "/health"]
+        }), 404
+
+
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve static files from Next.js build."""
+    # Check if the file exists directly
+    file_path = os.path.join(STATIC_DIR, path)
+    
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        return send_from_directory(STATIC_DIR, path)
+    
+    # For SPA routing, try to serve index.html from subdirectory
+    if os.path.isdir(file_path):
+        index_path = os.path.join(file_path, 'index.html')
+        if os.path.exists(index_path):
+            return send_file(index_path)
+    
+    # Try adding .html extension
+    html_path = file_path + '.html'
+    if os.path.exists(html_path):
+        return send_file(html_path)
+    
+    # Try index.html in path directory
+    path_index = os.path.join(STATIC_DIR, path, 'index.html')
+    if os.path.exists(path_index):
+        return send_file(path_index)
+    
+    # Fallback to main index for client-side routing
+    main_index = os.path.join(STATIC_DIR, 'index.html')
+    if os.path.exists(main_index):
+        return send_file(main_index)
+    
+    return jsonify({"error": "not_found", "path": path}), 404
+
+
 # CLI mode for testing
 if __name__ == '__main__':
     import sys
@@ -165,15 +230,24 @@ if __name__ == '__main__':
         print(json.dumps({"action": "connect_primary", "call_id": test_request['call_id']}, indent=2))
     else:
         # Server mode
+        ui_available = os.path.exists(os.path.join(STATIC_DIR, 'index.html'))
+        
         print("=" * 50)
         print("Dispatch Module - Starting on port 5002")
         print("=" * 50)
         print("\nAvailable endpoints:")
+        print("  GET  /                 - Dispatch UI" + (" ✓" if ui_available else " (not built)"))
         print("  POST /dispatch/webhook - Handle call dispatch")
         print("  GET  /health           - Health check")
+        
+        if not ui_available:
+            print("\n⚠️  UI not built. To build:")
+            print("  cd dispatch-service && npm install && npm run build")
+        
         print("\nDemo command:")
         print('  curl -X POST http://localhost:5002/dispatch/webhook \\')
         print('    -H "Content-Type: application/json" \\')
         print('    -d \'{"call_id": "demo_001", "from": "+919876543210", "primary_busy": true}\'')
         print("=" * 50)
         app.run(host='0.0.0.0', port=5002, debug=True)
+
