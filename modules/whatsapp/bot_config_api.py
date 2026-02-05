@@ -56,8 +56,7 @@ def get_supabase_headers():
 
 def load_configs():
     """Load configs from Supabase (HTTP) or fallback to local"""
-    # TEMP DISABLE SUPABASE
-    if False and SUPABASE_URL and SUPABASE_KEY:
+    if SUPABASE_URL and SUPABASE_KEY:
         try:
             url = f"{SUPABASE_URL}/rest/v1/bot_configs?select=*"
             response = requests.get(url, headers=get_supabase_headers(), timeout=5)
@@ -81,8 +80,7 @@ def load_configs():
 def save_single_config(business_id, config_data):
     """Save a single config to Supabase (HTTP)"""
     # 1. Try Supabase REST API
-    # TEMP DISABLE SUPABASE
-    if False and SUPABASE_URL and SUPABASE_KEY:
+    if SUPABASE_URL and SUPABASE_KEY:
         try:
             url = f"{SUPABASE_URL}/rest/v1/bot_configs"
             slug = config_data.get('slug')
