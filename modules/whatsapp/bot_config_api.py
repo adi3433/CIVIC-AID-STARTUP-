@@ -36,14 +36,21 @@ CORS(app)  # Allow n8n to call this API
 # Supabase Setup
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-supabase: Client = None
+supabase = None
 
-if SUPABASE_URL and SUPABASE_KEY:
-    try:
-        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-        print("✅ Connected to Supabase")
-    except Exception as e:
-        print(f"⚠️ Failed to connect to Supabase: {e}")
+# Try importing and initializing Supabase
+try:
+    from supabase import create_client, Client
+    if SUPABASE_URL and SUPABASE_KEY:
+        try:
+            supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+            print("✅ Connected to Supabase")
+        except Exception as e:
+            print(f"⚠️ Failed to connect to Supabase: {e}")
+except ImportError:
+    print("⚠️ Supabase library not installed. Using local JSON storage.")
+except Exception as e:
+    print(f"⚠️ Unexpected error importing Supabase: {e}")
 
 # Fallback in-memory storage for local dev without DB
 local_configs = {}

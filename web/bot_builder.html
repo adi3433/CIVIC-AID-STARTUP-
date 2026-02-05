@@ -712,18 +712,43 @@
             document.getElementById('result-section').classList.remove('active');
 
             try {
-                const response = await fetch(`${API_BASE}/api/bots/create`, {
+                const endpoint = `${API_BASE}/api/bots/create`; // Define endpoint
+                const response = await fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                     body: JSON.stringify(formData)
                 });
 
-                const data = await response.json();
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Server returned an error');
 
-                if (data.success) {
-                    showResult(data);
+                    // Success
+                    // Note: The 'status' element is not present in the provided HTML.
+                    // If you intend to display a status message, you'll need to add an element with id="status" to your HTML.
+                    // For now, this line will not have a visible effect unless the element is added.
+                    const statusElement = document.getElementById('status');
+                    if (statusElement) {
+                        statusElement.className = 'status success';
+                        statusElement.innerText = 'Bot created successfully! Redirecting...';
+                    }
+
+                    setTimeout(() => {
+                        const params = new URLSearchParams({
+                            business_id: data.business_id,
+                            bot_name: data.bot_name,
+                            link: data.whatsapp_link
+                        });
+                        window.location.href = `demo_whatsapp.html?${params.toString()}`;
+                    }, 1500);
                 } else {
-                    throw new Error(data.error || 'Failed to create bot');
+                    // Handle non-JSON response (likely HTML error from Vercel/Flask)
+                    const text = await response.text();
+                    console.error("Server Error:", text);
+                    throw new Error(`Server Error (${response.status}): ${text.substring(0, 100)}...`);
                 }
 
             } catch (error) {
