@@ -33,20 +33,69 @@ WHATSAPP_NUMBER = os.getenv('TWILIO_WHATSAPP_NUMBER', '+14155238886')
 app = Flask(__name__)
 CORS(app)  # Allow n8n to call this API
 
-# Config file path
-CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'business_configs.json')
+# Supabase Setup
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase: Client = None
+
+if SUPABASE_URL and SUPABASE_KEY:
+    try:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        print("✅ Connected to Supabase")
+    except Exception as e:
+        print(f"⚠️ Failed to connect to Supabase: {e}")
+
+# Fallback in-memory storage for local dev without DB
+local_configs = {}
 
 def load_configs():
-    """Load all business configs"""
-    if os.path.exists(CONFIG_FILE):
-        with open(CONFIG_FILE, 'r') as f:
+    """Load configs from Supabase or fallback to local"""
+    if supabase:
+        try:
+            response = supabase.table("bot_configs").select("*").execute()
+            # Convert list of rows to dict {business_id: config}
+            return {row['business_id']: row['config'] for row in response.data}
+        except Exception as e:
+            print(f"Error loading from Supabase: {e}")
+            return {}
+    
+    # Fallback to local JSON file if exists
+    if os.path.exists("modules/whatsapp/business_configs.json"):
+        with open("modules/whatsapp/business_configs.json", "r") as f:
             return json.load(f)
-    return {}
+    return local_configs
 
 def save_configs(configs):
-    """Save business configs"""
-    with open(CONFIG_FILE, 'w') as f:
-        json.dump(configs, f, indent=2)
+    """Save configs - strictly writes to DB if available"""
+    # In Supabase model, we usually save individual records, not the whole blob.
+    # But for compatibility with existing code structure that passes the whole dict,
+    # we'll implementing saving the *modified* item in the caller functions instead.
+    # This function is now deprecated for bulk saves, but we keep it for fallback.
+    
+    if not supabase:
+        with open("modules/whatsapp/business_configs.json", "w") as f:
+            json.dump(configs, f, indent=4)
+
+def save_single_config(business_id, config_data):
+    """Save a single config to Supabase"""
+    if supabase:
+        try:
+            slug = config_data.get('slug')
+            data = {
+                "business_id": business_id,
+                "slug": slug,
+                "config": config_data,
+                "updated_at": datetime.now().isoformat()
+            }
+            supabase.table("bot_configs").upsert(data).execute()
+            print(f"Saved to Supabase: {business_id}")
+        except Exception as e:
+            print(f"Error saving to Supabase: {e}")
+    else:
+        # Fallback
+        configs = load_configs()
+        configs[business_id] = config_data
+        save_configs(configs)
 
 def generate_system_prompt(config):
     """Convert business config into AI system prompt"""
@@ -440,9 +489,12 @@ def create_bot_from_form():
     }
     
     # Save config
-    configs = load_configs()
-    configs[business_id] = full_config
-    save_configs(configs)
+    # OLD: configs = load_configs()
+    # OLD: configs[business_id] = full_config
+    # OLD: save_configs(configs)
+    
+    # NEW: Save directly to Supabase via helper
+    save_single_config(business_id, full_config)
     
     print(f"[BOT CREATOR] Bot created: {business_id} ({slug}) for {business_name}")
     
