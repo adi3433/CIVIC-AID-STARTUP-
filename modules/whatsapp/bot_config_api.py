@@ -144,6 +144,27 @@ def dispatch_webhook():
             "note": "STUB: Would connect to primary agent via Twilio"
         })
     
+    # Check for n8n integration
+    n8n_webhook_url = os.getenv('N8N_DISPATCH_WEBHOOK_URL')
+    
+    if n8n_webhook_url:
+        try:
+            print(f"Forwarding to n8n: {n8n_webhook_url}")
+            n8n_response = requests.post(
+                n8n_webhook_url,
+                json=data,
+                timeout=10
+            )
+            
+            if n8n_response.status_code == 200:
+                return jsonify(n8n_response.json())
+            else:
+                print(f"n8n Error: {n8n_response.status_code} - {n8n_response.text}")
+                # Fallback to local logic on error
+        except Exception as e:
+            print(f"n8n Connection Failed: {e}")
+            # Fallback to local logic on exception
+
     # Fallback to AI - deterministic response for demos
     metadata = data.get('metadata', {})
     emergency_type = metadata.get('emergency_type', 'default')
