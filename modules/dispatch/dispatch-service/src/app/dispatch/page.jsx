@@ -682,7 +682,7 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
   };
 
   return (
-    <div className="max-w-lg mx-auto px-4 min-h-screen flex flex-col" style={{ background: 'var(--bg-dark)' }}>
+    <div className="max-w-lg mx-auto px-4 min-h-screen flex flex-col">
       {/* Header matching landing.html */}
       <header className="flex justify-between items-center py-5">
         <div className="flex items-center gap-2 text-xl font-bold">
@@ -695,59 +695,57 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
       </header>
 
       {/* Hero Section */}
-      <section className="text-center mb-6">
+      <section className="text-center mb-8">
         <span className="badge text-white mb-4 inline-block">🚨 EMERGENCY AI</span>
-        <h1 className="text-3xl font-bold mb-3 bg-gradient-to-r from-white to-red-300 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-white to-red-300 bg-clip-text text-transparent">
           Emergency Dispatch
         </h1>
-        <p className="text-gray-400 text-sm">AI-powered emergency response with voice recognition</p>
+        <p className="text-gray-400">AI-powered emergency response with voice recognition</p>
       </section>
       
       <div className="flex-1 flex flex-col">
-        {/* Phone UI Card */}
-        <div className="rounded-2xl overflow-hidden flex flex-col flex-1" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-          {/* Call status bar - Emergency Red Theme */}
-          <div className="p-4 flex justify-between items-center" style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))' }}>
-            <div className="text-sm font-semibold text-white">
-              {callStatus === 'idle' && 'Ready'}
-              {callStatus === 'calling' && 'Connecting...'}
-              {callStatus === 'connected' && 'Connected'}
-              {callStatus === 'ended' && 'Call Ended'}
-            </div>
-            <div className="flex items-center gap-3">
-              {callStatus === 'connected' && (
-                <>
-                  <button 
-                    onClick={toggleVoiceSettings}
-                    className="text-xs px-3 py-1.5 bg-white/20 rounded-full hover:bg-white/30 flex items-center gap-1 text-white transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
-                    </svg>
-                    Voice
-                  </button>
-                  <button 
-                    onClick={() => setInputMode(inputMode === 'unified' ? 'text' : 'unified')}
-                    className="text-xs px-3 py-1.5 bg-white/20 rounded-full hover:bg-white/30 text-white transition-colors"
-                  >
-                    {inputMode === 'unified' ? '⌨️ Text' : '🎤 Voice'}
-                  </button>
-                </>
-              )}
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                <span className="text-xs text-white/80">
-                  {isRecording && 'Recording'}
-                  {isProcessing && 'Processing'}
-                  {!isRecording && !isProcessing && 'Online'}
-                </span>
-              </div>
+        {/* Status bar - Emergency Red Theme */}
+        <div className="px-6 py-4 flex justify-between items-center mb-6 rounded-2xl" style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', boxShadow: '0 4px 20px var(--primary-glow)' }}>
+          <div className="text-sm font-semibold text-white">
+            {callStatus === 'idle' && 'Ready'}
+            {callStatus === 'calling' && 'Connecting...'}
+            {callStatus === 'connected' && 'Connected'}
+            {callStatus === 'ended' && 'Call Ended'}
+          </div>
+          <div className="flex items-center gap-3">
+            {callStatus === 'connected' && (
+              <>
+                <button 
+                  onClick={toggleVoiceSettings}
+                  className="text-xs px-3 py-1.5 bg-white/20 rounded-full hover:bg-white/30 flex items-center gap-1 text-white transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
+                  </svg>
+                  Voice
+                </button>
+                <button 
+                  onClick={() => setInputMode(inputMode === 'unified' ? 'text' : 'unified')}
+                  className="text-xs px-3 py-1.5 bg-white/20 rounded-full hover:bg-white/30 text-white transition-colors"
+                >
+                  {inputMode === 'unified' ? '⌨️ Text' : '🎤 Voice'}
+                </button>
+              </>
+            )}
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+              <span className="text-xs text-white/80">
+                {isRecording && 'Recording'}
+                {isProcessing && 'Processing'}
+                {!isRecording && !isProcessing && 'Online'}
+              </span>
             </div>
           </div>
+        </div>
           
           {/* Voice Settings Panel */}
           {showVoiceSettings && (
-            <div className="p-4 border-b" style={{ background: 'var(--bg-input)', borderColor: 'var(--border)' }}>
+            <div className="p-4 mb-4 rounded-2xl mx-2" style={{ background: 'rgba(31, 41, 55, 0.7)', backdropFilter: 'blur(10px)', border: '1px solid var(--border)' }}>
               <div className="flex justify-between items-center mb-3">
                 <h3 className="text-sm font-semibold text-white">Voice Settings</h3>
                 <button 
@@ -875,7 +873,6 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
           <div 
             ref={conversationContainerRef}
             className="flex-1 p-4 overflow-y-auto space-y-3 min-h-[300px]"
-            style={{ background: 'var(--bg-dark)' }}
           >
             {conversationHistory.length > 0 ? (
               conversationHistory.map((message, index) => (
@@ -1019,14 +1016,15 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
           
           {/* Input area for text mode */}
           {inputMode === 'text' && callStatus === 'connected' && (
-            <div className="p-3 bg-[#1e1e1e] border-t border-gray-800">
+            <div className="p-4">
               <form onSubmit={handleTextSubmit} className="flex gap-2">
                 <input
                   type="text"
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
                   placeholder="Type your message..."
-                  className="flex-1 py-2 px-3 border border-gray-700 bg-[#2d3748] text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 py-3 px-4 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-sm"
+                  style={{ background: 'var(--bg-input)', border: '1px solid var(--border)' }}
                   disabled={isProcessingText}
                   ref={textInputRef}
                 />
@@ -1054,7 +1052,7 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
           )}
           
           {/* Call controls */}
-          <div className="p-5 flex justify-center items-center gap-6" style={{ background: 'rgba(0,0,0,0.3)', borderTop: '1px solid var(--border)' }}>
+          <div className="p-5 flex justify-center items-center gap-6">
             {callStatus === 'idle' && (
               <button
                 onClick={initiateCall}
@@ -1129,7 +1127,6 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
               </button>
             )}
           </div>
-        </div>
       </div>
       
       {/* Footer */}
