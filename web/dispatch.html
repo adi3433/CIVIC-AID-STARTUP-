@@ -151,8 +151,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
 
         /* Conversation Area */
@@ -219,12 +226,25 @@
             animation: bounce 1.4s ease-in-out infinite;
         }
 
-        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
 
         @keyframes bounce {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-8px); }
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-8px);
+            }
         }
 
         /* Waveform */
@@ -249,8 +269,15 @@
         }
 
         @keyframes wave {
-            0%, 100% { height: 10px; }
-            50% { height: 30px; }
+
+            0%,
+            100% {
+                height: 10px;
+            }
+
+            50% {
+                height: 30px;
+            }
         }
 
         /* Input Area */
@@ -379,11 +406,15 @@
         }
 
         /* States */
-        .idle-state, .connected-state, .ended-state {
+        .idle-state,
+        .connected-state,
+        .ended-state {
             display: none;
         }
 
-        .idle-state.active, .connected-state.active, .ended-state.active {
+        .idle-state.active,
+        .connected-state.active,
+        .ended-state.active {
             display: block;
         }
 
@@ -497,7 +528,7 @@
             <!-- Connected State -->
             <div class="connected-state" id="connected-state">
                 <div class="conversation" id="conversation"></div>
-                
+
                 <div class="waveform" id="waveform">
                     <div class="waveform-bar" style="animation-delay: 0s;"></div>
                     <div class="waveform-bar" style="animation-delay: 0.1s;"></div>
@@ -512,7 +543,8 @@
                 <div class="input-area">
                     <div class="input-row">
                         <button class="btn-mic" id="mic-btn" onclick="toggleRecording()">🎤</button>
-                        <input type="text" class="text-input" id="text-input" placeholder="Type your emergency..." onkeypress="handleKeyPress(event)">
+                        <input type="text" class="text-input" id="text-input" placeholder="Type your emergency..."
+                            onkeypress="handleKeyPress(event)">
                         <button class="btn-send" id="send-btn" onclick="sendMessage()" disabled>➤</button>
                     </div>
                     <div class="call-controls" style="margin-top: 15px;">
@@ -526,7 +558,8 @@
                 <div class="ended-content">
                     <div class="icon">✅</div>
                     <h2>Call Ended</h2>
-                    <p style="color: var(--text-muted); margin-bottom: 20px;">Thank you for using CivicAid Emergency Dispatch</p>
+                    <p style="color: var(--text-muted); margin-bottom: 20px;">Thank you for using CivicAid Emergency
+                        Dispatch</p>
                     <button class="btn-new-call" onclick="resetCall()">Start New Call</button>
                 </div>
             </div>
@@ -584,7 +617,7 @@
 
                 recognition.onend = () => {
                     if (isRecording) {
-                        try { recognition.start(); } catch(e) {}
+                        try { recognition.start(); } catch (e) { }
                     }
                 };
             }
@@ -607,7 +640,7 @@
                 isRecording = true;
                 micBtn.classList.add('recording');
                 waveform.classList.add('active');
-                try { recognition.start(); } catch(e) {}
+                try { recognition.start(); } catch (e) { }
             }
         }
 
@@ -616,7 +649,7 @@
             micBtn.classList.remove('recording');
             waveform.classList.remove('active');
             if (recognition) {
-                try { recognition.stop(); } catch(e) {}
+                try { recognition.stop(); } catch (e) { }
             }
         }
 
@@ -624,14 +657,14 @@
         function initiateCall() {
             callState = 'connecting';
             updateUI();
-            
+
             statusText.textContent = 'Connecting...';
             statusLabel.textContent = 'Dialing';
 
             setTimeout(() => {
                 callState = 'connected';
                 updateUI();
-                
+
                 statusText.textContent = 'Connected';
                 statusLabel.textContent = 'In Call';
 
@@ -645,7 +678,7 @@
             stopRecording();
             callState = 'ended';
             updateUI();
-            
+
             statusText.textContent = 'Call Ended';
             statusLabel.textContent = 'Offline';
         }
@@ -657,7 +690,7 @@
             textInput.value = '';
             sendBtn.disabled = true;
             updateUI();
-            
+
             statusText.textContent = 'Ready';
             statusLabel.textContent = 'Online';
         }
@@ -746,7 +779,7 @@
         // AI responses via Flask backend API
         async function getAIResponse(text) {
             const lowerText = text.toLowerCase();
-            
+
             // Determine emergency type from text
             let emergencyType = 'default';
             if (lowerText.includes('fire') || lowerText.includes('burning') || lowerText.includes('smoke')) {
@@ -759,7 +792,7 @@
 
             try {
                 // Call the Flask dispatch webhook API
-                const response = await fetch('/dispatch/webhook', {
+                const response = await fetch('/api/dispatch/webhook', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -778,18 +811,18 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    
+
                     // Build response based on API result
                     const classification = data.classification || emergencyType;
                     const forwardTo = data.forward_to || '100';
-                    
+
                     // Generate appropriate dispatcher response based on classification and conversation stage
                     return generateDispatcherResponse(classification, text, conversationHistory.length);
                 }
             } catch (error) {
                 console.error('API Error:', error);
             }
-            
+
             // Fallback to local responses if API fails
             return getFallbackResponse(text, conversationHistory.length);
         }
@@ -797,18 +830,18 @@
         // Generate contextual dispatcher responses
         function generateDispatcherResponse(classification, userText, messageCount) {
             const lowerText = userText.toLowerCase();
-            
+
             // Check if user provided location info
-            const hasLocation = lowerText.includes('street') || lowerText.includes('road') || 
-                              lowerText.includes('building') || lowerText.includes('apartment') ||
-                              lowerText.includes('house') || lowerText.includes('near') ||
-                              lowerText.includes('address') || /\d{6}/.test(userText) || // PIN code
-                              lowerText.includes('floor') || lowerText.includes('block');
+            const hasLocation = lowerText.includes('street') || lowerText.includes('road') ||
+                lowerText.includes('building') || lowerText.includes('apartment') ||
+                lowerText.includes('house') || lowerText.includes('near') ||
+                lowerText.includes('address') || /\d{6}/.test(userText) || // PIN code
+                lowerText.includes('floor') || lowerText.includes('block');
 
             // Check if user confirmed safety or gave details
-            const confirmedInfo = lowerText.includes('yes') || lowerText.includes('no') || 
-                                 lowerText.includes('ok') || lowerText.includes('safe') ||
-                                 lowerText.includes('people') || lowerText.includes('person');
+            const confirmedInfo = lowerText.includes('yes') || lowerText.includes('no') ||
+                lowerText.includes('ok') || lowerText.includes('safe') ||
+                lowerText.includes('people') || lowerText.includes('person');
 
             // Emergency-specific responses based on conversation stage
             if (classification === 'fire') {
@@ -842,7 +875,7 @@
                     return "Officers are en route. Stay on the line and keep yourself safe. Do not engage with the perpetrator.";
                 }
             }
-            
+
             // Default/unknown emergency
             if (messageCount <= 2) {
                 return "I understand you need help. Can you describe the nature of your emergency? Is it medical, fire, or a crime in progress?";
@@ -856,7 +889,7 @@
         // Fallback when API unavailable
         function getFallbackResponse(text, messageCount) {
             const lowerText = text.toLowerCase();
-            
+
             if (lowerText.includes('fire') || lowerText.includes('burning')) {
                 return "Fire emergency noted. Fire brigade is being dispatched. What is your exact location?";
             } else if (lowerText.includes('medical') || lowerText.includes('heart') || lowerText.includes('hurt')) {
