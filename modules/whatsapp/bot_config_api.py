@@ -33,48 +33,42 @@ WHATSAPP_NUMBER = os.getenv('TWILIO_WHATSAPP_NUMBER', '+14155238886')
 app = Flask(__name__)
 CORS(app)  # Allow n8n to call this API
 
-# Supabase Setup
+# Supabase Config
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-supabase = None
-
-# Try importing and initializing Supabase
-try:
-    from supabase import create_client, Client
-    if SUPABASE_URL and SUPABASE_KEY:
-        try:
-            supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-            print("✅ Connected to Supabase")
-        except Exception as e:
-            print(f"⚠️ Failed to connect to Supabase: {e}")
-except ImportError:
-    print("⚠️ Supabase library not installed. Using local JSON storage.")
-except Exception as e:
-    print(f"⚠️ Unexpected error importing Supabase: {e}")
 
 # Fallback in-memory storage for local dev without DB
 local_configs = {}
 
 # Determine config file path (use /tmp/ for Vercel/Serverless if needed)
-# On Vercel, the project root is read-only, but /tmp is writable.
 if os.access("modules/whatsapp", os.W_OK):
     CONFIG_FILE = "modules/whatsapp/business_configs.json"
 else:
-    # Use /tmp for read-only environments (Vercel)
     CONFIG_FILE = "/tmp/business_configs.json"
-    print(f"⚠️ Read-only file system detected. Using ephemeral storage at {CONFIG_FILE}")
+
+def get_supabase_headers():
+    return {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+    }
 
 def load_configs():
-    """Load configs from Supabase or fallback to local"""
-    if supabase:
+    """Load configs from Supabase (HTTP) or fallback to local"""
+    if SUPABASE_URL and SUPABASE_KEY:
         try:
-            response = supabase.table("bot_configs").select("*").execute()
-            return {row['business_id']: row['config'] for row in response.data}
+            url = f"{SUPABASE_URL}/rest/v1/bot_configs?select=*"
+            response = requests.get(url, headers=get_supabase_headers(), timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                return {row['business_id']: row['config'] for row in data}
+            else:
+                print(f"⚠️ Supabase Error {response.status_code}: {response.text}")
         except Exception as e:
-            print(f"Error loading from Supabase: {e}")
-            # If DB fails, fall through to local
-    
-    # Fallback to local JSON file if exists
+            print(f"Error loading from Supabase HTTP: {e}")
+            
+    # Fallback to local JSON file
     if os.path.exists(CONFIG_FILE):
         try:
             with open(CONFIG_FILE, "r") as f:
@@ -83,39 +77,56 @@ def load_configs():
             return local_configs
     return local_configs
 
-def save_configs(configs):
-    """Save configs - strictly writes to DB if available"""
-    # This is the fallback path when Supabase is not available
-    if not supabase:
-        try:
-            with open(CONFIG_FILE, "w") as f:
-                json.dump(configs, f, indent=4)
-        except OSError as e:
-            print(f"CRITICAL: Failed to write to {CONFIG_FILE}: {e}")
-            # Identify if this is a Read-Only FS error despite our check
-            if e.errno == 30: 
-                print("Suggestion: Set SUPABASE_URL to use database instead of file system.")
-
 def save_single_config(business_id, config_data):
-    """Save a single config to Supabase"""
-    if supabase:
+    """Save a single config to Supabase (HTTP)"""
+    # 1. Try Supabase REST API
+    if SUPABASE_URL and SUPABASE_KEY:
         try:
+            url = f"{SUPABASE_URL}/rest/v1/bot_configs"
             slug = config_data.get('slug')
-            data = {
+            payload = {
                 "business_id": business_id,
                 "slug": slug,
                 "config": config_data,
                 "updated_at": datetime.now().isoformat()
             }
-            supabase.table("bot_configs").upsert(data).execute()
-            print(f"Saved to Supabase: {business_id}")
+            # Upsert via merge
+            headers = get_supabase_headers()
+            headers["Prefer"] = "resolution=merge-duplicates"
+            
+            response = requests.post(url, json=payload, headers=headers, timeout=5)
+            if response.status_code in [200, 201, 204]:
+                print(f"✅ Saved to Supabase (HTTP): {business_id}")
+                return
+            else:
+                print(f"⚠️ Supabase Save Error {response.status_code}: {response.text}")
         except Exception as e:
-            print(f"Error saving to Supabase: {e}")
-    else:
-        # Fallback
-        configs = load_configs()
-        configs[business_id] = config_data
-        save_configs(configs)
+            print(f"Error saving to Supabase HTTP: {e}")
+
+    # 2. Fallback to File System
+    try:
+        # Load existing first to merge (concurrency unsafe, but best effort)
+        current = {}
+        if os.path.exists(CONFIG_FILE):
+            try:
+                with open(CONFIG_FILE, "r") as f:
+                    current = json.load(f)
+            except: pass
+        
+        current[business_id] = config_data
+        
+        with open(CONFIG_FILE, "w") as f:
+            json.dump(current, f, indent=4)
+        print(f"⚠️ Saved to Local File (Fallback): {business_id} at {CONFIG_FILE}")
+            
+    except OSError as e:
+        print(f"CRITICAL: Failed to write to {CONFIG_FILE}: {e}")
+
+def save_configs(configs):
+    """Legacy helper - No-op for DB, provided for backward compatibility"""
+    # In new model, we just save individual items. 
+    # If forced to save bulk, we'd loop. For now, ignoring to prevent overwrites.
+    pass
 
 def generate_system_prompt(config):
     """Convert business config into AI system prompt"""
