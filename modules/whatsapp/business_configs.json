@@ -1,0 +1,118 @@
+{
+  "phone_company_demo": {
+    "business_id": "phone_company_demo",
+    "bot_name": "PhoneFix Assistant",
+    "features": {
+      "phone_repair": true,
+      "model_inquiry": true,
+      "price_quotes": true,
+      "appointment_booking": true,
+      "order_tracking": false,
+      "complaint_registration": true,
+      "faq": true
+    },
+    "custom_prompts": {
+      "welcome": "Welcome to PhoneFix! How can I help you today?",
+      "ask_issue": "What's wrong with your phone?"
+    },
+    "business_info": {
+      "name": "PhoneFix Store",
+      "hours": "9 AM - 8 PM, Mon-Sat",
+      "location": "MG Road, Mumbai",
+      "phone": "+91-9876543210"
+    },
+    "created_at": "2026-02-05T12:00:00",
+    "updated_at": "2026-02-05T12:00:00"
+  },
+  "restaurant_demo": {
+    "business_id": "restaurant_demo",
+    "bot_name": "Table Booking Bot",
+    "features": {
+      "phone_repair": false,
+      "model_inquiry": false,
+      "price_quotes": true,
+      "appointment_booking": true,
+      "order_tracking": true,
+      "complaint_registration": true,
+      "faq": true
+    },
+    "custom_prompts": {
+      "welcome": "Welcome to Spice Garden! Would you like to book a table?"
+    },
+    "business_info": {
+      "name": "Spice Garden Restaurant",
+      "hours": "12 PM - 11 PM, Daily",
+      "location": "Connaught Place, Delhi",
+      "phone": "+91-9988776655"
+    },
+    "created_at": "2026-02-05T12:00:00",
+    "updated_at": "2026-02-05T12:00:00"
+  },
+  "d4efa536": {
+    "business_id": "d4efa536",
+    "original_description": "I run a phone repair shop called PhoneFix. We fix iPhones, Samsung and other smartphones. We offer screen repairs, battery replacements, and water damage fixes. We are open 9am to 7pm Monday to Saturday at MG Road Mumbai.",
+    "bot_name": "PhoneFixBot",
+    "business_info": {
+      "name": "PhoneFix",
+      "type": "Phone repair shop",
+      "hours": "9am to 7pm, Monday to Saturday",
+      "location": "MG Road, Mumbai"
+    },
+    "capabilities": [
+      "screen repairs",
+      "battery replacements",
+      "water damage fixes"
+    ],
+    "welcome_message": "Hello! Welcome to PhoneFix. How can we help you with your phone repair today?",
+    "conversation_flow": [
+      {
+        "step": 1,
+        "action": "greet",
+        "message": "Hello! Welcome to PhoneFix. How can we help you with your phone repair today?"
+      },
+      {
+        "step": 2,
+        "action": "ask",
+        "question": "What type of phone do you need repaired?",
+        "variable": "phone_type"
+      },
+      {
+        "step": 3,
+        "action": "ask",
+        "question": "What seems to be the issue with your phone?",
+        "variable": "issue"
+      },
+      {
+        "step": 4,
+        "action": "provide_options",
+        "options": [
+          "screen repair",
+          "battery replacement",
+          "water damage fix"
+        ],
+        "variable": "repair_type"
+      },
+      {
+        "step": 5,
+        "action": "provide_info",
+        "message": "We offer {repair_type} for {phone_type}. Our prices start at [price]."
+      },
+      {
+        "step": 6,
+        "action": "ask",
+        "question": "Would you like to book an appointment or walk-in?",
+        "variable": "appointment"
+      },
+      {
+        "step": 7,
+        "action": "provide_info",
+        "message": "Our shop is open from 9am to 7pm, Monday to Saturday at MG Road, Mumbai. We look forward to serving you."
+      }
+    ],
+    "system_prompt": "Respond to user queries and provide phone repair services information",
+    "whatsapp_link": "https://wa.me/14155238886?text=Hi_d4efa536",
+    "qr_code_url": "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://wa.me/14155238886?text=Hi_d4efa536",
+    "created_at": "2026-02-05T12:28:21.081184",
+    "status": "active"
+  }
+}

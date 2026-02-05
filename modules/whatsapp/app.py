@@ -10,14 +10,24 @@ conversational flows based on configurable templates.
 NEW: Uses Fireworks AI (Qwen3 235B) to dynamically generate templates
 when a requested template doesn't exist.
 
+NEW: Modular Bot Builder - Build custom bots by selecting features
+through a visual interface.
+
 API Endpoints:
 - POST /whatsapp/generate - Generate bot flow from template
-- GET /health - Health check
+- GET  /health - Health check
+- GET  /whatsapp/modules - Get available modules catalog
+- GET  /whatsapp/presets - Get industry presets
+- POST /whatsapp/build - Build custom bot from selected modules
+- POST /whatsapp/export-n8n - Export bot to n8n workflow
+- POST /whatsapp/webhook - Handle incoming Twilio webhooks
+- POST /whatsapp/simulate - Simulate conversation with bot
 """
 
 import json
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -35,7 +45,49 @@ except ImportError:
         AI_AVAILABLE = False
         print("Warning: AI generator not available")
 
+# Import modular builder components
+try:
+    from .bot_builder_schema import (
+        get_module_catalog, 
+        get_industry_presets, 
+        build_bot_config,
+        AVAILABLE_MODULES,
+        ModuleCategory
+    )
+    from .n8n_exporter import export_to_n8n, save_n8n_workflow
+    BUILDER_AVAILABLE = True
+except ImportError:
+    try:
+        from bot_builder_schema import (
+            get_module_catalog, 
+            get_industry_presets, 
+            build_bot_config,
+            AVAILABLE_MODULES,
+            ModuleCategory
+        )
+        from n8n_exporter import export_to_n8n, save_n8n_workflow
+        BUILDER_AVAILABLE = True
+    except ImportError:
+        BUILDER_AVAILABLE = False
+        print("Warning: Bot builder components not available")
+
+# Import Twilio webhook handler
+try:
+    from .twilio_handler import TwilioWebhookHandler
+    TWILIO_AVAILABLE = True
+except ImportError:
+    try:
+        from twilio_handler import TwilioWebhookHandler
+        TWILIO_AVAILABLE = True
+    except ImportError:
+        TWILIO_AVAILABLE = False
+        print("Warning: Twilio handler not available")
+
 app = Flask(__name__)
+CORS(app)  # Enable CORS for frontend
+
+# Store active bot configurations in memory (use database in production)
+ACTIVE_BOTS = {}
 
 # Load templates from config file
 TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), 'config_templates.json')
@@ -90,12 +142,366 @@ DEMO_SIMULATIONS = {
 def health():
     """Health check endpoint."""
     ai_status = "available" if AI_AVAILABLE else "unavailable"
+    builder_status = "available" if BUILDER_AVAILABLE else "unavailable"
+    twilio_status = "available" if TWILIO_AVAILABLE else "unavailable"
     return jsonify({
         "status": "healthy", 
         "module": "whatsapp", 
         "port": 5001,
-        "ai_generation": ai_status
+        "ai_generation": ai_status,
+        "modular_builder": builder_status,
+        "twilio_handler": twilio_status,
+        "active_bots": len(ACTIVE_BOTS)
     })
+
+
+# ============================================
+# MODULAR BOT BUILDER ENDPOINTS
+# ============================================
+
+@app.route('/whatsapp/modules', methods=['GET'])
+def get_modules():
+    """
+    Get the catalog of available bot modules.
+    
+    Response JSON:
+    {
+        "modules": { module_id: module_config, ... },
+        "categories": ["greeting", "data_collection", ...]
+    }
+    """
+    if not BUILDER_AVAILABLE:
+        return jsonify({"error": "builder_unavailable", "message": "Bot builder not available"}), 503
+    
+    catalog = get_module_catalog()
+    categories = [cat.value for cat in ModuleCategory]
+    
+    return jsonify({
+        "modules": catalog,
+        "categories": categories
+    })
+
+
+@app.route('/whatsapp/presets', methods=['GET'])
+def get_presets():
+    """
+    Get industry preset configurations.
+    
+    Response JSON:
+    {
+        "presets": { preset_id: preset_config, ... }
+    }
+    """
+    if not BUILDER_AVAILABLE:
+        return jsonify({"error": "builder_unavailable", "message": "Bot builder not available"}), 503
+    
+    presets = get_industry_presets()
+    return jsonify({"presets": presets})
+
+
+@app.route('/whatsapp/build', methods=['POST'])
+def build_bot():
+    """
+    Build a custom bot from selected modules.
+    
+    Request JSON:
+    {
+        "business_name": "My Business",
+        "preset_id": "phone_repair",  // optional
+        "modules": ["welcome_message", "collect_name", ...],
+        "module_configs": { "welcome_message": { "message": "..." } },
+        "dry_run": true
+    }
+    
+    Response JSON:
+    {
+        "bot_config": { ... },
+        "simulation": [ ... ],
+        "n8n_workflow_available": true
+    }
+    """
+    if not BUILDER_AVAILABLE:
+        return jsonify({"error": "builder_unavailable", "message": "Bot builder not available"}), 503
+    
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({"error": "bad_request", "message": "Request body must be JSON"}), 400
+    
+    business_name = data.get('business_name', 'My Business')
+    preset_id = data.get('preset_id')
+    selected_modules = data.get('modules', [])
+    module_configs = data.get('module_configs', {})
+    dry_run = data.get('dry_run', True)
+    
+    # Build bot configuration
+    bot_config = build_bot_config(
+        business_name=business_name,
+        selected_modules=selected_modules,
+        module_configs=module_configs,
+        preset_id=preset_id
+    )
+    
+    # Generate simulation
+    simulation = generate_simulation_from_config(bot_config)
+    
+    # Store in active bots if not dry run
+    if not dry_run:
+        ACTIVE_BOTS[bot_config['bot_id']] = bot_config
+    
+    return jsonify({
+        "bot_config": bot_config,
+        "simulation": simulation,
+        "n8n_workflow_available": True,
+        "dry_run": dry_run
+    })
+
+
+@app.route('/whatsapp/export-n8n', methods=['POST'])
+def export_n8n_workflow():
+    """
+    Export bot configuration to n8n workflow JSON.
+    
+    Request JSON:
+    {
+        "bot_id": "bot_abc123",  // or provide full config
+        "bot_config": { ... },
+        "download": true  // return as file download
+    }
+    
+    Response: JSON workflow or file download
+    """
+    if not BUILDER_AVAILABLE:
+        return jsonify({"error": "builder_unavailable", "message": "Bot builder not available"}), 503
+    
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({"error": "bad_request", "message": "Request body must be JSON"}), 400
+    
+    # Get bot config from ID or direct config
+    bot_config = None
+    if 'bot_id' in data and data['bot_id'] in ACTIVE_BOTS:
+        bot_config = ACTIVE_BOTS[data['bot_id']]
+    elif 'bot_config' in data:
+        bot_config = data['bot_config']
+    
+    if not bot_config:
+        return jsonify({"error": "not_found", "message": "Bot configuration not found"}), 404
+    
+    # Export to n8n format
+    workflow = export_to_n8n(bot_config)
+    
+    # Return as file download if requested
+    if data.get('download', False):
+        filename = f"n8n_workflow_{bot_config.get('bot_id', 'export')}.json"
+        filepath = save_n8n_workflow(workflow, filename)
+        return send_file(filepath, as_attachment=True, download_name=filename)
+    
+    return jsonify({
+        "workflow": workflow,
+        "import_instructions": {
+            "step1": "Open n8n and go to Workflows",
+            "step2": "Click 'Import from File' or 'Import from URL'",
+            "step3": "Paste the workflow JSON or upload the file",
+            "step4": "Configure your Twilio and Fireworks AI credentials",
+            "step5": "Activate the workflow"
+        }
+    })
+
+
+@app.route('/whatsapp/simulate', methods=['POST'])
+def simulate_conversation():
+    """
+    Simulate a conversation with the bot.
+    
+    Request JSON:
+    {
+        "bot_id": "bot_abc123",
+        "message": "Hello",
+        "session_id": "user_123"  // for conversation state
+    }
+    
+    Response JSON:
+    {
+        "response": "Bot response text",
+        "next_step": "collect_name",
+        "session_state": { ... }
+    }
+    """
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({"error": "bad_request", "message": "Request body must be JSON"}), 400
+    
+    bot_id = data.get('bot_id')
+    message = data.get('message', '')
+    session_id = data.get('session_id', 'default')
+    
+    # Get bot config
+    if bot_id and bot_id in ACTIVE_BOTS:
+        bot_config = ACTIVE_BOTS[bot_id]
+    else:
+        # Use default simulation
+        return jsonify({
+            "response": f"Received: {message}. (No active bot configured)",
+            "next_step": None,
+            "session_state": {}
+        })
+    
+    # Simple simulation logic (in production, use AI)
+    response, next_step = simulate_bot_response(bot_config, message, session_id)
+    
+    return jsonify({
+        "response": response,
+        "next_step": next_step,
+        "session_state": {"session_id": session_id}
+    })
+
+
+@app.route('/whatsapp/webhook', methods=['POST', 'GET'])
+def twilio_webhook():
+    """
+    Handle incoming Twilio WhatsApp webhooks.
+    
+    GET: Webhook verification
+    POST: Incoming message handling
+    """
+    if request.method == 'GET':
+        # Webhook verification
+        return request.args.get('hub.challenge', 'OK')
+    
+    if not TWILIO_AVAILABLE:
+        return jsonify({"error": "twilio_unavailable", "message": "Twilio handler not available"}), 503
+    
+    # Parse incoming message
+    data = request.form.to_dict() if request.form else request.get_json()
+    
+    handler = TwilioWebhookHandler(ACTIVE_BOTS)
+    response = handler.handle_message(data)
+    
+    return response
+
+
+# ============================================
+# SIMULATION HELPERS
+# ============================================
+
+def generate_simulation_from_config(bot_config: dict) -> list:
+    """Generate a simulation conversation from bot config."""
+    simulation = []
+    modules = bot_config.get('modules', {})
+    flow = bot_config.get('flow', [])
+    
+    for module_id in flow:
+        if module_id not in modules:
+            continue
+        
+        module = modules[module_id]
+        config = module.get('config', {})
+        
+        if module_id == 'welcome_message':
+            simulation.append({
+                "from": "bot",
+                "text": config.get('message', 'Hello! Welcome!')
+            })
+        
+        elif module_id == 'collect_name':
+            simulation.append({
+                "from": "bot", 
+                "text": config.get('prompt', 'May I know your name?')
+            })
+            simulation.append({"from": "user", "text": "John Doe"})
+        
+        elif module_id == 'collect_phone':
+            simulation.append({
+                "from": "bot", 
+                "text": config.get('prompt', 'Please share your contact number')
+            })
+            simulation.append({"from": "user", "text": "+91 98765 43210"})
+        
+        elif module_id == 'product_selection':
+            items = config.get('items', [])
+            if items:
+                options = "\n".join([f"{i+1}. {item.get('label', item.get('id'))}" for i, item in enumerate(items)])
+                simulation.append({
+                    "from": "bot", 
+                    "text": f"{config.get('prompt', 'Select an option:')}\n\n{options}"
+                })
+                simulation.append({"from": "user", "text": "1"})
+        
+        elif module_id == 'booking_appointment':
+            simulation.append({
+                "from": "bot",
+                "text": config.get('prompt_date', 'Please select a date for your appointment')
+            })
+            simulation.append({"from": "user", "text": "Tomorrow"})
+            simulation.append({
+                "from": "bot",
+                "text": config.get('prompt_time', 'Please select a time slot')
+            })
+            simulation.append({"from": "user", "text": "10 AM"})
+            simulation.append({
+                "from": "bot",
+                "text": config.get('confirmation_message', 'Your appointment is confirmed for {date} at {time}').replace('{date}', 'tomorrow').replace('{time}', '10 AM')
+            })
+        
+        elif module_id == 'complaint_registration':
+            simulation.append({
+                "from": "bot",
+                "text": "Please describe your issue in detail."
+            })
+            simulation.append({"from": "user", "text": "There's a pothole on the main road"})
+            if config.get('collect_image'):
+                simulation.append({
+                    "from": "bot",
+                    "text": "Please share a photo of the issue (optional)"
+                })
+                simulation.append({"from": "user", "text": "[Photo shared]"})
+            simulation.append({
+                "from": "bot",
+                "text": config.get('acknowledgment_message', 'Your complaint has been registered with ID: {complaint_id}').replace('{complaint_id}', 'COMP-2026-001').replace('{response_time}', '48 hours')
+            })
+        
+        elif module_id == 'menu_navigation':
+            options = config.get('options', [])
+            if options:
+                menu_text = config.get('menu_prompt', 'Please select an option:') + "\n\n"
+                menu_text += "\n".join([f"{opt['number']}. {opt['label']}" for opt in options])
+                simulation.append({"from": "bot", "text": menu_text})
+                simulation.append({"from": "user", "text": "1"})
+    
+    # Add closing if no simulation generated
+    if not simulation:
+        simulation = [
+            {"from": "bot", "text": f"Hello! Welcome to {bot_config.get('business_name', 'our service')}. How can I help you?"},
+            {"from": "user", "text": "I need help"},
+            {"from": "bot", "text": "I'm here to assist you. Please tell me what you need."}
+        ]
+    
+    return simulation
+
+
+def simulate_bot_response(bot_config: dict, message: str, session_id: str) -> tuple:
+    """Simulate a single bot response."""
+    # Simple keyword-based responses for demo
+    message_lower = message.lower()
+    
+    modules = bot_config.get('modules', {})
+    
+    if any(word in message_lower for word in ['hi', 'hello', 'hey', 'start']):
+        if 'welcome_message' in modules:
+            return modules['welcome_message']['config'].get('message', 'Hello!'), 'collect_name'
+    
+    if any(word in message_lower for word in ['book', 'appointment', 'schedule']):
+        if 'booking_appointment' in modules:
+            return modules['booking_appointment']['config'].get('prompt_date', 'When would you like to book?'), 'booking_date'
+    
+    if any(word in message_lower for word in ['complaint', 'problem', 'issue', 'report']):
+        if 'complaint_registration' in modules:
+            return "Please describe your issue in detail.", 'complaint_description'
+    
+    return f"Thank you for your message. How else can I help you?", None
 
 
 @app.route('/whatsapp/generate', methods=['POST'])

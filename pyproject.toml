@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "civicaid-whatsapp"
+version = "1.0.0"
+description = "CivicAid WhatsApp Bot Generator API"
+requires-python = ">=3.10"
+dependencies = [
+    "flask>=3.0.0",
+    "flask-cors>=4.0.0",
+    "gunicorn>=21.0.0",
+    "requests>=2.31.0",
+    "python-dotenv>=1.0.0",
+]
