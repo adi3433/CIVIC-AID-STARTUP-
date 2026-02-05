@@ -1,26 +1,81 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* CivicAid Emergency Theme - matching landing.html */
+  --primary: #ef4444;
+  --primary-dark: #dc2626;
+  --primary-glow: rgba(239, 68, 68, 0.3);
+  --secondary: #25D366;
+  --bg-dark: #0a0f1a;
+  --bg-card: #111827;
+  --bg-input: #1f2937;
+  --text-light: #f8fafc;
+  --text-muted: #9ca3af;
+  --border: rgba(255, 255, 255, 0.1);
+  --gradient-start: #ef4444;
+  --gradient-end: #f97316;
+  
+  --background: #0a0f1a;
+  --foreground: #f8fafc;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: 'Inter', var(--font-geist-sans), sans-serif;
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
+  background-image:
+    radial-gradient(ellipse at top, rgba(239, 68, 68, 0.1), transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(249, 115, 22, 0.1), transparent 50%);
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 3px;
+}
+
+/* Badge styles */
+.badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Button animations */
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.5; }
+  100% { transform: scale(0.95); opacity: 1; }
+}
+
+.pulse-animation {
+  animation: pulse-ring 2s infinite;
+}
+
+/* Message bubbles */
+.message-user {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+}
+
+.message-assistant {
+  background: var(--bg-input);
 }

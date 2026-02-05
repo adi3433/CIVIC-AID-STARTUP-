@@ -682,57 +682,77 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 min-h-screen flex flex-col bg-[#121212]">
-      <h1 className="text-2xl font-bold mb-4 text-center text-gray-100">Emergency Dispatch AI</h1>
+    <div className="max-w-lg mx-auto px-4 min-h-screen flex flex-col" style={{ background: 'var(--bg-dark)' }}>
+      {/* Header matching landing.html */}
+      <header className="flex justify-between items-center py-5">
+        <div className="flex items-center gap-2 text-xl font-bold">
+          <span>🏛️</span>
+          <a href="/" className="text-white hover:text-gray-200 no-underline">CivicAid</a>
+        </div>
+        <nav className="flex gap-6">
+          <a href="/" className="text-gray-400 hover:text-[var(--primary)] transition-colors no-underline">Home</a>
+        </nav>
+      </header>
+
+      {/* Hero Section */}
+      <section className="text-center mb-6">
+        <span className="badge text-white mb-4 inline-block">🚨 EMERGENCY AI</span>
+        <h1 className="text-3xl font-bold mb-3 bg-gradient-to-r from-white to-red-300 bg-clip-text text-transparent">
+          Emergency Dispatch
+        </h1>
+        <p className="text-gray-400 text-sm">AI-powered emergency response with voice recognition</p>
+      </section>
       
       <div className="flex-1 flex flex-col">
-        {/* Phone UI */}
-        <div className="bg-[#1e1e1e] rounded-lg shadow-md overflow-hidden flex flex-col flex-1 border border-gray-800">
-          {/* Call status bar */}
-          <div className="bg-[#2c5282] text-white p-3 flex justify-between items-center">
-            <div className="text-sm font-medium">
-              {callStatus === 'idle' && 'Ready to call'}
-              {callStatus === 'calling' && 'Calling dispatch...'}
-              {callStatus === 'connected' && 'Connected to AI Dispatch'}
-              {callStatus === 'ended' && 'Call ended'}
+        {/* Phone UI Card */}
+        <div className="rounded-2xl overflow-hidden flex flex-col flex-1" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+          {/* Call status bar - Emergency Red Theme */}
+          <div className="p-4 flex justify-between items-center" style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))' }}>
+            <div className="text-sm font-semibold text-white">
+              {callStatus === 'idle' && 'Ready'}
+              {callStatus === 'calling' && 'Connecting...'}
+              {callStatus === 'connected' && 'Connected'}
+              {callStatus === 'ended' && 'Call Ended'}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {callStatus === 'connected' && (
                 <>
                   <button 
                     onClick={toggleVoiceSettings}
-                    className="text-xs px-2 py-1 bg-[#1a365d] rounded-full hover:bg-[#2a4365] flex items-center gap-1"
+                    className="text-xs px-3 py-1.5 bg-white/20 rounded-full hover:bg-white/30 flex items-center gap-1 text-white transition-colors"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
                     </svg>
                     Voice
                   </button>
                   <button 
                     onClick={() => setInputMode(inputMode === 'unified' ? 'text' : 'unified')}
-                    className="text-xs px-2 py-1 bg-[#1a365d] rounded-full hover:bg-[#2a4365]"
+                    className="text-xs px-3 py-1.5 bg-white/20 rounded-full hover:bg-white/30 text-white transition-colors"
                   >
-                    {inputMode === 'unified' ? 'Switch to Text' : 'Switch to Voice'}
+                    {inputMode === 'unified' ? '⌨️ Text' : '🎤 Voice'}
                   </button>
                 </>
               )}
-              <div className="text-sm font-medium">
-                {isRecording && 'Recording...'}
-                {isProcessing && 'Processing...'}
-                {isUploading && 'Uploading...'}
-                {isRecordingAudio && 'Recording Audio...'}
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                <span className="text-xs text-white/80">
+                  {isRecording && 'Recording'}
+                  {isProcessing && 'Processing'}
+                  {!isRecording && !isProcessing && 'Online'}
+                </span>
               </div>
             </div>
           </div>
           
           {/* Voice Settings Panel */}
           {showVoiceSettings && (
-            <div className="bg-[#2d3748] p-3 border-b border-gray-700">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-medium text-gray-200">Voice Settings</h3>
+            <div className="p-4 border-b" style={{ background: 'var(--bg-input)', borderColor: 'var(--border)' }}>
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-sm font-semibold text-white">Voice Settings</h3>
                 <button 
                   onClick={toggleVoiceSettings}
-                  className="text-gray-300 hover:text-gray-100"
+                  className="text-gray-400 hover:text-white transition-colors"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -743,12 +763,13 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
               <div className="space-y-3">
                 {/* Voice Selection */}
                 <div>
-                  <label htmlFor="voice-select" className="block text-xs font-medium text-gray-300 mb-1">Voice</label>
+                  <label htmlFor="voice-select" className="block text-xs font-medium text-gray-400 mb-1">Voice</label>
                   <select
                     id="voice-select"
                     value={voiceParams.voiceURI}
                     onChange={(e) => handleVoiceParamChange('voiceURI', e.target.value)}
-                    className="w-full text-sm rounded-md border-gray-600 bg-[#1e1e1e] text-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="w-full text-sm rounded-lg border px-3 py-2 text-white focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                    style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}
                   >
                     {availableVoices.map((voice) => (
                       <option key={voice.voiceURI} value={voice.voiceURI}>
@@ -853,23 +874,31 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
           {/* Conversation area */}
           <div 
             ref={conversationContainerRef}
-            className="flex-1 p-4 overflow-y-auto bg-[#1a1a1a] space-y-3"
+            className="flex-1 p-4 overflow-y-auto space-y-3 min-h-[300px]"
+            style={{ background: 'var(--bg-dark)' }}
           >
             {conversationHistory.length > 0 ? (
               conversationHistory.map((message, index) => (
                 <div 
                   key={index} 
-                  className={`p-3 rounded-lg max-w-[85%] ${
+                  className={`p-3 rounded-2xl max-w-[85%] ${
                     message.role === 'user' 
-                      ? 'bg-[#2c5282] ml-auto text-gray-100' 
+                      ? 'ml-auto text-white rounded-br-sm' 
                       : message.role === 'system'
-                        ? 'bg-[#4a5568] mx-auto text-gray-100 text-center'
-                        : 'bg-[#2d3748] text-gray-100'
+                        ? 'mx-auto text-gray-300 text-center'
+                        : 'text-white rounded-bl-sm'
                   }`}
+                  style={{
+                    background: message.role === 'user' 
+                      ? 'linear-gradient(135deg, var(--primary), var(--primary-dark))'
+                      : message.role === 'system'
+                        ? 'rgba(255,255,255,0.05)'
+                        : 'var(--bg-input)'
+                  }}
                 >
                   {message.isProcessing ? (
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin"></div>
                       <p className="text-sm font-medium">{typeof message.content === 'function' ? 'Processing...' : message.content}</p>
                     </div>
                   ) : message.isAudio ? (
@@ -880,21 +909,24 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
                       <p className="text-sm font-medium">{typeof message.content === 'function' ? 'Message content unavailable' : message.content}</p>
                     </div>
                   ) : (
-                    <p className="text-sm">{typeof message.content === 'function' ? 'Message content unavailable' : message.content}</p>
+                    <p className="text-sm leading-relaxed">{typeof message.content === 'function' ? 'Message content unavailable' : message.content}</p>
                   )}
                 </div>
               ))
             ) : (
               <>
                 {callStatus === 'idle' && (
-                  <div className="text-center p-4">
-                    <p className="text-gray-400">Press the call button to connect to AI dispatch</p>
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">📞</div>
+                    <h2 className="text-xl font-semibold text-white mb-2">Start Emergency Call</h2>
+                    <p className="text-gray-400 text-sm">Press the call button below to connect with AI dispatch</p>
                   </div>
                 )}
                 
                 {callStatus === 'calling' && (
-                  <div className="text-center p-4">
-                    <p className="text-gray-400">Connecting to AI dispatch...</p>
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4 animate-pulse">📱</div>
+                    <p className="text-gray-300">Connecting to AI dispatch...</p>
                   </div>
                 )}
               </>
@@ -1022,11 +1054,15 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
           )}
           
           {/* Call controls */}
-          <div className="bg-[#121212] p-4 flex justify-center items-center gap-6 border-t border-gray-800">
+          <div className="p-5 flex justify-center items-center gap-6" style={{ background: 'rgba(0,0,0,0.3)', borderTop: '1px solid var(--border)' }}>
             {callStatus === 'idle' && (
               <button
                 onClick={initiateCall}
-                className="w-16 h-16 bg-[#2c5282] rounded-full flex items-center justify-center text-white hover:bg-[#2b6cb0] shadow-md"
+                className="w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg transform hover:scale-105 transition-all duration-200"
+                style={{ 
+                  background: 'linear-gradient(135deg, var(--secondary), #128C7E)',
+                  boxShadow: '0 4px 20px rgba(37, 211, 102, 0.3)'
+                }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
@@ -1038,7 +1074,11 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
               <>
                 <button
                   onClick={endCall}
-                  className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-white hover:bg-red-700 shadow-md"
+                  className="w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg transform hover:scale-105 transition-all duration-200"
+                  style={{ 
+                    background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+                    boxShadow: '0 4px 20px var(--primary-glow)'
+                  }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -1048,10 +1088,10 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
                 {inputMode === 'unified' && !isRecording && !isProcessing && callStatus === 'connected' && (
                   <button
                     onClick={startRecording}
-                    className="w-16 h-16 bg-[#2c5282] rounded-full flex items-center justify-center text-white hover:bg-[#2b6cb0] shadow-md relative overflow-hidden group"
+                    className="w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg transform hover:scale-105 transition-all duration-200 relative overflow-hidden group"
+                    style={{ background: 'var(--bg-input)', border: '2px solid var(--border)' }}
                   >
-                    {/* Pulsing circle animation */}
-                    <div className="absolute inset-0 bg-[#3182ce] opacity-50 rounded-full scale-0 group-hover:scale-100 transition-transform duration-700"></div>
+                    <div className="absolute inset-0 bg-white/10 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 relative z-10">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
                     </svg>
@@ -1061,10 +1101,13 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
                 {inputMode === 'unified' && isRecording && (
                   <button
                     onClick={stopRecording}
-                    className="w-16 h-16 bg-yellow-600 rounded-full flex items-center justify-center text-white hover:bg-yellow-700 shadow-md relative overflow-hidden"
+                    className="w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg transform hover:scale-105 transition-all duration-200 relative overflow-hidden"
+                    style={{ 
+                      background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+                      boxShadow: '0 4px 20px var(--primary-glow)'
+                    }}
                   >
-                    {/* Recording animation */}
-                    <div className="absolute inset-0 bg-yellow-500 opacity-30 rounded-full animate-ping"></div>
+                    <div className="absolute inset-0 bg-red-400 opacity-30 rounded-full animate-ping"></div>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 relative z-10">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 7.5A2.25 2.25 0 0 1 7.5 5.25h9a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25h-9a2.25 2.25 0 0 1-2.25-2.25v-9Z" />
                     </svg>
@@ -1076,14 +1119,23 @@ Respond as if you are speaking to the caller directly. Keep your response brief,
             {callStatus === 'ended' && (
               <button
                 onClick={() => setCallStatus('idle')}
-                className="px-4 py-2 bg-[#2c5282] text-white rounded-lg hover:bg-[#2b6cb0] shadow-md"
+                className="px-6 py-3 rounded-xl text-white font-semibold shadow-lg transform hover:scale-105 transition-all duration-200"
+                style={{ 
+                  background: 'var(--bg-input)', 
+                  border: '2px solid var(--border)' 
+                }}
               >
-                New Call
+                Start New Call
               </button>
             )}
           </div>
         </div>
       </div>
+      
+      {/* Footer */}
+      <footer className="text-center py-5 text-gray-500 text-sm">
+        Powered by CivicAid • AI Emergency Response
+      </footer>
       
       {/* Add CSS for animations */}
       <style jsx>{`
