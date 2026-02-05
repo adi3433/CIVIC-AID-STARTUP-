@@ -143,7 +143,11 @@ def generate_system_prompt(config):
     # Get AI-generated system prompt if available
     ai_system_prompt = config.get('system_prompt', '')
     
-    # If AI already generated a system prompt, use it with enhancements
+    # If AI/Form already generated a system prompt, use it directly if it looks complete
+    if ai_system_prompt and "CRITICAL:" in ai_system_prompt:
+        return ai_system_prompt
+
+    # If AI generated a prompt but it needs wrapping (e.g. from raw AI generator)
     if ai_system_prompt:
         enhanced_prompt = [
             "CRITICAL: You MUST stay in character at all times. Never break character or mention you are an AI/LLM.",
