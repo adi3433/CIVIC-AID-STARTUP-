@@ -347,6 +347,9 @@ def create_bot_from_form():
     # Generate unique business ID
     business_id = generate_unique_id()
     
+    # Generate slug from business name (e.g., "Phone Fix" -> "phone_fix")
+    slug = re.sub(r'[^a-zA-Z0-9]+', '_', business_name.lower()).strip('_')
+    
     # Map capability codes to readable names
     capability_map = {
         'appointments': 'Book Appointments',
@@ -419,6 +422,7 @@ def create_bot_from_form():
     # Prepare full config
     full_config = {
         "business_id": business_id,
+        "slug": slug,
         "bot_name": bot_name,
         "business_info": {
             "name": business_name,
@@ -440,11 +444,12 @@ def create_bot_from_form():
     configs[business_id] = full_config
     save_configs(configs)
     
-    print(f"[BOT CREATOR] Bot created: {business_id} for {business_name}")
+    print(f"[BOT CREATOR] Bot created: {business_id} ({slug}) for {business_name}")
     
     return jsonify({
         "success": True,
         "business_id": business_id,
+        "slug": slug,
         "bot_name": bot_name,
         "capabilities": capability_names,
         "whatsapp_link": links["whatsapp_link"],
@@ -457,42 +462,53 @@ def get_bot_config(business_id):
     """Get full bot configuration"""
     configs = load_configs()
     
-    if business_id not in configs:
-        return jsonify({"error": "Business not found"}), 404
-    
-    return jsonify(configs[business_id])
+    # Try by ID first
+    if business_id in configs:
+        return jsonify(configs[business_id])
+        
+    # Try by slug
+    for config in configs.values():
+        if config.get('slug') == business_id:
+            return jsonify(config)
+
+    return jsonify({"error": "Business not found"}), 404
 
 
 @app.route('/api/bots/prompt', methods=['GET'])
 def get_bot_prompt():
     """
     Get dynamic system prompt for n8n AI Agent
-    
-    Query params:
-    - business_id: The business identifier
-    - phone: Optional, user's phone (for future routing)
+    Expects 'business_id' query param (can be ID or slug)
     """
-    business_id = request.args.get('business_id')
-    
-    if not business_id:
-        # Default prompt if no business specified
-        return jsonify({
-            "system_prompt": "You are CivicAid Assistant. Help users with general inquiries. Be helpful and friendly."
-        })
+    business_id = request.args.get('business_id', 'default')
+    print(f"[PROMPT FETCH] Request for business: {business_id}")
     
     configs = load_configs()
+    config = None
     
-    if business_id not in configs:
-        return jsonify({
-            "system_prompt": "You are CivicAid Assistant. Help users with general inquiries. Be helpful and friendly.",
-            "note": "Business not found, using default prompt"
-        })
+    # 1. Try direct ID match
+    if business_id in configs:
+        config = configs[business_id]
+    else:
+        # 2. Try searching by slug
+        for c in configs.values():
+            if c.get('slug') == business_id:
+                config = c
+                break
     
-    config = configs[business_id]
+    if not config:
+        # 3. Fallback to default
+        print(f"[PROMPT FETCH] Business {business_id} not found, using default")
+        config = {
+            "bot_name": "Assistant",
+            "business_id": "default",
+            "system_prompt": "You are CivicAid Assistant. Help users with general inquiries. Be helpful and friendly."
+        }
+        
     system_prompt = generate_system_prompt(config)
     
     return jsonify({
-        "business_id": business_id,
+        "business_id": config.get('business_id', 'default'),
         "bot_name": config.get('bot_name', 'Assistant'),
         "system_prompt": system_prompt
     })
