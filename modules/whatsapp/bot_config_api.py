@@ -161,9 +161,13 @@ def dispatch_webhook():
             else:
                 print(f"n8n Error: {n8n_response.status_code} - {n8n_response.text}")
                 # Fallback to local logic on error
+                n8n_error = f"Status {n8n_response.status_code}"
         except Exception as e:
             print(f"n8n Connection Failed: {e}")
             # Fallback to local logic on exception
+            n8n_error = str(e)
+    else:
+        n8n_error = "Env Var Not Set"
 
     # Fallback to AI - deterministic response for demos
     metadata = data.get('metadata', {})
