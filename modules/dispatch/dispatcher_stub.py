@@ -27,10 +27,10 @@ from flask import Flask, request, jsonify, send_from_directory, send_file
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 # Path to project root
 PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-# Path to web folder for dispatch.html
-WEB_DIR = os.path.join(PROJECT_ROOT, 'web')
+# Path to Next.js build output
+NEXTJS_BUILD_DIR = os.path.join(SCRIPT_DIR, 'dispatch-service', 'out')
 
-app = Flask(__name__, static_folder=WEB_DIR)
+app = Flask(__name__, static_folder=NEXTJS_BUILD_DIR, static_url_path='')
 
 
 # Deterministic responses for demos
@@ -59,12 +59,13 @@ DEMO_FALLBACK_RESPONSES = {
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint."""
-    ui_available = os.path.exists(os.path.join(WEB_DIR, 'dispatch.html'))
+    ui_available = os.path.exists(os.path.join(NEXTJS_BUILD_DIR, 'index.html'))
     return jsonify({
         "status": "healthy", 
         "module": "dispatch", 
         "port": 5002,
-        "ui_available": ui_available
+        "ui_available": ui_available,
+        "ui_type": "nextjs_static_build"
     })
 
 
@@ -154,27 +155,41 @@ def dispatch_webhook():
 
 @app.route('/')
 def serve_index():
-    """Serve the dispatch UI."""
-    dispatch_path = os.path.join(WEB_DIR, 'dispatch.html')
-    if os.path.exists(dispatch_path):
-        return send_file(dispatch_path)
+    """Serve the Next.js dispatch UI index page."""
+    index_path = os.path.join(NEXTJS_BUILD_DIR, 'index.html')
+    if os.path.exists(index_path):
+        return send_file(index_path)
     else:
         return jsonify({
             "error": "ui_not_found",
-            "message": "dispatch.html not found in web folder",
+            "message": "Next.js build not found. Run 'npm run build' in dispatch-service folder.",
             "api_available": True,
             "endpoints": ["/dispatch/webhook", "/health"]
         }), 404
 
 
+@app.route('/dispatch')
+@app.route('/dispatch/')
+def serve_dispatch():
+    """Serve the Next.js dispatch page."""
+    dispatch_path = os.path.join(NEXTJS_BUILD_DIR, 'dispatch', 'index.html')
+    if os.path.exists(dispatch_path):
+        return send_file(dispatch_path)
+    else:
+        return jsonify({
+            "error": "dispatch_page_not_found",
+            "message": "Dispatch page not found. Run 'npm run build' in dispatch-service folder.",
+        }), 404
+
+
 @app.route('/<path:path>')
 def serve_static(path):
-    """Serve static files from web folder."""
+    """Serve static files from Next.js build output."""
     # Check if the file exists directly
-    file_path = os.path.join(WEB_DIR, path)
+    file_path = os.path.join(NEXTJS_BUILD_DIR, path)
     
     if os.path.exists(file_path) and os.path.isfile(file_path):
-        return send_from_directory(WEB_DIR, path)
+        return send_from_directory(NEXTJS_BUILD_DIR, path)
     
     # Try adding .html extension
     html_path = file_path + '.html'
@@ -216,22 +231,19 @@ if __name__ == '__main__':
         print(json.dumps({"action": "connect_primary", "call_id": test_request['call_id']}, indent=2))
     else:
         # Server mode
-        ui_available = os.path.exists(os.path.join(WEB_DIR, 'dispatch.html'))
+        ui_available = os.path.exists(os.path.join(NEXTJS_BUILD_DIR, 'index.html'))
         
         print("=" * 50)
         print("Dispatch Module - Starting on port 5002")
         print("=" * 50)
         print("\nAvailable endpoints:")
-        print("  GET  /                 - Dispatch UI" + (" ✓" if ui_available else " (missing)"))
-        print("  POST /dispatch/webhook - Handle call dispatch")
+        print("  GET  /                 - Next.js Dispatch UI" + (" ✓" if ui_available else " (missing - run 'npm run build')"))
+        print("  GET  /dispatch         - Dispatch Page" + (" ✓" if ui_available else " (missing)"))
+        print("  POST /dispatch/webhook - Call dispatch webhook")
         print("  GET  /health           - Health check")
-        
-        if not ui_available:
-            print("\n⚠️  dispatch.html not found in web folder.")
-        
-        print("\nDemo command:")
-        print('  curl -X POST http://localhost:5002/dispatch/webhook \\')
-        print('    -H "Content-Type: application/json" \\')
-        print('    -d \'{"call_id": "demo_001", "from": "+919876543210", "primary_busy": true}\'')
+        print("\nAPI Documentation:")
+        print("  See README.md for detailed API specs")
+        print("\nStarting server...")
         print("=" * 50)
+        
         app.run(host='0.0.0.0', port=5002, debug=True)
