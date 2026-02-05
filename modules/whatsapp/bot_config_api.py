@@ -49,7 +49,7 @@ def save_configs(configs):
         json.dump(configs, f, indent=2)
 
 def generate_system_prompt(config):
-    """Convert business config checkboxes into AI system prompt"""
+    """Convert business config into AI system prompt"""
     
     business_name = config.get('business_info', {}).get('name', 'Business')
     bot_name = config.get('bot_name', 'Assistant')
@@ -57,15 +57,51 @@ def generate_system_prompt(config):
     custom_prompts = config.get('custom_prompts', {})
     business_info = config.get('business_info', {})
     
-    # Build dynamic prompt
+    # Get AI-generated capabilities (from /api/bots/generate)
+    ai_capabilities = config.get('capabilities', [])
+    
+    # Get AI-generated system prompt if available
+    ai_system_prompt = config.get('system_prompt', '')
+    
+    # If AI already generated a system prompt, use it with enhancements
+    if ai_system_prompt:
+        enhanced_prompt = [
+            "CRITICAL: You MUST stay in character at all times. Never break character or mention you are an AI/LLM.",
+            "",
+            ai_system_prompt,
+            "",
+            "IMPORTANT RULES:",
+            f"- You ARE {bot_name}. Never say you are an AI or language model.",
+            "- If you don't have real contact info, provide the business details below.",
+            "- Keep responses brief and helpful.",
+        ]
+        
+        # Add business info if available
+        if business_info.get('phone'):
+            enhanced_prompt.append(f"- Business Contact: {business_info['phone']}")
+        if business_info.get('location'):
+            enhanced_prompt.append(f"- Business Location: {business_info['location']}")
+        if business_info.get('hours'):
+            enhanced_prompt.append(f"- Business Hours: {business_info['hours']}")
+            
+        return "\n".join(enhanced_prompt)
+    
+    # Build dynamic prompt from checkboxes/config
     prompt_parts = [
+        "CRITICAL: You MUST stay in character at all times. Never break character.",
+        "",
         f"You are {bot_name} for {business_name}.",
         "Be helpful, friendly, and concise.",
         "",
         "YOUR CAPABILITIES:"
     ]
     
-    # Add features based on checkboxes
+    # Add AI-generated capabilities first
+    if ai_capabilities:
+        for cap in ai_capabilities:
+            prompt_parts.append(f"- {cap}")
+    
+    # Add checkbox-based features
     if features.get('phone_repair'):
         prompt_parts.append("- Phone Repair: Collect issue description, phone model, provide repair quotes")
     
@@ -105,17 +141,20 @@ def generate_system_prompt(config):
         prompt_parts.append("")
         prompt_parts.append(f"START CONVERSATION WITH: \"{custom_prompts['welcome']}\"")
     
-    # Add conversation rules
+    # Add conversation rules with stricter role enforcement
     prompt_parts.extend([
         "",
         "RULES:",
+        f"- You ARE {bot_name}. NEVER say you are an AI or language model.",
         "- Keep responses brief (under 200 words)",
         "- Ask one question at a time",
         "- Confirm bookings before finalizing",
-        "- If unsure, offer to connect with human support"
+        "- If unsure, offer to connect with human support",
+        "- If asked for contact, provide the business information above"
     ])
     
     return "\n".join(prompt_parts)
+
 
 
 def generate_bot_from_description(description: str) -> dict:
