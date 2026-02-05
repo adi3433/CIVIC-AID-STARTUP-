@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Created! - CivicAid</title>
+    <style>
+        :root {
+            --primary: #25D366;
+            --bg-dark: #0a0f1a;
+            --bg-card: #1f2937;
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        .container {
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .link-box {
+            background: rgba(37, 211, 102, 0.1);
+            border: 1px solid var(--primary);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            word-break: break-all;
+            font-family: monospace;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: black;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .qr-code {
+            margin: 20px 0;
+            max-width: 200px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="icon">🎉</div>
+        <h1>Bot Deployed Successfully!</h1>
+        <p>Your AI Bot <strong><span id="bot-name"></span></strong> is ready.</p>
+
+        <p>Test it by sending <strong><span id="trigger-cmd"></span></strong> to our WhatsApp number:</p>
+
+        <div class="qr-code">
+            <img id="qr-img" src="" alt="QR Code" width="100%">
+        </div>
+
+        <div class="link-box">
+            <a id="wa-link" href="#" target="_blank" style="color: var(--primary);">Open in WhatsApp</a>
+        </div>
+
+        <p style="color: #9ca3af; font-size: 0.9em; margin-top: 30px;">
+            Note: In production sandbox, you may need to join the sandbox first.
+        </p>
+
+        <a href="landing.html" style="color: grey; text-decoration: none; display: block; margin-top: 20px;">Back to
+            Home</a>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        document.getElementById('bot-name').innerText = params.get('bot_name') || 'Your Bot';
+
+        const link = params.get('link');
+        if (link) {
+            document.getElementById('wa-link').href = link;
+            // Generate simple QR code API for visual
+            document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}`;
+        }
+
+        const slug = params.get('business_id'); // Using business_id param which might contain slug or ID
+        document.getElementById('trigger-cmd').innerText = `Hi ${slug}`;
+    </script>
+</body>
+
+</html>

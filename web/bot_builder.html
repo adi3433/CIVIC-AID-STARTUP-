@@ -738,11 +738,11 @@
 
                     setTimeout(() => {
                         const params = new URLSearchParams({
-                            business_id: data.business_id,
+                            business_id: data.slug || data.business_id, // Prefer slug if available
                             bot_name: data.bot_name,
                             link: data.whatsapp_link
                         });
-                        window.location.href = `demo_whatsapp.html?${params.toString()}`;
+                        window.location.href = `bot_success.html?${params.toString()}`;
                     }, 1500);
                 } else {
                     // Handle non-JSON response (likely HTML error from Vercel/Flask)
