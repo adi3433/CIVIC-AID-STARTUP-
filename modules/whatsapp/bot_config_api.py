@@ -332,26 +332,123 @@ def generate_bot_endpoint():
 
 
 @app.route('/api/bots/create', methods=['POST'])
-def create_bot():
-    """Save a new bot configuration"""
+def create_bot_from_form():
+    """Create a new bot from structured form data"""
     data = request.json
-    business_id = data.get('business_id')
     
-    if not business_id:
-        return jsonify({"error": "business_id required"}), 400
+    business_name = data.get('business_name', '').strip()
+    if not business_name:
+        return jsonify({"error": "Business name is required"}), 400
     
-    configs = load_configs()
-    configs[business_id] = {
-        **data,
-        "created_at": datetime.now().isoformat(),
-        "updated_at": datetime.now().isoformat()
+    capabilities = data.get('capabilities', [])
+    if not capabilities:
+        return jsonify({"error": "Please select at least one capability"}), 400
+    
+    # Generate unique business ID
+    business_id = generate_unique_id()
+    
+    # Map capability codes to readable names
+    capability_map = {
+        'appointments': 'Book Appointments',
+        'price_quotes': 'Provide Price Quotes',
+        'orders': 'Take Orders',
+        'order_tracking': 'Track Orders',
+        'reservations': 'Table Reservations',
+        'menu': 'Show Menu/Catalog',
+        'faq': 'Answer FAQs',
+        'complaints': 'Handle Complaints',
+        'support': 'Customer Support',
+        'returns': 'Process Returns'
     }
+    
+    capability_names = [capability_map.get(c, c) for c in capabilities]
+    
+    # Build system prompt from form data
+    bot_name = f"{business_name} Bot"
+    
+    system_prompt_parts = [
+        "CRITICAL: You MUST stay in character at all times. Never break character or say you are an AI.",
+        "",
+        f"You are {bot_name}, the friendly assistant for {business_name}.",
+    ]
+    
+    if data.get('business_type'):
+        system_prompt_parts.append(f"We are a {data['business_type']} business.")
+    
+    system_prompt_parts.extend([
+        "",
+        "YOUR CAPABILITIES:",
+    ])
+    
+    for cap in capability_names:
+        system_prompt_parts.append(f"- {cap}")
+    
+    system_prompt_parts.extend([
+        "",
+        "BUSINESS INFORMATION:",
+    ])
+    
+    if data.get('contact_phone'):
+        system_prompt_parts.append(f"- Contact: {data['contact_phone']}")
+    if data.get('business_hours'):
+        system_prompt_parts.append(f"- Hours: {data['business_hours']}")
+    if data.get('location'):
+        system_prompt_parts.append(f"- Location: {data['location']}")
+    
+    if data.get('description'):
+        system_prompt_parts.extend([
+            "",
+            f"About us: {data['description']}"
+        ])
+    
+    system_prompt_parts.extend([
+        "",
+        "RULES:",
+        f"- You ARE {bot_name}. NEVER say you are an AI or language model.",
+        "- If asked for contact info, provide the business information above.",
+        "- Keep responses brief and helpful (under 200 words).",
+        "- Ask one question at a time.",
+        "- Be friendly and professional."
+    ])
+    
+    system_prompt = "\n".join(system_prompt_parts)
+    
+    # Generate WhatsApp links
+    links = generate_whatsapp_link(business_id)
+    
+    # Prepare full config
+    full_config = {
+        "business_id": business_id,
+        "bot_name": bot_name,
+        "business_info": {
+            "name": business_name,
+            "type": data.get('business_type', ''),
+            "phone": data.get('contact_phone', ''),
+            "hours": data.get('business_hours', ''),
+            "location": data.get('location', ''),
+        },
+        "capabilities": capability_names,
+        "system_prompt": system_prompt,
+        "whatsapp_link": links["whatsapp_link"],
+        "qr_code_url": links["qr_code_url"],
+        "created_at": datetime.now().isoformat(),
+        "status": "active"
+    }
+    
+    # Save config
+    configs = load_configs()
+    configs[business_id] = full_config
     save_configs(configs)
+    
+    print(f"[BOT CREATOR] Bot created: {business_id} for {business_name}")
     
     return jsonify({
         "success": True,
         "business_id": business_id,
-        "message": "Bot configuration saved!"
+        "bot_name": bot_name,
+        "capabilities": capability_names,
+        "whatsapp_link": links["whatsapp_link"],
+        "qr_code_url": links["qr_code_url"]
     })
 
 
