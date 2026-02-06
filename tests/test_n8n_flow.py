@@ -1,7 +1,8 @@
 import requests
 import time
 
-URL = "http://localhost:5002/api/dispatch/webhook"
+# Direct n8n Test URL (Bypassing Vercel/Flask for direct workflow testing)
+URL = "https://whiteknight001.app.n8n.cloud/webhook-test/dispatch-webhook"
 
 payload = {
     "call_id": "test_call_999",
