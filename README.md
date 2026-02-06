@@ -37,7 +37,15 @@ python -m modules.whatsapp.app
 cd modules/dispatch/dispatch-service
 npm install
 npm run dev
-# Opens at http://localhost:5002
+# CivicAid (Startup)
+
+Unified platform for civic tech modules.
+
+## Access
+- **Main Portal**: `http://localhost:5002` (Serves both Landing Page and APIs)
+- **LeadGen AI**: `http://localhost:5002/leadgen.html`
+- **Dispatcher**: `http://localhost:5002/dispatch.html`
+
 
 # Option 2: Run Flask Backend Only
 python -m modules.dispatch.dispatcher_stub

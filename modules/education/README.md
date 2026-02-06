@@ -13,14 +13,17 @@ This module generates educational presentations (PPT/PDF) from structured conten
 
 ```bash
 # From project root
-python -m modules.education.ppt_generator_stub
+python api/index.py
 ```
 
-The server runs on `http://localhost:5004`
+The module is integrated into the main application.
+
+### Access
+- API Endpoint: `/api/education/generate` (Hosted on port 5002)
 
 ## API Endpoints
 
-### POST /education/generate
+### POST /api/education/generate
 
 Generate a presentation from structured content.
 

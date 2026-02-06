@@ -31,7 +31,7 @@
         <!-- Header -->
         <header class="lead-prediction-header">
             <div class="lead-prediction-title">
-                <a href="landing.html"
+                <a href="/"
                     style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 1.5rem;">📈</span>
                     <span>LeadGen AI</span>
@@ -265,7 +265,7 @@
             addMessage('ai', null);
 
             try {
-                const response = await fetch('http://localhost:5002/api/leadgen/analyze', {
+                const response = await fetch('/api/leadgen/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

@@ -16,7 +16,11 @@ This module analyzes case text using RAG (Retrieval Augmented Generation) and pr
 python -m modules.leadgen.leadgen_stub
 ```
 
-The server runs on `http://localhost:5003`
+The module is now integrated into the main application.
+
+### Access
+- URL: `http://localhost:5002/leadgen.html`
+- API Endpoint: `/api/leadgen/analyze` (Hosted on port 5002)
 
 ## API Endpoints
 

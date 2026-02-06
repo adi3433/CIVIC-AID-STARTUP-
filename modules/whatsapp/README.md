@@ -20,7 +20,11 @@ python app.py
 python -m modules.whatsapp.app
 ```
 
-The server runs on `http://localhost:5001`
+The module is integrated into the main application.
+
+### Access
+- URL: `http://localhost:5002` (via Main App)
+- API Endpoint: `/whatsapp/generate` (Hosted on port 5002)
 
 ## API Endpoints
 
@@ -66,7 +70,7 @@ Health check endpoint.
 bash demo.sh
 
 # Or manual curl
-curl -X POST http://localhost:5001/whatsapp/generate \
+curl -X POST http://localhost:5002/whatsapp/generate \
   -H "Content-Type: application/json" \
   -d '{"template_id": "phone_repair_basic", "dry_run": true}'
 ```
