@@ -359,53 +359,57 @@
             }
         }
 
-        // Generate bot flow
+        // Generate bot flow (Client-Side Simulation)
         async function generateBot() {
             const btn = document.getElementById('generate-btn');
             const templateId = document.getElementById('template').value;
             const override = document.getElementById('override').value;
-            const dryRun = document.getElementById('dry-run').checked;
 
             btn.disabled = true;
             btn.textContent = 'Generating...';
 
-            const requestBody = {
-                template_id: templateId,
-                dry_run: dryRun
-            };
-
-            if (override) {
-                requestBody.overrides = { prompt_model: override };
-            }
+            // Simulate API latency
+            await new Promise(r => setTimeout(r, 1500));
 
             try {
-                const response = await fetch(`${API_BASE}/whatsapp/generate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
+                // Mock Response Logic (moved from Python backend)
+                const mockFlow = {
+                    id: `flow_${Date.now()}`,
+                    name: templateId === 'phone_repair_basic' ? "Phone Repair Bot" :
+                        templateId === 'complaint_basic' ? "Civic Complaint Bot" : "Emergency Bot",
+                    steps: ["step_welcome", "step_identify", "step_process", "step_end"]
+                };
 
-                const data = await response.json();
+                const mockSimulation = [
+                    { from: "bot", text: "Hello! Welcome to CivicAid Assistant." },
+                    { from: "user", text: "I need help with a request." },
+                    {
+                        from: "bot", text: override || (
+                            templateId === 'phone_repair_basic' ? "What is your device model?" :
+                                templateId === 'complaint_basic' ? "Please describe your complaint." :
+                                    "Is this a medical or fire emergency?"
+                        )
+                    }
+                ];
+
+                const data = {
+                    status: "success",
+                    bot_flow: mockFlow,
+                    simulation: mockSimulation,
+                    note: "Generated via Client-Side Simulation (No Backend)"
+                };
 
                 // Update response panel
                 document.getElementById('response-json').textContent =
                     JSON.stringify(data, null, 2);
 
                 // Update chat preview
-                if (data.bot_flow && data.simulation) {
-                    document.getElementById('bot-name').textContent = data.bot_flow.name;
-                    renderSimulation(data.simulation);
-                }
+                document.getElementById('bot-name').textContent = data.bot_flow.name;
+                renderSimulation(data.simulation);
 
             } catch (error) {
-                document.getElementById('response-json').textContent =
-                    JSON.stringify({ error: 'Failed to connect to API', details: error.message }, null, 2);
-                document.getElementById('chat-messages').innerHTML = `
-                    <div class="empty-state">
-                        <span>❌</span>
-                        <p>Could not connect to API. Make sure the server is running on port 5001.</p>
-                    </div>
-                `;
+                console.error(error);
+                document.getElementById('response-json').textContent = "Error generating bot.";
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Generate Bot Flow';
@@ -458,8 +462,7 @@
         }
 
         // Initialize
-        window.addEventListener('load', checkApiStatus);
-        setInterval(checkApiStatus, 10000);
+        // window.addEventListener('load', checkApiStatus); // API check removed for static demo
     </script>
 </body>
 

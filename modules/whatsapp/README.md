@@ -24,11 +24,11 @@ The module is integrated into the main application.
 
 ### Access
 - URL: `http://localhost:5002` (via Main App)
-- API Endpoint: `/whatsapp/generate` (Hosted on port 5002)
+- API Endpoint: `/api/bots/generate` (Hosted on port 5002)
 
 ## API Endpoints
 
-### POST /whatsapp/generate
+### POST /api/bots/generate
 
 Generate a WhatsApp bot flow from a template.
 
@@ -70,9 +70,9 @@ Health check endpoint.
 bash demo.sh
 
 # Or manual curl
-curl -X POST http://localhost:5002/whatsapp/generate \
+curl -X POST http://localhost:5002/api/bots/generate \
   -H "Content-Type: application/json" \
-  -d '{"template_id": "phone_repair_basic", "dry_run": true}'
+  -d '{"description": "A phone repair shop bot", "dry_run": true}'
 ```
 
 ## Testing

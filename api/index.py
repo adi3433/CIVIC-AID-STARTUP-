@@ -17,7 +17,16 @@ def index():
 
 @app.route('/<path:path>')
 def serve_web_files(path):
-    return send_from_directory('../web', path)
+    # Try serving the exact path
+    if os.path.exists(os.path.join('../web', path)):
+        return send_from_directory('../web', path)
+    
+    # Try appending .html (clean URL support)
+    if os.path.exists(os.path.join('../web', f"{path}.html")):
+        return send_from_directory('../web', f"{path}.html")
+    
+    # Return 404 if nothing found
+    return "File not found", 404
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002, debug=True)
