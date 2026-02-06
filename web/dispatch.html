@@ -791,8 +791,8 @@
             }
 
             try {
-                // Call the Flask dispatch webhook API
-                const response = await fetch('/api/dispatch/webhook', {
+                // Call the n8n webhook directly (Static Frontend Mode)
+                const response = await fetch('https://whiteknight001.app.n8n.cloud/webhook/dispatch-webhook', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
