@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CivicAid - Lead Generation AI for Law Enforcement">
+    <title>LeadGen AI | CivicAid</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0a0f1a;
+            --bg-card: #111827;
+            --bg-input: #1f2937;
+            --text-light: #f8fafc;
+            --text-muted: #9ca3af;
+            --border: rgba(255, 255, 255, 0.1);
+            --primary: #25D366;
+            --primary-glow: rgba(37, 211, 102, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Header */
+        .app-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            background: rgba(10, 15, 26, 0.95);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-light);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .api-status.demo {
+            color: #fbbf24;
+        }
+
+        .api-status.live {
+            color: var(--primary);
+        }
+
+        .api-config-btn {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 8px;
+            color: var(--text-light);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .api-config-btn:hover {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* API Config Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal h3 {
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+        }
+
+        .modal p {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 16px;
+        }
+
+        .modal input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .modal-btn.primary {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .modal-btn.primary:hover {
+            transform: scale(1.05);
+        }
+
+        .modal-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+        }
+
+        .modal-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .modal-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .modal-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Main Container */
+        .container {
+            height: calc(100vh - 65px);
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .welcome-section h2 {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-section p {
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+
+        .quick-prompts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .quick-prompt-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .quick-prompt-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            background: linear-gradient(180deg, rgba(37, 211, 102, 0.05) 0%, var(--bg-card) 100%);
+        }
+
+        .quick-prompt-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .quick-prompt-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Messages */
+        .messages-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+            align-self: flex-end;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            padding: 12px 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            max-width: 70%;
+            line-height: 1.6;
+        }
+
+        .message.user .message-content {
+            background: rgba(59, 130, 246, 0.2);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.ai .message-content {
+            background: rgba(255, 255, 255, 0.15);
+            border-bottom-left-radius: 4px;
+            max-width: 100%;
+        }
+
+        /* Input Container */
+        .input-container {
+            position: sticky;
+            bottom: 0;
+            padding: 16px 0 0 0;
+            background: linear-gradient(to top, var(--bg-dark) 60%, transparent);
+        }
+
+        .input-wrapper {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .input-wrapper input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .input-wrapper input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .input-wrapper button {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .input-wrapper button:hover {
+            transform: scale(1.05);
+        }
+
+        .input-wrapper button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 8px;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            animation: bounce 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-8px);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .quick-prompts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- API Config Modal -->
+    <div class="modal-overlay" id="apiModal">
+        <div class="modal">
+            <h3>⚙️ Configure Gemini API</h3>
+            <p>Enter your Google Gemini API key to enable live AI-powered analysis. Without a key, you can still use the demo responses.</p>
+            <p>
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="modal-link">
+                    Get your free API key from Google AI Studio →
+                </a>
+            </p>
+            <label for="apiKeyInput">Google Gemini API Key:</label>
+            <input type="password" id="apiKeyInput" placeholder="AIza...">
+            <div class="modal-actions">
+                <button class="modal-btn secondary" onclick="closeApiModal()">Cancel</button>
+                <button class="modal-btn primary" onclick="saveApiKey()">Save & Activate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="app-header">
+        <a href="#" class="logo">
+            <span>🏛️</span> CivicAid
+        </a>
+        <div class="header-actions">
+            <div class="api-status" id="apiStatus">
+                <span id="statusDot">●</span>
+                <span id="statusText">Demo Mode</span>
+            </div>
+            <button class="api-config-btn" onclick="openApiModal()">⚙️ Configure API</button>
+            <a href="landing.html" class="back-btn">← Back to Home</a>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">
+                <span>🔍</span>
+                Lead Prediction AI
+            </h1>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-container" id="chatContainer">
+            <!-- Welcome Section -->
+            <div class="welcome-section" id="welcomeSection">
+                <h2>AI-Powered Lead Analysis</h2>
+                <p>Analyze suspicious text, messages, and content for potential criminal patterns and fraud indicators</p>
+                
+                <div class="quick-prompts-grid">
+                    <div class="quick-prompt-card" onclick="useQuickPrompt('How do you approach a deepfake fraud case?')">
+                        <h4>🎭 Deepfake Fraud Investigation</h4>
+                        <p>Get a structured workflow for investigating deepfake fraud cases</p>
+                    </div>
+                    <div class="quick-prompt-card" onclick="useQuickPrompt('What\'s the process for analyzing a phishing campaign?')">
+                        <h4>🎣 Phishing Analysis</h4>
+                        <p>View detailed steps for analyzing phishing campaigns</p>
+                    </div>
+                    <div class="quick-prompt-card" onclick="useQuickPrompt('How to investigate a cryptocurrency scam?')">
+                        <h4>💰 Cryptocurrency Scam</h4>
+                        <p>See investigation workflow for crypto-related scams</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages will be appended here -->
+            <div class="messages-container" id="messagesContainer" style="display: none;"></div>
+        </div>
+
+        <!-- Input Container -->
+        <div class="input-container">
+            <div class="input-wrapper">
+                <span>🔍</span>
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    placeholder="Paste suspicious text, messages, or content for analysis..."
+                    onkeypress="handleKeyPress(event)"
+                />
+                <button onclick="sendMessage()" id="sendBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="19" x2="12" y2="5"></line>
+                        <polyline points="5 12 12 5 19 12"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const messages = [];
+        let isLoading = false;
+        let geminiApiKey = localStorage.getItem('gemini_api_key') || '';
+
+        // Update API status on load
+        updateApiStatus();
+
+        // API Configuration Functions
+        function openApiModal() {
+            document.getElementById('apiModal').classList.add('active');
+            document.getElementById('apiKeyInput').value = geminiApiKey;
+        }
+
+        function closeApiModal() {
+            document.getElementById('apiModal').classList.remove('active');
+        }
+
+        function saveApiKey() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            if (apiKey) {
+                localStorage.setItem('gemini_api_key', apiKey);
+                geminiApiKey = apiKey;
+                updateApiStatus();
+                closeApiModal();
+                alert('✅ API key saved! You can now use live AI analysis.');
+            } else {
+                alert('Please enter a valid API key');
+            }
+        }
+
+        function updateApiStatus() {
+            const statusEl = document.getElementById('apiStatus');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            
+            if (geminiApiKey) {
+                statusEl.className = 'api-status live';
+                statusText.textContent = 'Live AI';
+            } else {
+                statusEl.className = 'api-status demo';
+                statusText.textContent = 'Demo Mode';
+            }
+        }
+
+        // Predefined responses for demo mode
+        const predefinedResponses = {
+            "How do you approach a deepfake fraud case?": {
+                title: "Deepfake Fraud Investigation",
+                content: `
+### Investigation Process
+
+Deepfake fraud cases require a systematic approach to identify manipulated media, trace its origins, and build evidence for prosecution.
+
+**Key Steps:**
+
+1. **Evidence Collection** - Secure all digital evidence immediately with proper chain of custody
+2. **Media Authentication** - Use specialized forensic tools to analyze media authenticity
+3. **Technical Analysis** - Identify deepfake indicators through frame-by-frame analysis
+4. **Source Tracing** - Follow the distribution path to identify original source
+5. **Suspect Identification** - Use technical signatures to trace perpetrators
+6. **Case Building** - Compile evidence for legal proceedings
+
+### Key Findings
+
+- **Authentication First**: Media authentication must precede all other investigative steps
+- **Technical Expertise Required**: Specialized forensic tools and skills are essential
+- **Chain of Evidence**: Maintaining proper evidence handling is critical
+- **Digital Footprints**: Perpetrators often leave traceable technical signatures
+
+### Evidence Analysis
+
+- **Metadata Inconsistencies**: Missing or altered file metadata (High Severity)
+- **Visual Artifacts**: Unnatural blending, inconsistent lighting (Medium Severity)  
+- **Audio Discrepancies**: Voice tone shifts, unnatural pauses (Medium Severity)
+- **Distribution Patterns**: Unusual posting times or channels (Low Severity)
+
+### Next Steps
+
+1. Secure Original Evidence - Preserve all digital evidence
+2. Apply Forensic Tools - Use deepfake detection software
+3. Interview Witnesses - Gather verification statements
+4. Trace Digital Path - Identify source and suspects
+
+### Recommendations
+
+- **High Priority**: Establish dedicated deepfake investigation unit
+- **Medium Priority**: Implement automated detection tools
+- **Medium Priority**: Develop platform provider partnerships
+- **Low Priority**: Create public awareness campaigns
+                `
+            },
+            "What's the process for analyzing a phishing campaign?": {
+                title: "Phishing Campaign Analysis",
+                content: `
+### Investigation Workflow
+
+Phishing campaigns require careful analysis to identify attack vectors, compromised accounts, and prevent further damage.
+
+**Analysis Steps:**
+
+1. **Email Analysis** - Examine headers, sender information, and embedded links
+2. **Link Investigation** - Trace malicious URLs and identify hosting infrastructure
+3. **Victim Identification** - Determine scope of successful attacks
+4. **Infrastructure Mapping** - Identify command and control servers
+5. **Threat Attribution** - Link campaign to known threat actors
+6. **Mitigation** - Implement blocks and notify affected parties
+
+### Key Findings
+
+- **Social Engineering**: Campaigns exploit trust and urgency
+- **Infrastructure Reuse**: Attackers often reuse hosting infrastructure
+- **Pattern Recognition**: Similar templates indicate organized groups
+- **Timing Matters**: Quick response limits damage significantly
+
+### Evidence To Collect
+
+- **Email Headers**: Full header information including routing (Critical)
+- **Malicious URLs**: All links in suspicious emails (High Severity)
+- **Attachments**: Any files sent with phishing emails (High Severity)
+- **Reported Times**: When victims first noticed the attack (Medium Severity)
+
+### Next Steps
+
+1. Preserve Email Evidence - Save complete email with headers
+2. Analyze URLs - Use sandbox environment for link analysis  
+3. Identify Victims - Survey potentially affected users
+4. Block Infrastructure - Work with providers to shut down sites
+
+### Recommendations
+
+- **High Priority**: Deploy email filtering improvements
+- **High Priority**: Conduct user security awareness training
+- **Medium Priority**: Implement multi-factor authentication
+- **Low Priority**: Regular phishing simulation exercises
+                `
+            },
+            "How to investigate a cryptocurrency scam?": {
+                title: "Cryptocurrency Scam Investigation",
+                content: `
+### Investigation Framework
+
+Cryptocurrency scams require specialized knowledge of blockchain technology and financial fraud investigation techniques.
+
+**Investigation Steps:**
+
+1. **Transaction Tracing** - Follow cryptocurrency transfers on blockchain
+2. **Wallet Analysis** - Identify associated wallets and addresses
+3. **Exchange Coordination** - Work with exchanges to freeze assets
+4. **Victim Interview** - Document financial losses and attack methods
+5. **Technical Analysis** - Examine smart contracts or fraudulent platforms
+6. **Asset Recovery** - Attempt to recover stolen cryptocurrency
+
+### Key Findings
+
+- **Blockchain Transparency**: All transactions are permanently recorded
+- **Speed Critical**: Quick action increases recovery chances
+- **Exchange Cooperation**: Many reputable exchanges assist investigations
+- **Cross-Border Complexity**: Scams often involve multiple jurisdictions
+
+### Evidence Collection
+
+- **Wallet Addresses**: All involved cryptocurrency addresses (Critical)
+- **Transaction IDs**: Complete transaction history (High Severity)
+- **Communications**: Messages with scammers (High Severity)
+- **Platform Details**: Fraudulent website or app information (Medium Severity)
+
+### Next Steps
+
+1. Document Transactions - Record all wallet addresses and transaction IDs
+2. Contact Exchanges - Report fraud to relevant cryptocurrency exchanges
+3. Blockchain Analysis - Use blockchain explorers to trace funds
+4. File Reports - Submit to cybercrime units and financial authorities
+
+### Recommendations
+
+- **High Priority**: Establish cryptocurrency investigation expertise
+- **High Priority**: Build exchange partnership network
+- **Medium Priority**: Implement blockchain analysis tools
+- **Medium Priority**: Create crypto fraud awareness campaigns
+                `
+            }
+        };
+
+        // Call Gemini API
+        async function callGeminiAPI(prompt) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
+            
+            const systemPrompt = `You are an AI assistant specialized in analyzing text for potential criminal patterns, scams, threats, and generating investigative leads for law enforcement.
+
+Provide detailed analysis and actionable next steps for investigators in a structured format:
+
+1. Start with a brief summary
+2. Include these sections:
+   - Key Findings (bullet points)
+   - Evidence Analysis (with severity indicators)
+   - Next Steps (actionable items)
+   - Recommendations (prioritized)
+
+Use clear, professional language suitable for law enforcement.`;
+
+            const requestBody = {
+                contents: [{
+                    parts: [{
+                        text: systemPrompt + "\n\nUser Query: " + prompt
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 2048,
+                }
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return {
+                    title: "AI Analysis",
+                    content: data.candidates[0].content.parts[0].text
+                };
+            } catch (error) {
+                console.error('Gemini API error:', error);
+                return {
+                    title: "Error",
+                    content: `⚠️ Failed to get AI response: ${error.message}\n\nPlease check your API key or try again later.`
+                };
+            }
+        }
+
+        function useQuickPrompt(prompt) {
+            const input = document.getElementById('messageInput');
+            input.value = prompt;
+            sendMessage();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || isLoading) return;
+
+            // Hide welcome section
+            document.getElementById('welcomeSection').style.display = 'none';
+            document.getElementById('messagesContainer').style.display = 'flex';
+
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Show typing indicator
+            isLoading = true;
+            updateSendButton();
+            addTypingIndicator();
+
+            // Simulate API delay for demo responses
+            if (!geminiApiKey || predefinedResponses[message]) {
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                removeTypingIndicator();
+
+                if (predefinedResponses[message]) {
+                    const response = predefinedResponses[message];
+                    addMessage(response.content, 'ai', response.title);
+                } else {
+                    const demoResponse = `
+### Analysis Complete
+
+I've analyzed your input: "${message}"
+
+**Currently in Demo Mode** - To enable real-time AI analysis, please configure your Google Gemini API key by clicking "Configure API" in the header.
+
+**Try one of the quick prompts above to see a full analysis example**, or configure your API key to analyze any text.
+
+### Available Demo Features
+
+- Deepfake fraud investigation workflows
+- Phishing campaign analysis
+- Cryptocurrency scam investigation
+
+For real-time analysis of custom text, please add your Gemini API key.
+                    `;
+                    addMessage(demoResponse, 'ai', '🔒 Demo Mode');
+                }
+            } else {
+                // Use real Gemini API
+                const response = await callGeminiAPI(message);
+                removeTypingIndicator();
+                addMessage(response.content, 'ai', response.title);
+            }
+
+            isLoading = false;
+            updateSendButton();
+        }
+
+        function addMessage(content, type, title) {
+            const container = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = type === 'user' ? '👮' : '🔍';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            if (title) {
+                const titleEl = document.createElement('h3');
+                titleEl.style.marginBottom = '12px';
+                titleEl.style.color = '#f0f0f0';
+                titleEl.textContent = title;
+                contentDiv.appendChild(titleEl);
+            }
+            
+            // Convert markdown-like content to HTML
+            const formattedContent = formatContent(content);
+            contentDiv.innerHTML += formattedContent;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            container.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function formatContent(content) {
+            // Simple markdown-like formatting
+            let html = content;
+            
+            // Headers
+            html = html.replace(/^### (.*$)/gim, '<h3 style="margin: 16px 0 8px 0; color: #f0f0f0;">$1</h3>');
+            html = html.replace(/^## (.*$)/gim, '<h2 style="margin: 16px 0 8px 0; color: #f0f0f0;">$2</h2>');
+            
+            // Bold
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Lists
+            html = html.replace(/^\- (.*$)/gim, '<li style="margin-left: 20px;">$1</li>');
+            html = html.replace(/^\d+\. (.*$)/gim, '<li style="margin-left: 20px; list-style-type: decimal;">$1</li>');
+            
+            // Paragraphs
+            html = html.replace(/\n\n/g, '</p><p style="margin: 12px 0;">');
+            html = '<p style="margin: 12px 0;">' + html + '</p>';
+            
+            return html;
+        }
+
+        function addTypingIndicator() {
+            const container = document.getElementById('messagesContainer');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.className = 'message ai';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🔍</div>
+                <div class="message-content">
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(typingDiv);
+            
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        function updateSendButton() {
+            const btn = document.getElementById('sendBtn');
+            btn.disabled = isLoading;
+        }
+
+        // Focus input on load
+        window.addEventListener('load', () => {
+            document.getElementById('messageInput').focus();
+        });
+
+        // Close modal on outside click
+        document.getElementById('apiModal').addEventListener('click', (e) => {
+            if (e.target.id === 'apiModal') {
+                closeApiModal();
+            }
+        });
+    </script>
+</body>
+</html>

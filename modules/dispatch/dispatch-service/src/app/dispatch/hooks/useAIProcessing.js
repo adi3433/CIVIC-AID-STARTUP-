@@ -43,7 +43,7 @@ export function useAIProcessing() {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
     if (apiKey) {
       genAI.current = new GoogleGenerativeAI(apiKey);
-      model.current = genAI.current.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+      model.current = genAI.current.getGenerativeModel({ model: "gemini-2.5-flash" });
     }
   }, []);
   
