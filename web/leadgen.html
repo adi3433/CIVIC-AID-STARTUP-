@@ -287,7 +287,12 @@
                     })
                 });
 
-                if (!response.ok) throw new Error(`Gemini API Error: ${response.status}`);
+                if (!response.ok) {
+                    if (response.status === 429) {
+                        throw new Error("API Quota Exceeded (429). You are sending requests too quickly or have hit the free tier limit. Please wait a minute and try again.");
+                    }
+                    throw new Error(`Gemini API Error: ${response.status}`);
+                }
 
                 const data = await response.json();
                 const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I couldn't generate a response.";
@@ -299,7 +304,15 @@
             } catch (error) {
                 console.error("API Error:", error);
                 removeLoadingMessage();
-                addMessage('ai', `Error: ${error.message}. Please check your connection or API key.`);
+
+                let errorMsg = `Error: ${error.message}`;
+                if (error.message.includes('429')) {
+                    errorMsg = "⚠️ System Overload: We're experiencing high traffic (429). Please wait 30 seconds before your next request.";
+                } else if (error.message.includes('Missing Google API Key')) {
+                    errorMsg = "⚠️ Configuration Error: API Key missing. Please refresh and provide a valid Google Gemini API Key.";
+                }
+
+                addMessage('ai', errorMsg);
             }
         }
     </script>
