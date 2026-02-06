@@ -1,6 +1,8 @@
 from modules.whatsapp.bot_config_api import app
+from modules.leadgen.routes import leadgen_bp
 
-# This is required for Vercel to find the Flask app instance
-# Vercel looks for 'app' by default in the entry point
+# Register Blueprints
+app.register_blueprint(leadgen_bp)
+
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5002, debug=True)
