@@ -265,37 +265,50 @@
             addMessage('ai', null);
 
             try {
-                // Client-side call to Google Gemini API (No backend required)
-                let API_KEY = localStorage.getItem('civicaid_google_api_key');
+                // Client-side call to Fireworks AI (OpenAI Compatible)
+                let API_KEY = localStorage.getItem('civicaid_fireworks_api_key');
 
-                if (!API_KEY || API_KEY === 'YOUR_GOOGLE_API_KEY') {
-                    API_KEY = prompt("Please enter your Google Gemini API Key to continue (it will be saved locally):");
+                if (!API_KEY || API_KEY === 'YOUR_FIREWORKS_API_KEY') {
+                    API_KEY = prompt("Please enter your Fireworks AI API Key (starts with fw_...):");
                     if (API_KEY) {
-                        localStorage.setItem('civicaid_google_api_key', API_KEY);
+                        localStorage.setItem('civicaid_fireworks_api_key', API_KEY);
                     } else {
                         throw new Error("API Key is required to use this feature.");
                     }
                 }
 
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
+                // Fireworks AI Endpoint (Standard OpenAI Format)
+                const response = await fetch('https://api.fireworks.ai/inference/v1/chat/completions', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
                     body: JSON.stringify({
-                        contents: [{
-                            parts: [{ text: `You are an expert investigative assistant for CivicAid. Analyze this case and provide recommendations: ${text}` }]
-                        }]
+                        model: "accounts/fireworks/models/qwen2p5-72b-instruct",
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are an expert investigative assistant for CivicAid using the Qwen 2.5 model. Analyze cases with precision."
+                            },
+                            {
+                                role: "user",
+                                content: `Analyze the following case and provide actionable recommendations:\n\n${text}`
+                            }
+                        ],
+                        temperature: 0.6
                     })
                 });
 
                 if (!response.ok) {
                     if (response.status === 429) {
-                        throw new Error("API Quota Exceeded (429). You are sending requests too quickly or have hit the free tier limit. Please wait a minute and try again.");
+                        throw new Error("Rate Limit Exceeded (429). Please wait a moment.");
                     }
-                    throw new Error(`Gemini API Error: ${response.status}`);
+                    throw new Error(`Fireworks API Error: ${response.status}`);
                 }
 
                 const data = await response.json();
-                const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I couldn't generate a response.";
+                const aiText = data.choices?.[0]?.message?.content || "I couldn't generate a response.";
 
                 removeLoadingMessage();
                 addMessage('ai', aiText);
@@ -306,10 +319,12 @@
                 removeLoadingMessage();
 
                 let errorMsg = `Error: ${error.message}`;
-                if (error.message.includes('429')) {
-                    errorMsg = "⚠️ System Overload: We're experiencing high traffic (429). Please wait 30 seconds before your next request.";
-                } else if (error.message.includes('Missing Google API Key')) {
-                    errorMsg = "⚠️ Configuration Error: API Key missing. Please refresh and provide a valid Google Gemini API Key.";
+                if (error.message.includes('401')) {
+                    errorMsg = "⚠️ Authentication Failed: Invalid API Key. Please check your key.";
+                    // Clear invalid key so user is prompted again next time
+                    localStorage.removeItem('civicaid_fireworks_api_key');
+                } else if (error.message.includes('429')) {
+                    errorMsg = "⚠️ System Busy (429): Please wait 30 seconds before retrying.";
                 }
 
                 addMessage('ai', errorMsg);
