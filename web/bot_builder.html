@@ -711,51 +711,37 @@
             document.getElementById('loading-section').classList.add('active');
             document.getElementById('result-section').classList.remove('active');
 
+            // Simulate API call (Client-Side Mock)
+            // Removed /api/bots/create call to support static Vercel deployment without backend
+
             try {
-                const endpoint = `${API_BASE}/api/bots/create`; // Define endpoint
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
-                });
+                // Simulate network delay
+                await new Promise(r => setTimeout(r, 2000));
 
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.indexOf("application/json") !== -1) {
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.error || 'Server returned an error');
+                const mockBusinessId = formData.business_name.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Math.floor(Math.random() * 1000);
+                const mockLink = `https://wa.me/15550123456?text=Start_${mockBusinessId}`;
 
-                    // Success
-                    // Note: The 'status' element is not present in the provided HTML.
-                    // If you intend to display a status message, you'll need to add an element with id="status" to your HTML.
-                    // For now, this line will not have a visible effect unless the element is added.
-                    const statusElement = document.getElementById('status');
-                    if (statusElement) {
-                        statusElement.className = 'status success';
-                        statusElement.innerText = 'Bot created successfully! Redirecting...';
-                    }
-
-                    setTimeout(() => {
-                        const params = new URLSearchParams({
-                            business_id: data.slug || data.business_id, // Prefer slug if available
-                            bot_name: data.bot_name,
-                            link: data.whatsapp_link
-                        });
-                        window.location.href = `bot_success.html?${params.toString()}`;
-                    }, 1500);
-                } else {
-                    // Handle non-JSON response (likely HTML error from Vercel/Flask)
-                    const text = await response.text();
-                    console.error("Server Error:", text);
-                    throw new Error(`Server Error (${response.status}): ${text.substring(0, 100)}...`);
+                // Success Simulation
+                const statusElement = document.getElementById('status');
+                if (statusElement) {
+                    statusElement.className = 'status success';
+                    statusElement.innerText = 'Bot created successfully! Redirecting...';
                 }
+
+                setTimeout(() => {
+                    const params = new URLSearchParams({
+                        business_id: mockBusinessId,
+                        bot_name: formData.business_name + " Bot",
+                        link: mockLink
+                    });
+                    window.location.href = `bot_success.html?${params.toString()}`;
+                }, 1000);
 
             } catch (error) {
                 alert('Error: ' + error.message);
                 document.getElementById('form-section').style.display = 'block';
             } finally {
-                document.getElementById('loading-section').classList.remove('active');
+                // Keep loading screen until redirect happens
             }
         }
 
