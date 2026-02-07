@@ -15,7 +15,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/motion@latest/dist/motion.js"></script>
     <script>
-    const { animate, scroll } = Motion
+        const { animate, scroll } = Motion
     </script>
     <script>
         tailwind.config = {
@@ -37,9 +37,13 @@
         .glass-bg {
             background: rgba(10, 14, 26, 0.5);
         }
+
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
+
         .spinner {
             border: 3px solid rgba(139, 92, 246, 0.3);
             border-top: 3px solid #8b5cf6;
@@ -53,21 +57,28 @@
 
 <body class="bg-civic-dark text-white font-sans leading-relaxed min-h-screen overflow-x-hidden">
     <!-- Fixed Top Spotlight Effect -->
-    <div class="fixed top-0 left-0 w-full h-[400px] pointer-events-none z-0" style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.18) 10%, rgba(255, 255, 255, 0.12) 20%, rgba(255, 255, 255, 0.08) 35%, rgba(255, 255, 255, 0.04) 55%, rgba(255, 255, 255, 0.01) 75%, transparent 100%); filter: blur(60px);"></div>
-    
+    <div class="fixed top-0 left-0 w-full h-[400px] pointer-events-none z-0"
+        style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.18) 10%, rgba(255, 255, 255, 0.12) 20%, rgba(255, 255, 255, 0.08) 35%, rgba(255, 255, 255, 0.04) 55%, rgba(255, 255, 255, 0.01) 75%, transparent 100%); filter: blur(60px);">
+    </div>
+
     <!-- Right Side Spotlight -->
-    <div class="fixed top-[30%] right-[-10%] w-[800px] h-[800px] pointer-events-none z-0" style="background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 15%, rgba(255, 255, 255, 0.1) 30%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.02) 70%, transparent 100%); filter: blur(80px);"></div>
+    <div class="fixed top-[30%] right-[-10%] w-[800px] h-[800px] pointer-events-none z-0"
+        style="background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 15%, rgba(255, 255, 255, 0.1) 30%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.02) 70%, transparent 100%); filter: blur(80px);">
+    </div>
 
     <!-- Header - Premium Glassmorphism -->
     <header class="fixed top-0 left-0 right-0 z-50 glass-bg backdrop-blur-xl border-b border-white/[0.06]">
         <nav class="flex justify-between items-center py-4 px-10 max-w-[1400px] mx-auto">
             <a href="landing.html" class="flex items-center gap-3 text-lg font-semibold text-white no-underline group">
-                <img src="public/CivicLogo.png" alt="CivicAId Logo" class="w-10 h-10 object-contain transition-transform group-hover:scale-110">
+                <img src="public/CivicLogo.png" alt="CivicAId Logo"
+                    class="w-10 h-10 object-contain transition-transform group-hover:scale-110">
                 <span class="group-hover:text-blue-400 transition-colors">CivicAId</span>
             </a>
             <div class="flex items-center gap-8">
-                <a href="landing.html" class="text-white/70 no-underline text-sm font-medium hover:text-white transition-colors">Home</a>
-                <a href="https://github.com/adi3433/CIVIC-AID-STARTUP-" target="_blank" class="text-white/70 no-underline text-sm font-medium hover:text-white transition-colors">GitHub</a>
+                <a href="landing.html"
+                    class="text-white/70 no-underline text-sm font-medium hover:text-white transition-colors">Home</a>
+                <a href="https://github.com/adi3433/CIVIC-AID-STARTUP-" target="_blank"
+                    class="text-white/70 no-underline text-sm font-medium hover:text-white transition-colors">GitHub</a>
             </div>
         </nav>
     </header>
@@ -76,28 +87,35 @@
         <div class="max-w-[800px] mx-auto">
             <!-- Hero Section -->
             <div class="text-center mb-8">
-                <span class="inline-block text-xs font-medium text-white/60 bg-white/5 border border-white/[0.08] px-3 py-1.5 rounded tracking-wide mb-4">📊 AI EDUCATION SUITE</span>
-                <h1 class="text-4xl font-bold leading-tight text-white mb-3 tracking-tight">AI Presentation Generator</h1>
-                <p class="text-sm text-white/60 leading-relaxed">Generates complete 7-slide educational presentations in seconds</p>
+                <span
+                    class="inline-block text-xs font-medium text-white/60 bg-white/5 border border-white/[0.08] px-3 py-1.5 rounded tracking-wide mb-4">📊
+                    AI EDUCATION SUITE</span>
+                <h1 class="text-4xl font-bold leading-tight text-white mb-3 tracking-tight">AI Presentation Generator
+                </h1>
+                <p class="text-sm text-white/60 leading-relaxed">Generates complete 7-slide educational presentations in
+                    seconds</p>
             </div>
 
             <!-- Generator Card -->
-            <div class="bg-civic-card/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl p-8">
-                
+            <div
+                class="bg-civic-card/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl p-8">
+
                 <!-- Form Container -->
                 <div id="form-container">
                     <div class="space-y-6">
                         <!-- Topic -->
                         <div>
-                            <label for="topic" class="block text-sm font-medium text-white/70 mb-2">Presentation Topic <span class="text-red-400">*</span></label>
-                            <input type="text" id="topic" placeholder="e.g. Solar System Basics, History of Rome" 
+                            <label for="topic" class="block text-sm font-medium text-white/70 mb-2">Presentation Topic
+                                <span class="text-red-400">*</span></label>
+                            <input type="text" id="topic" placeholder="e.g. Solar System Basics, History of Rome"
                                 class="w-full bg-civic-surface border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all">
                         </div>
 
                         <!-- Grade Level -->
                         <div>
-                            <label for="grade" class="block text-sm font-medium text-white/70 mb-2">Target Grade Level <span class="text-red-400">*</span></label>
-                            <select id="grade" 
+                            <label for="grade" class="block text-sm font-medium text-white/70 mb-2">Target Grade Level
+                                <span class="text-red-400">*</span></label>
+                            <select id="grade"
                                 class="w-full bg-civic-surface border border-white/10 rounded-xl px-4 py-3 text-white focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer">
                                 <option value="1st Grade">1st Grade</option>
                                 <option value="3rd Grade">3rd Grade</option>
@@ -110,14 +128,16 @@
 
                         <!-- Source URL -->
                         <div>
-                            <label for="source" class="block text-sm font-medium text-white/70 mb-2">Source Material URL (Optional)</label>
-                            <input type="url" id="source" placeholder="https://example.com/article.pdf" 
+                            <label for="source" class="block text-sm font-medium text-white/70 mb-2">Source Material URL
+                                (Optional)</label>
+                            <input type="url" id="source" placeholder="https://example.com/article.pdf"
                                 class="w-full bg-civic-surface border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all">
-                            <p class="text-xs text-white/40 mt-2">Provide a link to a document for the AI to analyze (optional).</p>
+                            <p class="text-xs text-white/40 mt-2">Provide a link to a document for the AI to analyze
+                                (optional).</p>
                         </div>
 
                         <!-- Generate Button -->
-                        <button id="generate-btn" onclick="generatePPT()" 
+                        <button id="generate-btn" onclick="generatePPT()"
                             class="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-600 text-white font-semibold py-4 px-6 rounded-xl transition-all hover:shadow-lg hover:shadow-purple-500/50 hover:-translate-y-0.5 flex items-center justify-center gap-2">
                             <span>✨ Generate Presentation</span>
                         </button>
@@ -140,13 +160,13 @@
                         <p class="text-sm text-white/60 mb-6">
                             Generated <span id="slide-count">8</span> slides with custom AI imagery.
                         </p>
-                        <a href="#" id="download-link" target="_blank" 
+                        <a href="#" id="download-link" target="_blank"
                             class="inline-block bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-xl transition-all hover:shadow-lg hover:-translate-y-0.5">
                             Download PPTX File
                         </a>
                     </div>
 
-                    <button onclick="resetForm()" 
+                    <button onclick="resetForm()"
                         class="w-full mt-5 bg-transparent border border-white/10 text-white/60 hover:text-white hover:border-white/30 py-3 px-6 rounded-xl transition-all">
                         Create Another
                     </button>
@@ -203,10 +223,7 @@
                 }
 
                 const data = await response.json();
-
-                // Expecting structure: { status: "success", slides: [{ title, bullet_points, image_url }, ...] }
-                // OR just the array of slides directly, depending on n8n output.
-                // Assuming n8n returns object with 'slides' array or just the array.
+                console.log("n8n Response:", data);
 
                 let slides = [];
                 if (Array.isArray(data)) {
@@ -216,9 +233,8 @@
                 } else if (data.output && Array.isArray(data.output)) {
                     slides = data.output;
                 } else {
-                    // Fallback if data is wrapped in n8n structure
-                    console.log("Raw Data:", data);
-                    slides = data; // Try using raw data
+                    // Fallback: try raw data
+                    slides = data;
                 }
 
                 if (!slides || slides.length === 0) {
@@ -226,7 +242,6 @@
                 }
 
                 await createAndDownloadPPT(topic, grade, slides);
-                showResult(slides.length, topic);
 
             } catch (error) {
                 console.error('Generation Error:', error);
@@ -235,113 +250,79 @@
             }
         }
 
-<<<<<<< HEAD
-        function showResult(data) {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('result').classList.remove('hidden');
-
-            document.getElementById('result-title').textContent = data.presentation_title || 'Presentation';
-            document.getElementById('slide-count').textContent = data.slides_generated || '8';
-            document.getElementById('download-link').href = data.download_url;
-=======
         async function createAndDownloadPPT(topic, grade, slides) {
-            const pres = new PptxGenJS();
-            pres.layout = 'LAYOUT_16x9';
-            pres.title = topic;
+            try {
+                const pres = new PptxGenJS();
+                pres.layout = 'LAYOUT_16x9';
+                pres.title = topic;
 
-            // 1. Title Slide
-            let slide = pres.addSlide();
-            slide.background = { color: '111827' }; // Dark theme
-            slide.addText(topic, { x: 1, y: 2, w: '80%', fontSize: 48, color: 'FFFFFF', bold: true, align: 'center' });
-            slide.addText(`Grade: ${grade}`, { x: 1, y: 3.5, w: '80%', fontSize: 24, color: 'CCCCCC', align: 'center' });
-            slide.addText('Generated by CivicAid AI', { x: 1, y: 6.5, w: '80%', fontSize: 14, color: '8b5cf6', align: 'center' });
-
-            // 2. Content Slides
-            for (let i = 0; i < slides.length; i++) {
-                const s = slides[i];
+                // 1. Title Slide (Dark Theme)
                 let slide = pres.addSlide();
-                slide.background = { color: 'FFFFFF' };
+                slide.background = { color: '111827' };
+                slide.addText(topic, { x: 1, y: 2, w: '80%', fontSize: 44, color: 'FFFFFF', bold: true, align: 'center' });
+                slide.addText(`Grade: ${grade}`, { x: 1, y: 3.5, w: '80%', fontSize: 24, color: 'CCCCCC', align: 'center' });
+                slide.addText('Generated by CivicAid AI', { x: 1, y: 6.5, w: '80%', fontSize: 14, color: '8b5cf6', align: 'center' });
 
-                // Title Bar
-                slide.addShape(pres.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 1.0, fill: '1e293b' });
-                slide.addText(s.title || `Slide ${i + 1}`, { x: 0.5, y: 0.1, w: '90%', fontSize: 24, color: 'FFFFFF', bold: true });
+                // 2. Content Slides
+                for (let i = 0; i < slides.length; i++) {
+                    const s = slides[i];
+                    let slide = pres.addSlide();
+                    slide.background = { color: 'FFFFFF' };
 
-                // Content (Bullets)
-                let bulletsArray = s.bullet_points || s.bullets || [];
-                let bullets = [];
-                if (Array.isArray(bulletsArray)) {
-                    bullets = bulletsArray.map(b => ({ text: b, options: { fontSize: 14, breakLine: true, bullet: true, paraSpaceBefore: 10 } }));
-                } else if (typeof bulletsArray === 'string') {
-                    bullets = [{ text: bulletsArray, options: { fontSize: 14, bullet: true } }];
-                }
+                    // Title Bar
+                    slide.addShape(pres.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 1.2, fill: '1e293b' });
+                    slide.addText(s.title || `Slide ${i + 1}`, { x: 0.5, y: 0.2, w: '90%', fontSize: 24, color: 'FFFFFF', bold: true });
 
-                slide.addText(bullets, { x: 0.5, y: 1.2, w: 5.5, h: 5.5, color: '333333', valign: 'top' });
+                    // Content (Bullets)
+                    let bulletsArray = s.bullet_points || s.bullets || [];
+                    let bullets = [];
+                    if (Array.isArray(bulletsArray)) {
+                        bullets = bulletsArray.map(b => ({ text: b, options: { fontSize: 16, breakLine: true, bullet: true, paraSpaceBefore: 10 } }));
+                    } else if (typeof bulletsArray === 'string') {
+                        bullets = [{ text: bulletsArray, options: { fontSize: 16, bullet: true } }];
+                    }
+                    slide.addText(bullets, { x: 0.5, y: 1.5, w: 5.5, h: 5.0, color: '333333', valign: 'top' });
 
-                // Image (Right Side)
-                if (s.image_url && s.image_url.startsWith('http')) {
-                    try {
-                        const base64Data = await fetchImageWithFallback(s.image_url);
-                        if (base64Data) {
-                            slide.addImage({ data: base64Data, x: 6.2, y: 1.2, w: 3.5, h: 3.5 });
-                        } else {
-                            throw new Error("All proxies failed");
+                    // Image Handling (Priority: Base64 -> URL)
+                    if (s.image_base64) {
+                        // Priority 1: Base64 from n8n (Best)
+                        slide.addImage({ data: s.image_base64, x: 6.2, y: 1.5, w: 3.5, h: 3.5 });
+                    } else if (s.image_url && s.image_url.startsWith('http')) {
+                        // Priority 2: Simple Proxy URL Fallback
+                        try {
+                            const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(s.image_url);
+                            slide.addImage({ path: proxyUrl, x: 6.2, y: 1.5, w: 3.5, h: 3.5 });
+                        } catch (e) {
+                            console.warn("Proxy fallback failed", e);
+                            slide.addText("[Image Not Available]", { x: 6.5, y: 3, color: 'FF0000', fontSize: 12 });
                         }
-                    } catch (e) {
-                        console.warn(`Skipping image for slide ${i + 1}: ${e.message}`);
-                        slide.addText("[Image Not Available]", { x: 6.5, y: 3, w: 3, align: 'center', fontSize: 12, color: 'FF0000' });
-                        slide.addText("Link", { x: 6.5, y: 3.5, w: 3, align: 'center', fontSize: 10, color: '0000FF', hyperlink: { url: s.image_url } });
+                    } else {
+                        slide.addText("No Image Available", { x: 6.5, y: 3, color: 'CCCCCC', fontSize: 12, align: 'center' });
                     }
                 }
+
+                // Save File
+                await pres.writeFile({ fileName: `CivicAid_${topic.replace(/[^a-z0-9]/gi, '_')}.pptx` });
+                showResult(slides.length, topic);
+
+            } catch (err) {
+                console.error("PPT Generation Error:", err);
+                alert("Failed to build PPT file: " + err.message);
+                resetForm();
             }
-
-            // Save
-            await pres.writeFile({ fileName: `CivicAid_${topic.replace(/[^a-z0-9]/gi, '_')}.pptx` });
-        }
-
-        // Helper: Fetch Image with Fallback Proxies
-        async function fetchImageWithFallback(originalUrl) {
-            const proxies = [
-                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                (url) => `https://thingproxy.freeboard.io/fetch/${url}`
-            ];
-
-            for (let createProxyUrl of proxies) {
-                try {
-                    const proxyUrl = createProxyUrl(originalUrl);
-                    const resp = await fetch(proxyUrl);
-                    if (resp.ok) {
-                        const blob = await resp.blob();
-                        return await blobToBase64(blob);
-                    }
-                } catch (e) {
-                    continue;
-                }
-            }
-            return null; // All failed
-        }
-
-        // Helper: Blob to Base64
-        function blobToBase64(blob) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
         }
 
         function showResult(count, title) {
-            document.getElementById('loading').classList.remove('active');
-            document.getElementById('result').classList.add('active');
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('result').classList.remove('hidden');
+
             document.getElementById('result-title').textContent = title;
             document.getElementById('slide-count').textContent = count;
-            // Link is not needed as it auto-downloads, but we can update text
+
             const btn = document.getElementById('download-link');
-            btn.textContent = "Downloaded! (Click to Retry)";
-            btn.href = "#"; // Reset
-            btn.onclick = () => createAndDownloadPPT(title, "Unknown", []); // This won't work perfectly without saving state, but simple retry is ok.
->>>>>>> 3b4f53f0d9e2d301908991e96c74fa201900c753
+            btn.textContent = "Presentation Downloaded! (Click to Retry)";
+            btn.href = "#";
+            btn.onclick = () => location.reload();
         }
 
         function resetForm() {
@@ -352,7 +333,10 @@
 
         // Motion.js animation on load
         window.addEventListener('load', () => {
-            animate('.max-w-\\[800px\\] > *', { opacity: [0, 1] }, { duration: 1.5, easing: 'linear' });
+            // Simple fade in if Motion logic is present, else standard
+            if (typeof animate !== 'undefined') {
+                animate('.max-w-\\[800px\\] > *', { opacity: [0, 1] }, { duration: 1.5, easing: 'linear' });
+            }
         });
     </script>
 </body>
