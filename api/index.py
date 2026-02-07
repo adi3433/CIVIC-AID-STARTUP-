@@ -9,27 +9,7 @@ import os
 # Register Blueprints
 app.register_blueprint(leadgen_bp)
 app.register_blueprint(dispatch_bp)
-import requests
-from flask import request, Response
-
-@app.route('/api/proxy_image')
-def proxy_image():
-    image_url = request.args.get('url')
-    if not image_url:
-        return "Missing URL", 400
-    
-    try:
-        # Fetch image from external URL (Server-Side bypasses CORS)
-        resp = requests.get(image_url, stream=True, timeout=10)
-        
-        # Return image directly to client
-        excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-        headers = [(name, value) for (name, value) in resp.raw.headers.items()
-                   if name.lower() not in excluded_headers]
-        
-        return Response(resp.content, resp.status_code, headers)
-    except Exception as e:
-        return f"Proxy Error: {str(e)}", 500
+app.register_blueprint(education_bp)
 
 @app.route('/')
 def index():
