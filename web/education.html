@@ -408,35 +408,30 @@
                 slide.background = { color: 'FFFFFF' };
 
                 // Title Bar
-                slide.addShape(pres.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 1.2, fill: '1e293b' });
-                slide.addText(s.title || `Slide ${i + 1}`, { x: 0.5, y: 0.2, w: '90%', fontSize: 28, color: 'FFFFFF', bold: true });
+                slide.addShape(pres.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 1.0, fill: '1e293b' });
+                slide.addText(s.title || `Slide ${i + 1}`, { x: 0.5, y: 0.1, w: '90%', fontSize: 24, color: 'FFFFFF', bold: true });
 
                 // Content (Bullets)
-                let bulletsArray = s.bullet_points || s.bullets || []; // Support both keys
+                let bulletsArray = s.bullet_points || s.bullets || [];
                 let bullets = [];
                 if (Array.isArray(bulletsArray)) {
-                    bullets = bulletsArray.map(b => ({ text: b, options: { fontSize: 18, breakLine: true, bullet: true } }));
+                    bullets = bulletsArray.map(b => ({ text: b, options: { fontSize: 14, breakLine: true, bullet: true, paraSpaceBefore: 10 } }));
                 } else if (typeof bulletsArray === 'string') {
-                    bullets = [{ text: bulletsArray, options: { fontSize: 18, bullet: true } }];
+                    bullets = [{ text: bulletsArray, options: { fontSize: 14, bullet: true } }];
                 }
 
-                slide.addText(bullets, { x: 0.5, y: 1.5, w: 5.5, h: 5, color: '333333' });
+                slide.addText(bullets, { x: 0.5, y: 1.2, w: 5.5, h: 5.5, color: '333333', valign: 'top' });
 
                 // Image (Right Side)
                 if (s.image_url && s.image_url.startsWith('http')) {
                     try {
-                        // Pre-check if image is accessible (CORS check)
-                        // If we can't fetch it, PptxGenJS will fail.
-                        const canLoad = await checkImageAccessible(s.image_url);
-                        if (canLoad) {
-                            slide.addImage({ path: s.image_url, x: 6.2, y: 1.5, w: 3.5, h: 3.5 });
-                        } else {
-                            throw new Error("CORS/Network Block");
-                        }
+                        // Use CORS Proxy
+                        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(s.image_url);
+                        slide.addImage({ path: proxyUrl, x: 6.2, y: 1.2, w: 3.5, h: 3.5 });
                     } catch (e) {
                         console.warn(`Skipping image for slide ${i + 1}: ${e.message}`);
-                        slide.addText("[Image Not Available - CORS Restriction]", { x: 6.5, y: 3, w: 3, align: 'center', fontSize: 12, color: 'FF0000' });
-                        slide.addText("(Right-click link to view)", { x: 6.5, y: 3.5, w: 3, align: 'center', fontSize: 10, color: '0000FF', hyperlink: { url: s.image_url } });
+                        slide.addText("[Image Not Available]", { x: 6.5, y: 3, w: 3, align: 'center', fontSize: 12, color: 'FF0000' });
+                        slide.addText("Link", { x: 6.5, y: 3.5, w: 3, align: 'center', fontSize: 10, color: '0000FF', hyperlink: { url: s.image_url } });
                     }
                 }
             }
