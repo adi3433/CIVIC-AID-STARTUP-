@@ -55,11 +55,6 @@ def proxy_image():
         return f"Proxy Error: {str(e)}", 500
 
 
-@app.route('/health')
-def health():
-    return {"status": "healthy", "service": "civicaid-api"}, 200
-
-
 @app.route('/')
 def index():
     return send_from_directory('../web', 'landing.html')
