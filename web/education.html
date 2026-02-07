@@ -290,14 +290,15 @@
                     // 1. Try URL Fetch Manually (to catch errors before passing to PptxGenJS)
                     if (s.image_url && s.image_url.startsWith('http')) {
                         const proxies = [
-                            (u) => 'https://corsproxy.io/?' + encodeURIComponent(u),
-                            (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-                            (u) => `/api/proxy_image?url=${encodeURIComponent(u)}` // Local fallback
+                            { name: 'corsproxy.io', gen: (u) => 'https://corsproxy.io/?' + encodeURIComponent(u) },
+                            { name: 'allorigins.win', gen: (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}` },
+                            { name: 'Local Server', gen: (u) => `/api/proxy_image?url=${encodeURIComponent(u)}` }
                         ];
 
-                        for (let proxyGen of proxies) {
+                        for (let p of proxies) {
                             try {
-                                const proxyUrl = proxyGen(s.image_url);
+                                const proxyUrl = p.gen(s.image_url);
+                                console.log(`Slide ${i + 1}: Trying proxy ${p.name}...`);
                                 const resp = await fetch(proxyUrl);
                                 if (resp.ok) {
                                     const blob = await resp.blob();
@@ -306,10 +307,15 @@
                                         r.onloadend = () => resolve(r.result);
                                         r.readAsDataURL(blob);
                                     });
-                                    if (imageData) break; // Success!
+                                    if (imageData) {
+                                        console.log(`Slide ${i + 1}: Success with ${p.name}`);
+                                        break;
+                                    }
+                                } else {
+                                    console.warn(`Slide ${i + 1}: ${p.name} failed with status ${resp.status}`);
                                 }
                             } catch (e) {
-                                console.warn(`Slide ${i + 1}: Proxy attempt failed.`, e);
+                                console.warn(`Slide ${i + 1}: ${p.name} fetch error:`, e);
                             }
                         }
                     }
