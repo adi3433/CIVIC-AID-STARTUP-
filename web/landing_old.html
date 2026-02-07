@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CivicAid - Enterprise AI Platform for Government & Business">
+    <title>CivicAid | Enterprise AI Platform</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="public/CivicLogo.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="public/CivicLogo.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="public/CivicLogo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="public/CivicLogo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/motion@latest/dist/motion.js"></script>
+    <script>
+    const { animate, scroll } = Motion
+    </script>   
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand': {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        },
+                        'neutral': {
+                            850: '#1a1d29',
+                            900: '#0f1117',
+                            950: '#0a0c10',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Enterprise-grade design system */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            background: #0a0c10;
+            font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        }
+
+        /* Subtle background grid pattern for depth */
+        .bg-grid {
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
+
+        /* Glassmorphism for modern feel */
+        .glass {
+            background: rgba(26, 29, 41, 0.7);
+            backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Elevated card with subtle glow */
+        .card-elevated {
+            background: linear-gradient(to bottom, rgba(31, 35, 48, 0.8), rgba(26, 29, 41, 0.8));
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+        }
+
+        .card-elevated:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+        }
+
+        /* Status badge with subtle pulse */
+        .status-live {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
+        }
+
+        .status-live::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.95); }
+        }
+
+        /* Primary button - emerald accent */
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Secondary button */
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Module card hover effect */
+        .module-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .module-card:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Icon container with accent glow */
+        .icon-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .module-card:hover .icon-container {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Trust indicator */
+        .trust-badge {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Fade in animation setup */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+    </style>
+</head>
+<body class="text-white font-sans antialiased bg-grid">
+    <!-- Subtle gradient overlay for depth -->
+    <div class="fixed inset-0 pointer-events-none" style="background: radial-gradient(ellipse at top, rgba(16, 185, 129, 0.05), transparent 60%), radial-gradient(ellipse at bottom right, rgba(16, 185, 129, 0.03), transparent 60%);"></div>
+
+    <!-- Header - Clean & Minimal -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass border-b">
+        <nav class="flex justify-between items-center h-16 px-6 max-w-7xl mx-auto">
+            <a href="landing.html" class="flex items-center gap-2.5 no-underline group">
+                <img src="public/CivicLogo.png" alt="CivicAid Logo" class="w-8 h-8 object-contain">
+                <span class="text-base font-semibold text-white">CivicAid</span>
+            </a>
+            <div class="flex items-center gap-1">
+                <a href="#platform" class="px-3 py-2 text-sm font-medium text-white/60 hover:text-white no-underline transition-colors rounded-md hover:bg-white/5">Platform</a>
+                <a href="https://github.com/adi3433/CIVIC-AID-STARTUP-" target="_blank" class="px-3 py-2 text-sm font-medium text-white/60 hover:text-white no-underline transition-colors rounded-md hover:bg-white/5">GitHub</a>
+                <div class="w-px h-5 bg-white/10 mx-2"></div>
+                <a href="bot_builder.html" class="btn-primary px-4 py-2 rounded-lg text-sm no-underline inline-flex items-center gap-2">
+                    Launch Console
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="relative z-10">
+        <!-- Hero Section - Enterprise Clean -->
+        <section class="pt-32 pb-20 px-6">
+            <div class="max-w-7xl mx-auto">
+                <div class="max-w-3xl mx-auto text-center">
+                    <!-- Trust badge -->
+                    <div class="inline-flex items-center gap-2 trust-badge px-3 py-1.5 rounded-full mb-6 fade-in-up">
+                        <svg class="w-3.5 h-3.5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        <span>Trusted by government & enterprise</span>
+                    </div>
+
+                    <h1 class="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight leading-tight fade-in-up">
+                        Enterprise AI Platform<br/>for Civic Services
+                    </h1>
+                    
+                    <p class="text-lg text-white/60 mb-10 leading-relaxed max-w-2xl mx-auto fade-in-up">
+                        Production-ready AI agents for emergency dispatch, citizen engagement, and process automation. Built for scale, security, and compliance.
+                    </p>
+                    
+                    <div class="flex items-center justify-center gap-4 mb-12 fade-in-up">
+                        <a href="bot_builder.html" class="btn-primary px-6 py-3 rounded-lg text-sm no-underline inline-flex items-center gap-2">
+                            Get Started
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                        </a>
+                        <a href="#platform" class="btn-secondary px-6 py-3 rounded-lg text-sm no-underline inline-flex items-center gap-2">
+                            View Platform
+                        </a>
+                    </div>
+                    
+                    <!-- Trust indicators -->
+                    <div class="flex items-center justify-center gap-8 text-xs text-white/40 fade-in-up">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1 h-1 rounded-full bg-brand-500"></div>
+                            <span>SOC 2 Compliant</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-1 h-1 rounded-full bg-brand-500"></div>
+                            <span>99.9% Uptime</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-1 h-1 rounded-full bg-brand-500"></div>
+                            <span>Enterprise Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Platform Modules - Clean Grid -->
+        <section id="platform" class="py-24 px-6">
+            <div class="max-w-7xl mx-auto">
+                <!-- Section header -->
+                <div class="text-center mb-16 fade-in-up">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">AI Agent Platform</h2>
+                    <p class="text-white/50 max-w-2xl mx-auto">
+                        Production-grade modules designed for government agencies and enterprises. Deploy, configure, and scale with confidence.
+                    </p>
+                </div>
+
+                <!-- Module grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Module 1: WhatsApp Bot Generator -->
+                    <div class="card-elevated rounded-2xl p-8 module-card fade-in-up">
+                        <!-- Icon + Status -->
+                        <div class="flex items-start justify-between mb-6">
+                            <div class="icon-container w-12 h-12 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                </svg>
+                            </div>
+                            <span class="status-live text-xs font-medium px-2.5 py-1 rounded-full">LIVE</span>
+                        </div>
+                        
+                        <!-- Content -->
+                        <h3 class="text-lg font-semibold text-white mb-3">WhatsApp Bot Generator</h3>
+                        <p class="text-sm text-white/50 leading-relaxed mb-6">
+                            Deploy conversational AI agents for customer service, order management, and citizen engagement. No-code configuration with n8n integration.
+                        </p>
+                        
+                        <!-- CTA -->
+                        <a href="bot_builder.html" class="inline-flex items-center gap-2 text-sm font-medium text-brand-500 hover:text-brand-400 no-underline group">
+                            Launch Agent
+                            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Module 2: Emergency Dispatch -->
+                    <div class="card-elevated rounded-2xl p-8 module-card fade-in-up" style="animation-delay: 0.1s;">
+                        <div class="flex items-start justify-between mb-6">
+                            <div class="icon-container w-12 h-12 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                </svg>
+                            </div>
+                            <span class="status-live text-xs font-medium px-2.5 py-1 rounded-full">LIVE</span>
+                        </div>
+                        
+                        <h3 class="text-lg font-semibold text-white mb-3">Emergency Dispatch</h3>
+                        <p class="text-sm text-white/50 leading-relaxed mb-6">
+                            AI-powered emergency call routing with voice recognition, real-time transcription, and intelligent service allocation for 911/112 systems.
+                        </p>
+                        
+                        <a href="dispatch.html" class="inline-flex items-center gap-2 text-sm font-medium text-red-500 hover:text-red-400 no-underline group">
+                            Launch Agent
+                            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Module 3: LeadGen AI -->
+                    <div class="card-elevated rounded-2xl p-8 module-card fade-in-up" style="animation-delay: 0.2s;">
+                        <div class="flex items-start justify-between mb-6">
+                            <div class="icon-container w-12 h-12 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                            </div>
+                            <span class="status-live text-xs font-medium px-2.5 py-1 rounded-full">LIVE</span>
+                        </div>
+                        
+                        <h3 class="text-lg font-semibold text-white mb-3">LeadGen AI</h3>
+                        <p class="text-sm text-white/50 leading-relaxed mb-6">
+                            Predictive lead scoring and qualification using RAG architecture. Analyze case histories and identify high-value prospects automatically.
+                        </p>
+                        
+                        <a href="leadgen.html" class="inline-flex items-center gap-2 text-sm font-medium text-blue-500 hover:text-blue-400 no-underline group">
+                            Launch Agent
+                            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Module 4: Education Suite -->
+                    <div class="card-elevated rounded-2xl p-8 module-card fade-in-up" style="animation-delay: 0.3s;">
+                        <div class="flex items-start justify-between mb-6">
+                            <div class="icon-container w-12 h-12 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                            </div>
+                            <span class="status-live text-xs font-medium px-2.5 py-1 rounded-full">LIVE</span>
+                        </div>
+                        
+                        <h3 class="text-lg font-semibold text-white mb-3">Education Suite</h3>
+                        <p class="text-sm text-white/50 leading-relaxed mb-6">
+                            AI-generated educational content and presentations. Create training materials, policy documents, and learning resources at scale.
+                        </p>
+                        
+                        <a href="education.html" class="inline-flex items-center gap-2 text-sm font-medium text-purple-500 hover:text-purple-400 no-underline group">
+                            Launch Agent
+                            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- System Status Panel -->
+                <div class="glass rounded-2xl p-8 mt-12 fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-base font-semibold text-white">System Status</h3>
+                        <span class="text-xs text-white/40">Updated every 10s</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="flex items-center gap-3 bg-white/[0.02] rounded-xl p-4">
+                            <div class="w-2 h-2 rounded-full bg-brand-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" id="whatsapp-status"></div>
+                            <div>
+                                <div class="text-sm font-medium text-white">WhatsApp</div>
+                                <div class="text-xs text-white/40">Operational</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-3 bg-white/[0.02] rounded-xl p-4">
+                            <div class="w-2 h-2 rounded-full bg-brand-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" id="dispatch-status"></div>
+                            <div>
+                                <div class="text-sm font-medium text-white">Dispatch</div>
+                                <div class="text-xs text-white/40">Operational</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-3 bg-white/[0.02] rounded-xl p-4">
+                            <div class="w-2 h-2 rounded-full bg-brand-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" id="leadgen-status"></div>
+                            <div>
+                                <div class="text-sm font-medium text-white">LeadGen</div>
+                                <div class="text-xs text-white/40">Operational</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-3 bg-white/[0.02] rounded-xl p-4">
+                            <div class="w-2 h-2 rounded-full bg-brand-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" id="education-status"></div>
+                            <div>
+                                <div class="text-sm font-medium text-white">Education</div>
+                                <div class="text-xs text-white/40">Operational</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer - Minimal -->
+    <footer class="py-12 border-t border-white/[0.06]">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <img src="public/CivicLogo.png" alt="CivicAid Logo" class="w-6 h-6 object-contain">
+                    <span class="text-sm font-semibold text-white">CivicAid</span>
+                </div>
+                <p class="text-sm text-white/40">&copy; 2026 CivicAid. Enterprise AI Platform.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Health check for service status
+        async function checkStatus(port, elementId) {
+            const el = document.getElementById(elementId);
+            try {
+                const response = await fetch(`http://localhost:${port}/health`, {
+                    mode: 'cors',
+                    signal: AbortSignal.timeout(2000)
+                });
+                if (response.ok) {
+                    el.style.background = '#10b981';
+                    el.style.boxShadow = '0 0 8px rgba(16, 185, 129, 0.6)';
+                } else {
+                    el.style.background = '#ef4444';
+                    el.style.boxShadow = '0 0 8px rgba(239, 68, 68, 0.6)';
+                }
+            } catch {
+                el.style.background = '#6b7280';
+                el.style.boxShadow = 'none';
+            }
+        }
+
+        // Animation on load - smooth, professional
+        window.addEventListener('load', () => {
+            // Check service health
+            checkStatus(5001, 'whatsapp-status');
+            checkStatus(5002, 'dispatch-status');
+            checkStatus(5003, 'leadgen-status');
+            checkStatus(5004, 'education-status');
+            
+            // Animate all fade-in elements
+            const fadeElements = document.querySelectorAll('.fade-in-up');
+            fadeElements.forEach((el, index) => {
+                animate(
+                    el,
+                    { opacity: [0, 1], y: [16, 0] },
+                    { duration: 0.6, delay: index * 0.1, easing: [0.22, 1, 0.36, 1] }
+                );
+            });
+
+            // Card hover animations
+            const cards = document.querySelectorAll('.module-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    animate(
+                        card,
+                        { y: -2 },
+                        { duration: 0.2, easing: 'ease-out' }
+                    );
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    animate(
+                        card,
+                        { y: 0 },
+                        { duration: 0.2, easing: 'ease-out' }
+                    );
+                });
+            });
+        });
+
+        // Refresh status every 10 seconds
+        setInterval(() => {
+            checkStatus(5001, 'whatsapp-status');
+            checkStatus(5002, 'dispatch-status');
+            checkStatus(5003, 'leadgen-status');
+            checkStatus(5004, 'education-status');
+        }, 10000);
+    </script>
+</body>
+</html>
