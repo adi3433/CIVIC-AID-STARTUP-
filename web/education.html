@@ -183,7 +183,8 @@
     <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
     <script>
         // WEBHOOK URL provided by user
-        const WEBHOOK_URL = 'https://whiteknight001.app.n8n.cloud/webhook-test/civicaid-ppt-generator';
+        // WEBHOOK URL provided by user (Production Endpoint)
+        const WEBHOOK_URL = 'https://whiteknight001.app.n8n.cloud/webhook/civicaid-ppt-generator';
 
         async function generatePPT() {
             const topic = document.getElementById('topic').value.trim();
