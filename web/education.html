@@ -443,27 +443,23 @@
             await pres.writeFile({ fileName: `CivicAid_${topic.replace(/[^a-z0-9]/gi, '_')}.pptx` });
         }
 
-        // Helper: Fetch Image with Fallback Proxies
+        // Helper: Fetch Image via Server-Side Proxy (Bypasses CORS 100%)
         async function fetchImageWithFallback(originalUrl) {
-            const proxies = [
-                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                (url) => `https://thingproxy.freeboard.io/fetch/${url}`
-            ];
+            try {
+                // Use our own Vercel/Python backend proxy
+                const proxyUrl = `/api/proxy_image?url=${encodeURIComponent(originalUrl)}`;
+                const resp = await fetch(proxyUrl);
 
-            for (let createProxyUrl of proxies) {
-                try {
-                    const proxyUrl = createProxyUrl(originalUrl);
-                    const resp = await fetch(proxyUrl);
-                    if (resp.ok) {
-                        const blob = await resp.blob();
-                        return await blobToBase64(blob);
-                    }
-                } catch (e) {
-                    continue;
+                if (resp.ok) {
+                    const blob = await resp.blob();
+                    return await blobToBase64(blob);
+                } else {
+                    console.error(`Proxy Failed: ${resp.status}`);
                 }
+            } catch (e) {
+                console.error("Image Fetch Error:", e);
             }
-            return null; // All failed
+            return null;
         }
 
         // Helper: Blob to Base64
