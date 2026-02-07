@@ -289,21 +289,28 @@
 
                     // 1. Try URL Fetch Manually (to catch errors before passing to PptxGenJS)
                     if (s.image_url && s.image_url.startsWith('http')) {
-                        try {
-                            const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(s.image_url);
-                            const resp = await fetch(proxyUrl);
-                            if (resp.ok) {
-                                const blob = await resp.blob();
-                                imageData = await new Promise((resolve) => {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => resolve(reader.result);
-                                    reader.readAsDataURL(blob);
-                                });
-                            } else {
-                                console.warn(`Slide ${i + 1}: Proxy fetch failed: ${resp.status}`);
+                        const proxies = [
+                            (u) => 'https://corsproxy.io/?' + encodeURIComponent(u),
+                            (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+                            (u) => `/api/proxy_image?url=${encodeURIComponent(u)}` // Local fallback
+                        ];
+
+                        for (let proxyGen of proxies) {
+                            try {
+                                const proxyUrl = proxyGen(s.image_url);
+                                const resp = await fetch(proxyUrl);
+                                if (resp.ok) {
+                                    const blob = await resp.blob();
+                                    imageData = await new Promise((resolve) => {
+                                        const r = new FileReader();
+                                        r.onloadend = () => resolve(r.result);
+                                        r.readAsDataURL(blob);
+                                    });
+                                    if (imageData) break; // Success!
+                                }
+                            } catch (e) {
+                                console.warn(`Slide ${i + 1}: Proxy attempt failed.`, e);
                             }
-                        } catch (e) {
-                            console.warn(`Slide ${i + 1}: Network Error fetching image via proxy.`, e);
                         }
                     }
 
