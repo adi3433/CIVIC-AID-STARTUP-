@@ -425,16 +425,34 @@
                 // Image (Right Side)
                 if (s.image_url && s.image_url.startsWith('http')) {
                     try {
-                        slide.addImage({ path: s.image_url, x: 6.2, y: 1.5, w: 3.5, h: 3.5 });
+                        // Pre-check if image is accessible (CORS check)
+                        // If we can't fetch it, PptxGenJS will fail.
+                        const canLoad = await checkImageAccessible(s.image_url);
+                        if (canLoad) {
+                            slide.addImage({ path: s.image_url, x: 6.2, y: 1.5, w: 3.5, h: 3.5 });
+                        } else {
+                            throw new Error("CORS/Network Block");
+                        }
                     } catch (e) {
-                        console.error("Failed to add image", e);
-                        slide.addText("[Image Failed to Load]", { x: 6.5, y: 3, color: 'FF0000' });
+                        console.warn(`Skipping image for slide ${i + 1}: ${e.message}`);
+                        slide.addText("[Image Not Available - CORS Restriction]", { x: 6.5, y: 3, w: 3, align: 'center', fontSize: 12, color: 'FF0000' });
+                        slide.addText("(Right-click link to view)", { x: 6.5, y: 3.5, w: 3, align: 'center', fontSize: 10, color: '0000FF', hyperlink: { url: s.image_url } });
                     }
                 }
             }
 
             // Save
             await pres.writeFile({ fileName: `CivicAid_${topic.replace(/[^a-z0-9]/gi, '_')}.pptx` });
+        }
+
+        // Helper to check if image can be fetched (CORS)
+        async function checkImageAccessible(url) {
+            try {
+                const response = await fetch(url, { method: 'HEAD', mode: 'cors' });
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
         }
 
         function showResult(count, title) {
