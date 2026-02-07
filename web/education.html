@@ -299,9 +299,11 @@
                                     reader.onloadend = () => resolve(reader.result);
                                     reader.readAsDataURL(blob);
                                 });
+                            } else {
+                                console.warn(`Slide ${i + 1}: Proxy fetch failed: ${resp.status}`);
                             }
                         } catch (e) {
-                            console.warn(`Slide ${i + 1}: URL fetch failed via proxy. Trying Base64 fallback...`);
+                            console.warn(`Slide ${i + 1}: Network Error fetching image via proxy.`, e);
                         }
                     }
 
