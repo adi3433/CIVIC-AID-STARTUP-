@@ -5,313 +5,159 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="AI Presentation Generator - CivicAid Education Suite">
-    <title>AI PPT Generator | CivicAid Education</title>
+    <title>AI PPT Generator | CivicAId Education</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="public/CivicLogo.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="public/CivicLogo.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="public/CivicLogo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="public/CivicLogo.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #8b5cf6;
-            /* Violet for Education */
-            --primary-dark: #7c3aed;
-            --primary-glow: rgba(139, 92, 246, 0.3);
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --bg-input: #334155;
-            --text-light: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: rgba(255, 255, 255, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-light);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            width: 100%;
-            flex: 1;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0 40px;
-        }
-
-        .logo {
-            font-size: 1.4rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .logo a {
-            color: var(--text-light);
-            text-decoration: none;
-        }
-
-        .nav-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            margin-left: 20px;
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-
-        /* Hero */
-        .hero {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #fff, #a78bfa);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .subtitle {
-            color: var(--text-muted);
-        }
-
-        /* Generator Card */
-        .generator-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        input,
-        select {
-            width: 100%;
-            padding: 12px 14px;
-            border-radius: 10px;
-            border: 2px solid var(--border);
-            background: var(--bg-input);
-            color: var(--text-light);
-            font-size: 1rem;
-            transition: all 0.2s;
-        }
-
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-glow);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Loading State */
-        .loading-state {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .loading-state.active {
-            display: block;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/motion@latest/dist/motion.js"></script>
+    <script>
+    const { animate, scroll } = Motion
+    </script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'civic-dark': '#0a0e1a',
+                        'civic-surface': '#0f1420',
+                        'civic-card': '#141b2d',
+                    },
+                    backdropBlur: {
+                        'xl': '20px',
+                    }
+                }
             }
         }
-
-        /* Result State */
-        .result-state {
-            display: none;
+    </script>
+    <style>
+        .glass-bg {
+            background: rgba(10, 14, 26, 0.5);
         }
-
-        .result-state.active {
-            display: block;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-
-        .success-box {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid #10b981;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .download-btn {
-            display: inline-block;
-            background: #10b981;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            margin-top: 15px;
-            transition: transform 0.2s;
-        }
-
-        .download-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        footer {
-            text-align: center;
-            padding: 30px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
+        .spinner {
+            border: 3px solid rgba(139, 92, 246, 0.3);
+            border-top: 3px solid #8b5cf6;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
         }
     </style>
 </head>
 
-<body>
-    <div class="container">
-        <header>
-            <div class="logo">
-                <span>🏛️</span>
-                <a href="landing.html">CivicAid</a>
+<body class="bg-civic-dark text-white font-sans leading-relaxed min-h-screen overflow-x-hidden">
+    <!-- Fixed Top Spotlight Effect -->
+    <div class="fixed top-0 left-0 w-full h-[400px] pointer-events-none z-0" style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.18) 10%, rgba(255, 255, 255, 0.12) 20%, rgba(255, 255, 255, 0.08) 35%, rgba(255, 255, 255, 0.04) 55%, rgba(255, 255, 255, 0.01) 75%, transparent 100%); filter: blur(60px);"></div>
+    
+    <!-- Right Side Spotlight -->
+    <div class="fixed top-[30%] right-[-10%] w-[800px] h-[800px] pointer-events-none z-0" style="background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 15%, rgba(255, 255, 255, 0.1) 30%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.02) 70%, transparent 100%); filter: blur(80px);"></div>
+
+    <!-- Header - Premium Glassmorphism -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass-bg backdrop-blur-xl border-b border-white/[0.06]">
+        <nav class="flex justify-between items-center py-4 px-10 max-w-[1400px] mx-auto">
+            <a href="landing.html" class="flex items-center gap-3 text-lg font-semibold text-white no-underline group">
+                <img src="public/CivicLogo.png" alt="CivicAId Logo" class="w-10 h-10 object-contain transition-transform group-hover:scale-110">
+                <span class="group-hover:text-blue-400 transition-colors">CivicAId</span>
+            </a>
+            <div class="flex items-center gap-8">
+                <a href="landing.html" class="text-white/70 no-underline text-sm font-medium hover:text-white transition-colors">Home</a>
+                <a href="https://github.com/adi3433/CIVIC-AID-STARTUP-" target="_blank" class="text-white/70 no-underline text-sm font-medium hover:text-white transition-colors">GitHub</a>
             </div>
-            <nav class="nav-links">
-                <a href="landing.html">Home</a>
-                <a href="dispatch.html">Dispatch</a>
-            </nav>
-        </header>
+        </nav>
+    </header>
 
-        <section class="hero">
-            <h1>AI Presentation Generator</h1>
-            <p class="subtitle">Generates complete 7-slide educational presentations in seconds</p>
-        </section>
-
-        <div class="generator-card">
-            <div id="form-container">
-                <div class="form-group">
-                    <label for="topic">Presentation Topic <span style="color: #ef4444">*</span></label>
-                    <input type="text" id="topic" placeholder="e.g. Solar System Basics, History of Rome" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="grade">Target Grade Level <span style="color: #ef4444">*</span></label>
-                    <select id="grade">
-                        <option value="1st Grade">1st Grade</option>
-                        <option value="3rd Grade">3rd Grade</option>
-                        <option value="5th Grade" selected>5th Grade</option>
-                        <option value="8th Grade">8th Grade</option>
-                        <option value="High School">High School</option>
-                        <option value="University">University</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="source">Source Material URL (Optional)</label>
-                    <input type="url" id="source" placeholder="https://example.com/article.pdf">
-                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">
-                        Provide a link to a document for the AI to analyze (optional).
-                    </p>
-                </div>
-
-                <button class="btn" id="generate-btn" onclick="generatePPT()">
-                    <span>✨ Generate Presentation</span>
-                </button>
+    <main class="relative z-10 pt-28 px-6 pb-12">
+        <div class="max-w-[800px] mx-auto">
+            <!-- Hero Section -->
+            <div class="text-center mb-8">
+                <span class="inline-block text-xs font-medium text-white/60 bg-white/5 border border-white/[0.08] px-3 py-1.5 rounded tracking-wide mb-4">📊 AI EDUCATION SUITE</span>
+                <h1 class="text-4xl font-bold leading-tight text-white mb-3 tracking-tight">AI Presentation Generator</h1>
+                <p class="text-sm text-white/60 leading-relaxed">Generates complete 7-slide educational presentations in seconds</p>
             </div>
 
-            <div class="loading-state" id="loading">
-                <div class="spinner"></div>
-                <h3>Generating Presentation...</h3>
-                <p style="color: var(--text-muted)">Orchestrating 14 parallel AI agents to build slides & images.</p>
-                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--primary);">Estimated time: ~15-30 seconds
-                </p>
-            </div>
+            <!-- Generator Card -->
+            <div class="bg-civic-card/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl p-8">
+                
+                <!-- Form Container -->
+                <div id="form-container">
+                    <div class="space-y-6">
+                        <!-- Topic -->
+                        <div>
+                            <label for="topic" class="block text-sm font-medium text-white/70 mb-2">Presentation Topic <span class="text-red-400">*</span></label>
+                            <input type="text" id="topic" placeholder="e.g. Solar System Basics, History of Rome" 
+                                class="w-full bg-civic-surface border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all">
+                        </div>
 
-            <div class="result-state" id="result">
-                <div class="success-box">
-                    <h3 style="color: #10b981; margin-bottom: 10px;">🎉 Presentation Ready!</h3>
-                    <p id="result-title" style="font-weight: 600; margin-bottom: 5px;">Solar System Basics</p>
-                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">
-                        Generated <span id="slide-count">8</span> slides with custom AI imagery.
-                    </p>
+                        <!-- Grade Level -->
+                        <div>
+                            <label for="grade" class="block text-sm font-medium text-white/70 mb-2">Target Grade Level <span class="text-red-400">*</span></label>
+                            <select id="grade" 
+                                class="w-full bg-civic-surface border border-white/10 rounded-xl px-4 py-3 text-white focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer">
+                                <option value="1st Grade">1st Grade</option>
+                                <option value="3rd Grade">3rd Grade</option>
+                                <option value="5th Grade" selected>5th Grade</option>
+                                <option value="8th Grade">8th Grade</option>
+                                <option value="High School">High School</option>
+                                <option value="University">University</option>
+                            </select>
+                        </div>
 
-                    <a href="#" id="download-link" class="download-btn" target="_blank">
-                        Download PPTX File
-                    </a>
+                        <!-- Source URL -->
+                        <div>
+                            <label for="source" class="block text-sm font-medium text-white/70 mb-2">Source Material URL (Optional)</label>
+                            <input type="url" id="source" placeholder="https://example.com/article.pdf" 
+                                class="w-full bg-civic-surface border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all">
+                            <p class="text-xs text-white/40 mt-2">Provide a link to a document for the AI to analyze (optional).</p>
+                        </div>
+
+                        <!-- Generate Button -->
+                        <button id="generate-btn" onclick="generatePPT()" 
+                            class="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-600 text-white font-semibold py-4 px-6 rounded-xl transition-all hover:shadow-lg hover:shadow-purple-500/50 hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                            <span>✨ Generate Presentation</span>
+                        </button>
+                    </div>
                 </div>
 
-                <button onclick="resetForm()"
-                    style="background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 10px; width: 100%; margin-top: 20px; border-radius: 8px; cursor: pointer;">
-                    Create Another
-                </button>
+                <!-- Loading State -->
+                <div id="loading" class="hidden text-center py-12">
+                    <div class="spinner mx-auto mb-6"></div>
+                    <h3 class="text-xl font-bold mb-2">Generating Presentation...</h3>
+                    <p class="text-white/60 mb-4">Orchestrating 14 parallel AI agents to build slides & images.</p>
+                    <p class="text-sm text-purple-400">Estimated time: ~15-30 seconds</p>
+                </div>
+
+                <!-- Result State -->
+                <div id="result" class="hidden">
+                    <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-6 text-center">
+                        <h3 class="text-xl font-bold text-green-400 mb-3">🎉 Presentation Ready!</h3>
+                        <p id="result-title" class="font-semibold text-lg mb-1">Solar System Basics</p>
+                        <p class="text-sm text-white/60 mb-6">
+                            Generated <span id="slide-count">8</span> slides with custom AI imagery.
+                        </p>
+                        <a href="#" id="download-link" target="_blank" 
+                            class="inline-block bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-xl transition-all hover:shadow-lg hover:-translate-y-0.5">
+                            Download PPTX File
+                        </a>
+                    </div>
+
+                    <button onclick="resetForm()" 
+                        class="w-full mt-5 bg-transparent border border-white/10 text-white/60 hover:text-white hover:border-white/30 py-3 px-6 rounded-xl transition-all">
+                        Create Another
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <footer>
-        <p>Powered by CivicAid Education • Deepseek R1 + Qwen + Llama 3.3</p>
+    <!-- Footer -->
+    <footer class="relative z-10 text-center py-8 text-white/40 text-sm">
+        <p>Powered by CivicAId Education • Deepseek R1 + Qwen + Llama 3.3</p>
     </footer>
 
     <script>
@@ -330,7 +176,7 @@
 
             // UI Updates
             document.getElementById('form-container').style.display = 'none';
-            document.getElementById('loading').classList.add('active');
+            document.getElementById('loading').classList.remove('hidden');
 
             try {
                 // Prepare Payload
@@ -372,8 +218,8 @@
         }
 
         function showResult(data) {
-            document.getElementById('loading').classList.remove('active');
-            document.getElementById('result').classList.add('active');
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('result').classList.remove('hidden');
 
             document.getElementById('result-title').textContent = data.presentation_title || 'Presentation';
             document.getElementById('slide-count').textContent = data.slides_generated || '8';
@@ -381,10 +227,15 @@
         }
 
         function resetForm() {
-            document.getElementById('loading').classList.remove('active');
-            document.getElementById('result').classList.remove('active');
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('result').classList.add('hidden');
             document.getElementById('form-container').style.display = 'block';
         }
+
+        // Motion.js animation on load
+        window.addEventListener('load', () => {
+            animate('.max-w-\\[800px\\] > *', { opacity: [0, 1] }, { duration: 1.5, easing: 'linear' });
+        });
     </script>
 </body>
 
