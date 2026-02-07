@@ -425,18 +425,12 @@
                 // Image (Right Side)
                 if (s.image_url && s.image_url.startsWith('http')) {
                     try {
-                        // 1. Fetch Image via CORS Proxy
-                        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(s.image_url);
-                        const imgResp = await fetch(proxyUrl);
-                        if (!imgResp.ok) throw new Error(`Fetch failed: ${imgResp.status}`);
-
-                        // 2. Convert to Base64
-                        const blob = await imgResp.blob();
-                        const base64Data = await blobToBase64(blob);
-
-                        // 3. Add to Slide
-                        slide.addImage({ data: base64Data, x: 6.2, y: 1.2, w: 3.5, h: 3.5 });
-
+                        const base64Data = await fetchImageWithFallback(s.image_url);
+                        if (base64Data) {
+                            slide.addImage({ data: base64Data, x: 6.2, y: 1.2, w: 3.5, h: 3.5 });
+                        } else {
+                            throw new Error("All proxies failed");
+                        }
                     } catch (e) {
                         console.warn(`Skipping image for slide ${i + 1}: ${e.message}`);
                         slide.addText("[Image Not Available]", { x: 6.5, y: 3, w: 3, align: 'center', fontSize: 12, color: 'FF0000' });
@@ -449,6 +443,29 @@
             await pres.writeFile({ fileName: `CivicAid_${topic.replace(/[^a-z0-9]/gi, '_')}.pptx` });
         }
 
+        // Helper: Fetch Image with Fallback Proxies
+        async function fetchImageWithFallback(originalUrl) {
+            const proxies = [
+                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+                (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                (url) => `https://thingproxy.freeboard.io/fetch/${url}`
+            ];
+
+            for (let createProxyUrl of proxies) {
+                try {
+                    const proxyUrl = createProxyUrl(originalUrl);
+                    const resp = await fetch(proxyUrl);
+                    if (resp.ok) {
+                        const blob = await resp.blob();
+                        return await blobToBase64(blob);
+                    }
+                } catch (e) {
+                    continue;
+                }
+            }
+            return null; // All failed
+        }
+
         // Helper: Blob to Base64
         function blobToBase64(blob) {
             return new Promise((resolve, reject) => {
@@ -457,16 +474,6 @@
                 reader.onerror = reject;
                 reader.readAsDataURL(blob);
             });
-        }
-
-        // Helper to check if image can be fetched (CORS)
-        async function checkImageAccessible(url) {
-            try {
-                const response = await fetch(url, { method: 'HEAD', mode: 'cors' });
-                return response.ok;
-            } catch (error) {
-                return false;
-            }
         }
 
         function showResult(count, title) {
