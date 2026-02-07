@@ -26,16 +26,32 @@ def proxy_image():
         return "Missing URL", 400
     
     try:
+        # Add User-Agent to avoid being blocked by GCS and CDNs
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'image/*,*/*;q=0.8'
+        }
+        
         # Fetch image from external URL (Server-Side bypasses CORS)
-        resp = requests.get(image_url, stream=True, timeout=10)
+        resp = requests.get(image_url, headers=headers, timeout=30)
+        resp.raise_for_status()  # Raise exception for 4xx/5xx
         
-        # Return image directly to client
-        excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-        headers = [(name, value) for (name, value) in resp.raw.headers.items()
-                   if name.lower() not in excluded_headers]
+        # Build response with explicit CORS headers
+        response = Response(resp.content, resp.status_code)
+        response.headers['Content-Type'] = resp.headers.get('Content-Type', 'image/png')
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Cache-Control'] = 'public, max-age=3600'
         
-        return Response(resp.content, resp.status_code, headers)
+        return response
+    except requests.exceptions.Timeout:
+        print(f"Proxy Timeout for: {image_url}")
+        return "Proxy Timeout - image took too long to fetch", 504
+    except requests.exceptions.HTTPError as e:
+        print(f"Proxy HTTP Error for {image_url}: {e.response.status_code}")
+        return f"Upstream Error: {e.response.status_code}", 502
     except Exception as e:
+        print(f"Proxy Error for {image_url}: {str(e)}")
         return f"Proxy Error: {str(e)}", 500
 
 

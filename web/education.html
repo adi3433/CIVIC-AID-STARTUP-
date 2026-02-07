@@ -289,10 +289,11 @@
 
                     // 1. Try URL Fetch Manually (to catch errors before passing to PptxGenJS)
                     if (s.image_url && s.image_url.startsWith('http')) {
+                        // Prioritize local server proxy (most reliable), fallback to third-party proxies
                         const proxies = [
+                            { name: 'Local Server', gen: (u) => `/api/proxy_image?url=${encodeURIComponent(u)}` },
                             { name: 'corsproxy.io', gen: (u) => 'https://corsproxy.io/?' + encodeURIComponent(u) },
-                            { name: 'allorigins.win', gen: (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}` },
-                            { name: 'Local Server', gen: (u) => `/api/proxy_image?url=${encodeURIComponent(u)}` }
+                            { name: 'allorigins.win', gen: (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}` }
                         ];
 
                         for (let p of proxies) {
