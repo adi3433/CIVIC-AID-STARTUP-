@@ -284,42 +284,51 @@
                     }
                     slide.addText(bullets, { x: 0.5, y: 1.5, w: 5.5, h: 5.0, color: '333333', valign: 'top' });
 
-                    // IMAGE HANDLING (SAFE & BULLETPROOF)
-                    if (s.image_url && typeof s.image_url === 'string' && s.image_url.startsWith('http')) {
+                    // IMAGE HANDLING (Safe Manual Fetch & Fallback)
+                    let imageData = null;
+
+                    // 1. Try URL Fetch Manually (to catch errors before passing to PptxGenJS)
+                    if (s.image_url && s.image_url.startsWith('http')) {
                         try {
                             const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(s.image_url);
-                            slide.addImage({ path: proxyUrl, x: 6.2, y: 1.5, w: 3.5, h: 3.5 });
+                            const resp = await fetch(proxyUrl);
+                            if (resp.ok) {
+                                const blob = await resp.blob();
+                                imageData = await new Promise((resolve) => {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => resolve(reader.result);
+                                    reader.readAsDataURL(blob);
+                                });
+                            }
                         } catch (e) {
-                            slide.addText("[Image Load Failed]", { x: 6.5, y: 3, color: 'FF0000', fontSize: 12 });
+                            console.warn(`Slide ${i + 1}: URL fetch failed via proxy. Trying Base64 fallback...`);
                         }
+                    }
 
-                    } else if (
-                        typeof s.image_base64 === 'string' &&
-                        s.image_base64.length > 50 &&
-                        !s.image_base64.includes('undefined')
-                    ) {
+                    // 2. Try n8n Base64 if URL failed or wasn't provided
+                    if (!imageData && s.image_base64 && typeof s.image_base64 === 'string' && s.image_base64.length > 50) {
                         try {
-                            console.log(`Slide ${i + 1} Using Base64 Image`);
                             let cleanBase64 = s.image_base64.trim().replace(/\s/g, '');
                             if (!cleanBase64.startsWith('data:image')) {
                                 cleanBase64 = 'data:image/png;base64,' + cleanBase64;
                             }
-                            slide.addImage({ data: cleanBase64, x: 6.2, y: 1.5, w: 3.5, h: 3.5 });
+                            imageData = cleanBase64;
                         } catch (e) {
-                            console.error("Base64 Error:", e);
-                            slide.addText("[Invalid Image Data]", { x: 6.5, y: 3, color: 'FF0000', fontSize: 12 });
+                            console.warn(`Slide ${i + 1}: Base64 processing failed.`);
                         }
-
-                    } else {
-                        slide.addText("No Image Available", {
-                            x: 6.5,
-                            y: 3,
-                            color: '999999',
-                            fontSize: 12,
-                            align: 'center'
-                        });
                     }
 
+                    // 3. Add to Slide (Safety check)
+                    if (imageData) {
+                        try {
+                            slide.addImage({ data: imageData, x: 6.2, y: 1.5, w: 3.5, h: 3.5 });
+                        } catch (addErr) {
+                            console.error(`Slide ${i + 1}: PptxGenJS addImage Error:`, addErr);
+                            slide.addText("[Image Rendering Error]", { x: 6.5, y: 3, color: 'FF0000', fontSize: 12 });
+                        }
+                    } else {
+                        slide.addText("No Image Available", { x: 6.5, y: 3, color: 'CCCCCC', fontSize: 12, align: 'center' });
+                    }
                 }
 
                 // Save File (Wait for all slides to be ready)
