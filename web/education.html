@@ -285,8 +285,20 @@
 
                     // Image Handling (Priority: Base64 -> URL)
                     if (s.image_base64) {
-                        // Priority 1: Base64 from n8n (Best)
-                        slide.addImage({ data: s.image_base64, x: 6.2, y: 1.5, w: 3.5, h: 3.5 });
+                        try {
+                            // Ensure clean Base64 string
+                            let cleanBase64 = s.image_base64.trim().replace(/\s/g, '');
+
+                            // Check for comma prefix if missing (n8n might return raw base64 without mime type)
+                            if (!cleanBase64.startsWith('data:image')) {
+                                cleanBase64 = 'data:image/png;base64,' + cleanBase64;
+                            }
+
+                            slide.addImage({ data: cleanBase64, x: 6.2, y: 1.5, w: 3.5, h: 3.5 });
+                        } catch (imgErr) {
+                            console.error("Base64 Image Error:", imgErr);
+                            slide.addText("[Image Corrupt]", { x: 6.5, y: 3, color: 'FF0000', fontSize: 12 });
+                        }
                     } else if (s.image_url && s.image_url.startsWith('http')) {
                         // Priority 2: Simple Proxy URL Fallback
                         try {
