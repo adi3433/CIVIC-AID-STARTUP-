@@ -285,20 +285,37 @@
                     slide.addText(bullets, { x: 0.5, y: 1.5, w: 5.5, h: 5.0, color: '333333', valign: 'top' });
 
                     // Image Handling (Priority: Base64 -> URL)
+                    // Image Handling (Priority: Base64 -> URL)
                     if (s.image_base64) {
                         try {
-                            // Ensure clean Base64 string
+                            console.log(`Slide ${i + 1} Base64 Preview:`, s.image_base64 ? s.image_base64.substring(0, 50) + "..." : "NULL");
+
+                            if (typeof s.image_base64 !== 'string') throw new Error("Not a string");
+
+                            // 1. Clean
                             let cleanBase64 = s.image_base64.trim().replace(/\s/g, '');
 
-                            // Check for comma prefix if missing (n8n might return raw base64 without mime type)
+                            // 2. Normalize Prefix
                             if (!cleanBase64.startsWith('data:image')) {
                                 cleanBase64 = 'data:image/png;base64,' + cleanBase64;
                             }
 
                             slide.addImage({ data: cleanBase64, x: 6.2, y: 1.5, w: 3.5, h: 3.5 });
+
                         } catch (imgErr) {
-                            console.error("Base64 Image Error:", imgErr);
-                            slide.addText("[Image Corrupt]", { x: 6.5, y: 3, color: 'FF0000', fontSize: 12 });
+                            console.error(`Slide ${i + 1} Image Error:`, imgErr);
+                            // Fallback to URL if Base64 failed
+                            if (s.image_url) {
+                                slide.addText("Trying URL...", { x: 6.5, y: 3, fontSize: 10 });
+                                try {
+                                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(s.image_url);
+                                    slide.addImage({ path: proxyUrl, x: 6.2, y: 1.5, w: 3.5, h: 3.5 });
+                                } catch (e) {
+                                    slide.addText("[Image Failed]", { x: 6.5, y: 3.5, color: 'FF0000', fontSize: 12 });
+                                }
+                            } else {
+                                slide.addText("[Bad Image Data]", { x: 6.5, y: 3, color: 'FF0000', fontSize: 12 });
+                            }
                         }
                     } else if (s.image_url && s.image_url.startsWith('http')) {
                         // Priority 2: Simple Proxy URL Fallback
@@ -310,13 +327,20 @@
                             slide.addText("[Image Not Available]", { x: 6.5, y: 3, color: 'FF0000', fontSize: 12 });
                         }
                     } else {
+                        // No image provided
                         slide.addText("No Image Available", { x: 6.5, y: 3, color: 'CCCCCC', fontSize: 12, align: 'center' });
                     }
+
                 }
 
-                // Save File
-                await pres.writeFile({ fileName: `CivicAid_${topic.replace(/[^a-z0-9]/gi, '_')}.pptx` });
-                showResult(slides.length, topic);
+                // Save File (Wait for all slides to be ready)
+                try {
+                    await pres.writeFile({ fileName: `CivicAid_${topic.replace(/[^a-z0-9]/gi, '_')}.pptx` });
+                    showResult(slides.length, topic);
+                } catch (saveErr) {
+                    console.error("Save Error:", saveErr);
+                    throw saveErr; // Re-throw to main catch
+                }
 
             } catch (err) {
                 console.error("PPT Generation Error:", err);
