@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,261 +9,263 @@
     <link rel="icon" type="image/png" sizes="64x64" href="public/CivicLogo.png">
     <link rel="icon" type="image/png" sizes="96x96" href="public/CivicLogo.png">
     <link rel="apple-touch-icon" sizes="180x180" href="public/CivicLogo.png">
-    
-    <!-- Tailwind CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Motion One -->
     <script src="https://cdn.jsdelivr.net/npm/motion@11.11.17/dist/motion.min.js"></script>
-    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'civic-dark': '#0a0e1a',
-                        'civic-surface': '#0f1420',
-                        'civic-card': '#141b2d',
+                        'civic-dark': '#060f08',
+                        'civic-surface': '#0a1a0e',
+                        'civic-card': '#0f2415',
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    backdropBlur: {
-                        xs: '2px',
-                    },
-                    keyframes: {
-                        glow: {
-                            '0%, 100%': { boxShadow: '0 0 20px rgba(31, 163, 163, 0.5)' },
-                            '50%': { boxShadow: '0 0 30px rgba(31, 163, 163, 0.8)' },
-                        },
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        },
-                        pulseDot: {
-                            '0%, 100%': { opacity: '1' },
-                            '50%': { opacity: '0.5' },
-                        }
-                    },
-                    animation: {
-                        glow: 'glow 2s ease-in-out infinite',
-                        float: 'float 3s ease-in-out infinite',
-                        'pulse-dot': 'pulseDot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    }
+                    fontFamily: { sans: ['Inter','system-ui','sans-serif'] },
                 }
             }
         }
     </script>
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        *,*::before,*::after{box-sizing:border-box}
+        *{-webkit-font-smoothing:antialiased}
+        html{scroll-behavior:smooth}
+        body{background:#060f08;font-feature-settings:"cv02","cv03","cv04","cv11";overflow-x:hidden}
 
-        /* Glassmorphism effect */
-        .glass-bg {
-            background: rgba(15, 20, 32, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
+        #particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 
-        /* Dashboard gradient */
-        .dashboard-gradient {
-            background: linear-gradient(135deg, rgba(20, 27, 45, 0.95) 0%, rgba(15, 20, 32, 0.98) 100%);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
+        .ambient-green{background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(37,211,102,0.12) 0%,rgba(37,211,102,0.04) 40%,transparent 70%)}
+        .ambient-side{background:radial-gradient(ellipse 40% 60% at 100% 30%,rgba(16,185,129,0.07) 0%,transparent 70%)}
+        .ambient-bottom{background:radial-gradient(ellipse 60% 40% at 20% 100%,rgba(34,197,94,0.05) 0%,transparent 70%)}
 
-        /* Icon glow effects */
-        .icon-glow-green {
-            background: rgba(37, 211, 102, 0.1);
-            box-shadow: 0 0 20px rgba(37, 211, 102, 0.3);
-        }
+        .glass-nav{background:rgba(6,15,8,0.75);backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);border-bottom:1px solid rgba(37,211,102,0.08)}
 
-        .icon-glow-teal {
-            background: rgba(31, 163, 163, 0.1);
-            box-shadow: 0 0 20px rgba(31, 163, 163, 0.3);
+        .card-glass{
+            background:linear-gradient(160deg,rgba(15,36,21,0.95) 0%,rgba(10,26,14,0.98) 100%);
+            border:1px solid rgba(37,211,102,0.1);
+            box-shadow:0 0 0 1px rgba(37,211,102,0.03) inset,0 4px 24px rgba(0,0,0,0.4),0 0 80px rgba(37,211,102,0.04);
+            transition:transform 0.4s cubic-bezier(.22,1,.36,1),box-shadow 0.4s ease;
         }
+        .card-glass:hover{box-shadow:0 0 0 1px rgba(37,211,102,0.06) inset,0 8px 40px rgba(0,0,0,0.5),0 0 120px rgba(37,211,102,0.08)}
 
-        /* Chat bubble styling */
-        .message.bot {
-            background: rgba(31, 163, 163, 0.15);
-            border: 1px solid rgba(31, 163, 163, 0.2);
-            border-bottom-left-radius: 0;
-        }
+        .input-glow:focus{border-color:rgba(37,211,102,0.5)!important;box-shadow:0 0 0 3px rgba(37,211,102,0.1),0 0 20px rgba(37,211,102,0.08)}
 
-        .message.user {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-bottom-right-radius: 0;
-        }
+        .btn-green{background:linear-gradient(135deg,#25D366 0%,#128C7E 50%,#075E54 100%);box-shadow:0 2px 12px rgba(37,211,102,0.3),0 0 40px rgba(37,211,102,0.08);transition:all 0.3s ease}
+        .btn-green:hover{box-shadow:0 4px 20px rgba(37,211,102,0.5),0 0 60px rgba(37,211,102,0.15);transform:translateY(-2px)}
+        .btn-green:active{transform:translateY(0)}
+        .btn-green:disabled{opacity:0.5;cursor:not-allowed;transform:none}
 
-        /* Custom scrollbar */
-        .chat-messages::-webkit-scrollbar {
-            width: 6px;
-        }
+        .message.bot{background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.15);border-radius:16px;border-bottom-left-radius:4px}
+        .message.user{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;border-bottom-right-radius:4px}
 
-        .chat-messages::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.02);
-        }
+        .chat-messages::-webkit-scrollbar{width:6px}
+        .chat-messages::-webkit-scrollbar-track{background:rgba(255,255,255,0.02)}
+        .chat-messages::-webkit-scrollbar-thumb{background:rgba(37,211,102,0.2);border-radius:3px}
 
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: rgba(31, 163, 163, 0.3);
-            border-radius: 3px;
-        }
+        .whatsapp-phone{animation:phoneFloat 5s ease-in-out infinite}
+        @keyframes phoneFloat{0%,100%{transform:translateY(0) rotateY(-8deg) rotateX(3deg)}50%{transform:translateY(-12px) rotateY(-3deg) rotateX(-2deg)}}
 
-        .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: rgba(31, 163, 163, 0.5);
-        }
+        .orbit-ring{position:absolute;border-radius:50%;border:1px solid rgba(37,211,102,0.06)}
+        .orbit-ring-1{width:280px;height:280px;top:-40px;left:-60px;animation:orbitSpin 35s linear infinite}
+        .orbit-ring-2{width:420px;height:420px;top:-110px;left:-130px;animation:orbitSpin 50s linear infinite reverse}
+        @keyframes orbitSpin{to{transform:rotate(360deg)}}
+
+        .control-panel{padding:24px}
+        .control-panel h2{font-size:1.125rem;font-weight:700;margin-bottom:20px;color:#25D366}
+        .form-group{margin-bottom:16px}
+        .form-group label{display:block;font-size:0.8125rem;font-weight:500;color:rgba(255,255,255,0.5);margin-bottom:8px}
+        .form-group select,.form-group input[type="text"]{width:100%;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-family:inherit;font-size:0.875rem;transition:all 0.2s}
+        .form-group select:focus,.form-group input[type="text"]:focus{outline:none;border-color:rgba(37,211,102,0.5);box-shadow:0 0 0 3px rgba(37,211,102,0.1)}
+        .form-group select option{background:#0f2415}
+
+        .chat-preview{display:flex;flex-direction:column;min-height:400px}
+        .chat-header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid rgba(37,211,102,0.1);background:rgba(37,211,102,0.04)}
+        .chat-avatar{width:40px;height:40px;border-radius:50%;background:rgba(37,211,102,0.15);display:flex;align-items:center;justify-content:center;font-size:1.25rem;border:1px solid rgba(37,211,102,0.2)}
+        .chat-info h3{font-size:0.9375rem;font-weight:600;margin:0}
+        .chat-info span{font-size:0.75rem;color:rgba(255,255,255,0.4)}
+        .chat-messages{flex:1;padding:16px;overflow-y:auto;min-height:250px;max-height:350px}
+        .empty-state{text-align:center;padding:40px 20px;color:rgba(255,255,255,0.3)}
+        .empty-state span{font-size:3rem;display:block;margin-bottom:12px}
+
+        .response-panel{margin-top:24px}
+        .response-panel h3{font-size:0.9375rem;font-weight:600;margin-bottom:12px;color:rgba(255,255,255,0.6)}
+        .response-panel pre{background:rgba(0,0,0,0.3);border:1px solid rgba(37,211,102,0.08);border-radius:12px;padding:16px;font-size:0.8125rem;color:rgba(255,255,255,0.6);overflow-x:auto;font-family:'Fira Code',monospace;max-height:200px;overflow-y:auto}
+
+        .reveal{opacity:0;transform:translateY(24px)}
+
+        .dry-run-check{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.875rem;color:rgba(255,255,255,0.6)}
+        .dry-run-check input[type="checkbox"]{accent-color:#25D366;width:16px;height:16px}
     </style>
 </head>
+<body class="text-white font-sans leading-relaxed min-h-screen">
+    <canvas id="particle-canvas"></canvas>
+    <div class="fixed inset-0 pointer-events-none z-[1] ambient-green"></div>
+    <div class="fixed inset-0 pointer-events-none z-[1] ambient-side"></div>
+    <div class="fixed inset-0 pointer-events-none z-[1] ambient-bottom"></div>
 
-<body class="bg-civic-dark text-white font-sans leading-relaxed min-h-screen overflow-x-hidden">
-    <!-- Fixed Top Spotlight Effect -->
-    <div class="fixed top-0 left-0 w-full h-[400px] pointer-events-none z-0" style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.18) 10%, rgba(255, 255, 255, 0.12) 20%, rgba(255, 255, 255, 0.08) 35%, rgba(255, 255, 255, 0.04) 55%, rgba(255, 255, 255, 0.01) 75%, transparent 100%); filter: blur(60px);"></div>
-    
-    <!-- Right Side Spotlight -->
-    <div class="fixed top-[30%] right-[-10%] w-[800px] h-[800px] pointer-events-none z-0" style="background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 15%, rgba(255, 255, 255, 0.1) 30%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.02) 70%, transparent 100%); filter: blur(80px);"></div>
-
-    <!-- Header - Premium Glassmorphism -->
-    <header class="fixed top-0 left-0 right-0 z-50 glass-bg backdrop-blur-xl border-b border-white/[0.06]">
-        <nav class="flex justify-between items-center py-4 px-10 max-w-[1400px] mx-auto">
-            <a href="landing.html" class="flex items-center gap-3 text-lg font-semibold text-white no-underline group">
-                <img src="public/CivicLogo.png" alt="CivicAId Logo" class="w-10 h-10 object-contain transition-transform group-hover:scale-110">
-                <span class="group-hover:text-blue-400 transition-colors">CivicAId</span>
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass-nav">
+        <nav class="flex items-center justify-between h-16 px-6 lg:px-10 max-w-[1280px] mx-auto">
+            <a href="landing.html" class="flex items-center gap-2.5 no-underline shrink-0 group">
+                <img src="public/CivicLogo.png" alt="CivicAId" class="w-8 h-8 object-contain transition-transform group-hover:scale-110">
+                <span class="text-[0.9375rem] font-semibold text-white">CivicAId</span>
             </a>
-            <div class="flex items-center gap-8">
-                <a href="landing.html" class="text-white/70 no-underline text-sm font-medium hover:text-white transition-colors">Home</a>
-                <a href="bot_builder.html" class="text-white/70 no-underline text-sm font-medium hover:text-white transition-colors">Bot Builder</a>
-                <span class="inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded bg-emerald-500/20 text-emerald-400" id="api-status">
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse-dot"></span>
+            <div class="flex items-center gap-6">
+                <a href="landing.html" class="text-white/50 text-sm font-medium hover:text-white transition-colors no-underline">Home</a>
+                <a href="bot_builder.html" class="text-white/50 text-sm font-medium hover:text-white transition-colors no-underline">Bot Builder</a>
+                <div class="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" id="api-status">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse"></span>
                     Ready
-                </span>
+                </div>
             </div>
         </nav>
     </header>
 
-    <main class="relative z-10 pt-36 pb-24">
-        <div class="max-w-[1200px] mx-auto px-10">
-            <!-- Page Header -->
-            <div class="mb-12 fade-in-card">
-                <span class="inline-block text-xs font-medium text-white/60 bg-white/5 border border-white/[0.08] px-3 py-1.5 rounded tracking-wide mb-4">LIVE DEMO</span>
-                <h1 class="text-4xl font-bold text-white mb-3 tracking-tight">WhatsApp Bot Generator</h1>
-                <p class="text-white/60 text-base leading-relaxed">Generate conversational bot flows with dry-run simulation</p>
-            </div>
+    <main class="relative z-10 pt-32 pb-24">
+        <div class="max-w-[1200px] mx-auto px-6 lg:px-10">
+            <!-- Hero -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+                <div>
+                    <div class="reveal inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6" style="background:rgba(37,211,102,0.06);border:1px solid rgba(37,211,102,0.12);">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                        <span class="text-[0.6875rem] font-medium tracking-wide text-green-400/80 uppercase">Live Demo</span>
+                    </div>
+                    <h1 class="reveal text-[clamp(2rem,4.5vw,3.25rem)] font-extrabold tracking-[-0.035em] leading-[1.1] text-white mb-5">
+                        WhatsApp Bot<br><span class="bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent">Generator</span>
+                    </h1>
+                    <p class="reveal text-base text-white/50 leading-relaxed mb-8 max-w-[440px]">Generate conversational bot flows with dry-run simulation. Deploy to WhatsApp in seconds.</p>
+                </div>
+                <!-- 3D Phone Visual -->
+                <div class="reveal flex justify-center lg:justify-end relative">
+                    <div class="relative w-[300px] h-[320px]">
+                        <div class="orbit-ring orbit-ring-1"></div>
+                        <div class="orbit-ring orbit-ring-2"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="whatsapp-phone" style="perspective:800px">
+                                <!-- Phone mockup -->
+                                <div class="w-[180px] h-[300px] rounded-[24px] bg-gradient-to-b from-gray-800 to-gray-900 border border-white/10 shadow-2xl p-2 relative overflow-hidden" style="box-shadow:0 0 60px rgba(37,211,102,0.15)">
+                                    <div class="w-full h-full rounded-[18px] bg-gradient-to-b from-[#0a1a0e] to-[#060f08] overflow-hidden">
+                                        <!-- Status bar -->
+                                        <div class="h-6 bg-green-900/30 flex items-center justify-center"><div class="w-12 h-1 rounded-full bg-white/10"></div></div>
+                                        <!-- Chat header -->
+                                        <div class="h-10 bg-green-800/20 flex items-center gap-2 px-3 border-b border-green-500/10">
+                                            <div class="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center text-[8px]">🤖</div>
+                                            <div><div class="text-[7px] font-bold text-white/80">CivicAid Bot</div><div class="text-[5px] text-green-400/60">Online</div></div>
+                                        </div>
+                                        <!-- Messages -->
+                                        <div class="p-2 space-y-1.5">
+                                            <div class="bg-green-500/10 rounded-lg rounded-bl-sm p-1.5 max-w-[75%]"><div class="text-[6px] text-white/70">Hello! Welcome to CivicAid</div></div>
+                                            <div class="bg-white/5 rounded-lg rounded-br-sm p-1.5 max-w-[65%] ml-auto"><div class="text-[6px] text-white/50">I need help</div></div>
+                                            <div class="bg-green-500/10 rounded-lg rounded-bl-sm p-1.5 max-w-[75%]"><div class="text-[6px] text-white/70">What can I assist with?</div></div>
+                                        </div>
+                                        <!-- Input area -->
+                                        <div class="absolute bottom-2 left-2 right-2">
+                                            <div class="flex gap-1"><div class="flex-1 h-6 rounded-full bg-white/5 border border-white/5"></div><div class="w-6 h-6 rounded-full bg-green-500/30 flex items-center justify-center text-[8px]">▶</div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Floating WhatsApp icon -->
+                        <div class="absolute -top-2 -right-2 text-4xl" style="animation:robotFloat 3s ease-in-out infinite;filter:drop-shadow(0 0 20px rgba(37,211,102,0.4))">💬</div>
+                        <div class="absolute bottom-4 left-0 w-3 h-3 rounded-full bg-green-400/30" style="animation:robotFloat 4s ease-in-out infinite 1s"></div>
+                        <div class="absolute top-8 left-4 w-2 h-2 rounded-full bg-emerald-400/20" style="animation:robotFloat 3.5s ease-in-out infinite 0.5s"></div>
+                    </div>
+                </div>
+            </section>
+            <style>@keyframes robotFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}</style>
 
             <!-- Demo Layout -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-in-card">
-            <div class="control-panel">
-                <h2>Configuration</h2>
-
-                <div class="form-group">
-                    <label for="template">Template</label>
-                    <select id="template">
-                        <option value="phone_repair_basic">Phone Repair Bot</option>
-                        <option value="complaint_basic">Civic Complaints Bot</option>
-                        <option value="emergency_basic">Emergency Response Bot</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="override">Custom Prompt Override (optional)</label>
-                    <input type="text" id="override" placeholder="e.g., What brand is your device?">
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="dry-run" checked>
-                        Dry Run (simulation only)
-                    </label>
-                </div>
-
-                <button class="btn btn-primary" id="generate-btn" onclick="generateBot()">
-                    Generate Bot Flow
-                </button>
-            </div>
-
-            <div class="chat-preview">
-                <div class="chat-header">
-                    <div class="chat-avatar">🤖</div>
-                    <div class="chat-info">
-                        <h3 id="bot-name">CivicAid Bot</h3>
-                        <span>Simulation Preview</span>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 reveal">
+                <!-- Control Panel -->
+                <div class="card-glass rounded-2xl overflow-hidden">
+                    <div class="control-panel">
+                        <h2>⚙️ Configuration</h2>
+                        <div class="form-group">
+                            <label for="template">Template</label>
+                            <select id="template">
+                                <option value="phone_repair_basic">Phone Repair Bot</option>
+                                <option value="complaint_basic">Civic Complaints Bot</option>
+                                <option value="emergency_basic">Emergency Response Bot</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="override">Custom Prompt Override (optional)</label>
+                            <input type="text" id="override" placeholder="e.g., What brand is your device?">
+                        </div>
+                        <div class="form-group">
+                            <label class="dry-run-check">
+                                <input type="checkbox" id="dry-run" checked>
+                                Dry Run (simulation only)
+                            </label>
+                        </div>
+                        <button class="btn-green w-full text-white font-semibold py-3.5 px-6 rounded-xl flex items-center justify-center gap-2" id="generate-btn" onclick="generateBot()">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            Generate Bot Flow
+                        </button>
                     </div>
                 </div>
-                <div class="chat-messages" id="chat-messages">
-                    <div class="empty-state">
-                        <span>💬</span>
-                        <p>Click "Generate Bot Flow" to see the simulation</p>
+
+                <!-- Chat Preview -->
+                <div class="card-glass rounded-2xl overflow-hidden chat-preview">
+                    <div class="chat-header">
+                        <div class="chat-avatar">🤖</div>
+                        <div class="chat-info">
+                            <h3 id="bot-name">CivicAid Bot</h3>
+                            <span>Simulation Preview</span>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="empty-state">
+                            <span>💬</span>
+                            <p>Click "Generate Bot Flow" to see the simulation</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="response-panel">
-            <h3>API Response</h3>
-            <pre id="response-json">{ "message": "Click Generate to see response" }</pre>
+            <!-- API Response -->
+            <div class="response-panel reveal">
+                <h3>📋 API Response</h3>
+                <pre id="response-json">{ "message": "Click Generate to see response" }</pre>
+            </div>
         </div>
-    </div>
+    </main>
+
+    <footer class="relative z-10 text-center py-8 text-white/30 text-sm border-t border-white/[0.04]">
+        <p>&copy; 2026 CivicAId. WhatsApp Bot Generator Platform.</p>
+    </footer>
 
     <script>
-        const API_BASE = ''; // Relative path for Vercel/Unified Server
+        // ── Particle System (Green) ──
+        (function(){const c=document.getElementById('particle-canvas'),x=c.getContext('2d');let p=[];const C=['rgba(37,211,102,','rgba(16,185,129,','rgba(34,197,94,','rgba(52,211,153,'];function r(){c.width=window.innerWidth;c.height=window.innerHeight}window.addEventListener('resize',r);r();class P{constructor(){this.reset()}reset(){this.x=Math.random()*c.width;this.y=Math.random()*c.height;this.s=Math.random()*2.5+0.5;this.sx=(Math.random()-0.5)*0.35;this.sy=(Math.random()-0.5)*0.25;this.c=C[Math.floor(Math.random()*C.length)];this.o=Math.random()*0.35+0.08;this.p=Math.random()*Math.PI*2;this.ps=Math.random()*0.02+0.005}update(){this.x+=this.sx;this.y+=this.sy;this.p+=this.ps;if(this.x<0||this.x>c.width||this.y<0||this.y>c.height)this.reset()}draw(){const o=this.o*(0.6+Math.sin(this.p)*0.4);x.beginPath();x.arc(this.x,this.y,this.s,0,Math.PI*2);x.fillStyle=this.c+o+')';x.fill()}}for(let i=0;i<70;i++)p.push(new P());function d(){for(let i=0;i<p.length;i++)for(let j=i+1;j<p.length;j++){const dx=p[i].x-p[j].x,dy=p[i].y-p[j].y,di=Math.sqrt(dx*dx+dy*dy);if(di<140){x.beginPath();x.strokeStyle=`rgba(37,211,102,${0.05*(1-di/140)})`;x.lineWidth=0.5;x.moveTo(p[i].x,p[i].y);x.lineTo(p[j].x,p[j].y);x.stroke()}}}function l(){x.clearRect(0,0,c.width,c.height);p.forEach(i=>{i.update();i.draw()});d();requestAnimationFrame(l)}l()})();
 
-        // Generate bot flow (Client-Side Simulation)
+        const {animate, inView} = Motion;
+
+        // ── Bot Generator Logic ──
+        const API_BASE = '';
         async function generateBot() {
             const btn = document.getElementById('generate-btn');
             const templateId = document.getElementById('template').value;
             const override = document.getElementById('override').value;
-
             btn.disabled = true;
             btn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...';
-
-            // Simulate API latency
             await new Promise(r => setTimeout(r, 1500));
-
             try {
-                // Mock Response Logic (moved from Python backend)
                 const mockFlow = {
                     id: `flow_${Date.now()}`,
-                    name: templateId === 'phone_repair_basic' ? "Phone Repair Bot" :
-                        templateId === 'complaint_basic' ? "Civic Complaint Bot" : "Emergency Bot",
+                    name: templateId === 'phone_repair_basic' ? "Phone Repair Bot" : templateId === 'complaint_basic' ? "Civic Complaint Bot" : "Emergency Bot",
                     steps: ["step_welcome", "step_identify", "step_process", "step_end"]
                 };
-
                 const mockSimulation = [
                     { from: "bot", text: "Hello! Welcome to CivicAid Assistant." },
                     { from: "user", text: "I need help with a request." },
-                    {
-                        from: "bot", text: override || (
-                            templateId === 'phone_repair_basic' ? "What is your device model?" :
-                                templateId === 'complaint_basic' ? "Please describe your complaint." :
-                                    "Is this a medical or fire emergency?"
-                        )
-                    }
+                    { from: "bot", text: override || (templateId === 'phone_repair_basic' ? "What is your device model?" : templateId === 'complaint_basic' ? "Please describe your complaint." : "Is this a medical or fire emergency?") }
                 ];
-
-                const data = {
-                    status: "success",
-                    bot_flow: mockFlow,
-                    simulation: mockSimulation,
-                    note: "Generated via Client-Side Simulation"
-                };
-
-                // Update response panel
-                document.getElementById('response-json').textContent =
-                    JSON.stringify(data, null, 2);
-
-                // Update chat preview
+                const data = { status: "success", bot_flow: mockFlow, simulation: mockSimulation, note: "Generated via Client-Side Simulation" };
+                document.getElementById('response-json').textContent = JSON.stringify(data, null, 2);
                 document.getElementById('bot-name').textContent = data.bot_flow.name;
                 renderSimulation(data.simulation);
-
             } catch (error) {
                 console.error(error);
                 document.getElementById('response-json').textContent = "Error generating bot.";
@@ -274,82 +275,33 @@
             }
         }
 
-        // Render simulation messages
         function renderSimulation(simulation) {
             const container = document.getElementById('chat-messages');
             container.innerHTML = '';
-
             simulation.forEach((msg, index) => {
-                const messageEl = document.createElement('div');
-                messageEl.className = `message ${msg.from} max-w-[80%] p-3 rounded-lg mb-3 text-sm`;
-
-                // Add slight delay for animation effect
-                messageEl.style.opacity = '0';
-                messageEl.style.transform = 'translateY(10px)';
-                messageEl.style.transition = 'all 0.3s ease';
-
-                messageEl.innerHTML = `
-                    <div class="text-white/90">${msg.text}</div>
-                    <div class="text-[0.7rem] text-white/40 mt-1 text-right">${formatTime(index)}</div>
-                `;
-
-                container.appendChild(messageEl);
-
-                // Animate in
-                setTimeout(() => {
-                    messageEl.style.opacity = '1';
-                    messageEl.style.transform = 'translateY(0)';
-                }, index * 300);
+                const el = document.createElement('div');
+                el.className = `message ${msg.from} max-w-[80%] p-3 mb-3 text-sm ${msg.from === 'user' ? 'ml-auto' : ''}`;
+                el.style.opacity = '0'; el.style.transform = 'translateY(10px)'; el.style.transition = 'all 0.3s ease';
+                el.innerHTML = `<div class="text-white/90">${msg.text}</div><div class="text-[0.7rem] text-white/30 mt-1 text-right">${formatTime(index)}</div>`;
+                container.appendChild(el);
+                setTimeout(() => { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; }, index * 300);
             });
-
-            // Scroll to bottom
-            setTimeout(() => {
-                container.scrollTop = container.scrollHeight;
-            }, simulation.length * 300 + 100);
+            setTimeout(() => { container.scrollTop = container.scrollHeight; }, simulation.length * 300 + 100);
         }
 
-        // Format time for messages
         function formatTime(index) {
-            const now = new Date();
-            now.setMinutes(now.getMinutes() + index);
-            return now.toLocaleTimeString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
-            });
+            const now = new Date(); now.setMinutes(now.getMinutes() + index);
+            return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
         }
 
-        // Initialize Motion.js animations
+        // ── Reveal Animations ──
         window.addEventListener('load', () => {
-            const { animate } = Motion;
-            const consistentEase = "linear";
-            const slowDuration = 1.5;
-
-            // Animate page header
-            animate(
-                "main > div > div:first-child",
-                { opacity: [0, 1], y: [30, 0], scale: [0.98, 1] },
-                { duration: slowDuration, easing: consistentEase }
-            );
-
-            // Animate demo cards
-            const cards = document.querySelectorAll("main > div > div:nth-child(2) > div");
-            cards.forEach((card, index) => {
-                animate(
-                    card,
-                    { opacity: [0, 1], y: [30, 0], scale: [0.98, 1] },
-                    { duration: slowDuration, delay: 0.3 + (index * 0.15), easing: consistentEase }
-                );
+            document.querySelectorAll('.reveal').forEach((el, i) => {
+                inView(el, () => {
+                    animate(el, { opacity: [0, 1], y: [30, 0] }, { duration: 0.85, delay: 0.1 * (i % 6), easing: [0.22, 1, 0.36, 1] });
+                }, { amount: 0.15 });
             });
-
-            // Animate response panel
-            animate(
-                "main > div > div:nth-child(3)",
-                { opacity: [0, 1], y: [30, 0], scale: [0.98, 1] },
-                { duration: slowDuration, delay: 0.6, easing: consistentEase }
-            );
         });
     </script>
 </body>
-
 </html>

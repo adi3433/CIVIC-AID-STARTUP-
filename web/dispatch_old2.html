@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CivicAid Emergency Dispatch - AI-powered emergency call handling">
+    <title>Emergency Dispatch AI | CivicAId</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="public/CivicLogo.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="public/CivicLogo.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="public/CivicLogo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="public/CivicLogo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/motion@latest/dist/motion.js"></script>
+    <script>
+    const { animate, scroll } = Motion
+    </script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'civic-dark': '#0a0e1a',
+                        'civic-surface': '#0f1420',
+                        'civic-card': '#141b2d',
+                    },
+                    backdropBlur: {
+                        'xl': '20px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-bg {
+            background: rgba(10, 14, 26, 0.5);
+        }
+        @keyframes waveAnimation {
+            0%, 100% { height: 20px; }
+            50% { height: 40px; }
+        }
+        .waveform-bar {
+            animation: waveAnimation 1s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-civic-dark text-white font-sans leading-relaxed min-h-screen overflow-x-hidden">
+    <!-- Fixed Top Spotlight Effect -->
+    <div class="fixed top-0 left-0 w-full h-[400px] pointer-events-none z-0" style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.18) 10%, rgba(255, 255, 255, 0.12) 20%, rgba(255, 255, 255, 0.08) 35%, rgba(255, 255, 255, 0.04) 55%, rgba(255, 255, 255, 0.01) 75%, transparent 100%); filter: blur(60px);"></div>
+    
+    <!-- Right Side Spotlight -->
+    <div class="fixed top-[30%] right-[-10%] w-[800px] h-[800px] pointer-events-none z-0" style="background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 15%, rgba(255, 255, 255, 0.1) 30%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.02) 70%, transparent 100%); filter: blur(80px);"></div>
+
+    <!-- Header - Premium Glassmorphism -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass-bg backdrop-blur-xl border-b border-white/[0.06]">
+        <nav class="flex justify-between items-center py-4 px-10 max-w-[1400px] mx-auto">
+            <a href="landing.html" class="flex items-center gap-3 text-lg font-semibold text-white no-underline group">
+                <img src="public/CivicLogo.png" alt="CivicAId Logo" class="w-10 h-10 object-contain transition-transform group-hover:scale-110">
+                <span class="group-hover:text-blue-400 transition-colors">CivicAId</span>
+            </a>
+            <div class="flex items-center gap-8">
+                <a href="landing.html" class="text-white/70 no-underline text-sm font-medium hover:text-white transition-colors">Home</a>
+                <a href="https://github.com/adi3433/CIVIC-AID-STARTUP-" target="_blank" class="text-white/70 no-underline text-sm font-medium hover:text-white transition-colors">GitHub</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="relative z-10 pt-28 px-6 pb-12">
+        <div class="max-w-[500px] mx-auto">
+            <!-- Hero Section -->
+            <div class="text-center mb-8">
+                <span class="inline-block text-xs font-medium text-white/60 bg-white/5 border border-white/[0.08] px-3 py-1.5 rounded tracking-wide mb-4">🚨 EMERGENCY RESPONSE AI</span>
+                <h1 class="text-4xl font-bold leading-tight text-white mb-3 tracking-tight">Emergency Dispatch</h1>
+                <p class="text-sm text-white/60 leading-relaxed">AI-powered emergency call handling and response</p>
+            </div>
+
+            <!-- Dispatch Card -->
+            <div class="bg-civic-card/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl">
+                <!-- Status Bar -->
+                <div class="bg-gradient-to-r from-red-500 to-orange-500 px-5 py-4 flex justify-between items-center">
+                    <span class="font-semibold text-sm" id="status-text">Dispatch Center</span>
+                    <div class="flex items-center gap-2 text-xs">
+                        <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                        <span id="status-label">Ready to Listen</span>
+                    </div>
+                </div>
+
+                <!-- Idle State -->
+                <div class="p-10 text-center" id="idle-state">
+                    <div class="text-6xl mb-6">📞</div>
+                    <h2 class="text-2xl font-bold mb-3">Start Emergency Call</h2>
+                    <p class="text-white/60 mb-8">Press the button below to connect with our AI dispatcher</p>
+                    <button onclick="initiateCall()" class="w-24 h-24 rounded-full bg-gradient-to-br from-red-500 to-orange-500 text-4xl hover:scale-110 transition-transform shadow-lg hover:shadow-red-500/50">
+                        📞
+                    </button>
+                </div>
+
+                <!-- Connected State -->
+                <div class="hidden" id="connected-state">
+                    <!-- Conversation Area -->
+                    <div class="p-5 overflow-y-auto flex flex-col gap-3 min-h-[300px] max-h-[400px]" id="conversation"></div>
+
+                    <!-- Waveform -->
+                    <div class="hidden justify-center items-end gap-1 h-16 px-5" id="waveform">
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0s;"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0.1s;"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0.2s;"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0.3s;"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0.4s;"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0.5s;"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0.6s;"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0.7s;"></div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="p-5 border-t border-white/[0.08]">
+                        <div class="flex gap-3 mb-3">
+                            <button id="mic-btn" onclick="toggleRecording()" class="w-12 h-12 rounded-full bg-civic-surface hover:bg-red-500/20 border border-white/10 text-2xl flex items-center justify-center transition-all">🎤</button>
+                            <input type="text" id="text-input" class="flex-1 bg-civic-surface border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:border-red-500/50 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all" placeholder="Type your emergency..." onkeypress="handleKeyPress(event)">
+                            <button id="send-btn" onclick="sendMessage()" disabled class="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-xl flex items-center justify-center transition-all hover:scale-110">➤</button>
+                        </div>
+                        <div class="text-center">
+                            <button onclick="endCall()" class="w-16 h-16 rounded-full bg-red-600 hover:bg-red-700 text-2xl transition-all hover:scale-110 shadow-lg">✕</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Call Button (after call ends) -->
+            <div class="hidden mt-6 text-center" id="new-call-section">
+                <button onclick="initiateCall()" class="bg-civic-card/60 backdrop-blur-xl border border-white/10 text-white px-8 py-4 rounded-xl font-semibold hover:border-red-500/50 transition-all">
+                    📞 New Emergency Call
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 text-center py-8 text-white/40 text-sm">
+        <p>&copy; 2024 CivicAId. AI-Powered Emergency Response System.</p>
+    </footer>
+
+    <script>
+        let isRecording = false;
+        let recognition = null;
+        let messageCount = 0;
+        let currentClassification = null;
+
+        // Initialize Speech Recognition
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('text-input').value = transcript;
+                    sendMessage();
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    stopRecording();
+                };
+
+                recognition.onend = () => {
+                    stopRecording();
+                };
+            } else {
+                console.warn('Speech recognition not supported');
+            }
+        }
+
+        function initiateCall() {
+            document.getElementById('idle-state').classList.add('hidden');
+            document.getElementById('connected-state').classList.remove('hidden');
+            document.getElementById('new-call-section').classList.add('hidden');
+            document.getElementById('status-text').textContent = 'Connected';
+            document.getElementById('status-label').textContent = 'Active Call';
+            
+            messageCount = 0;
+            currentClassification = null;
+            
+            addMessage('system', 'Call connected to Emergency Dispatch AI');
+            setTimeout(() => {
+                addMessage('assistant', 'Emergency Dispatch. What is your emergency?');
+                speakText('Emergency Dispatch. What is your emergency?');
+            }, 500);
+            
+            // Animation
+            animate('.container > *', { opacity: [0, 1] }, { duration: 1.5, easing: 'linear' });
+        }
+
+        function endCall() {
+            document.getElementById('idle-state').classList.add('hidden');
+            document.getElementById('connected-state').classList.add('hidden');
+            document.getElementById('new-call-section').classList.remove('hidden');
+            document.getElementById('status-text').textContent = 'Call Ended';
+            document.getElementById('status-label').textContent = 'Offline';
+            
+            addMessage('system', 'Call ended. Emergency services have been notified.');
+            
+            if (isRecording) {
+                stopRecording();
+            }
+        }
+
+        function toggleRecording() {
+            if (!recognition) {
+                alert('Speech recognition is not supported in your browser');
+                return;
+            }
+
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        function startRecording() {
+            isRecording = true;
+            document.getElementById('mic-btn').classList.add('bg-red-500');
+            document.getElementById('waveform').classList.remove('hidden');
+            document.getElementById('waveform').classList.add('flex');
+            recognition.start();
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            document.getElementById('mic-btn').classList.remove('bg-red-500');
+            document.getElementById('waveform').classList.add('hidden');
+            document.getElementById('waveform').classList.remove('flex');
+            if (recognition) {
+                recognition.stop();
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+            document.getElementById('send-btn').disabled = !event.target.value.trim();
+        }
+
+        document.getElementById('text-input').addEventListener('input', (e) => {
+            document.getElementById('send-btn').disabled = !e.target.value.trim();
+        });
+
+        async function sendMessage() {
+            const input = document.getElementById('text-input');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            input.value = '';
+            document.getElementById('send-btn').disabled = true;
+            
+            addMessage('user', text);
+            messageCount++;
+            
+            showTypingIndicator();
+            
+            try {
+                const response = await fetch('/api/dispatch/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text, messageCount, classification: currentClassification })
+                });
+                
+                const data = await response.json();
+                
+                hideTypingIndicator();
+                
+                if (data.classification && !currentClassification) {
+                    currentClassification = data.classification;
+                }
+                
+                addMessage('assistant', data.response);
+                speakText(data.response);
+            } catch (error) {
+                console.error('Error:', error);
+                hideTypingIndicator();
+                
+                const fallbackResponse = getFallbackResponse(text, messageCount);
+                addMessage('assistant', fallbackResponse);
+                speakText(fallbackResponse);
+            }
+        }
+
+        function addMessage(type, text) {
+            const conversation = document.getElementById('conversation');
+            const messageDiv = document.createElement('div');
+            
+            if (type === 'system') {
+                messageDiv.className = 'text-center text-xs text-white/40 py-2';
+                messageDiv.textContent = text;
+            } else if (type === 'assistant') {
+                messageDiv.className = 'max-w-[85%] self-start bg-civic-surface px-4 py-3 rounded-2xl rounded-tl-sm text-sm';
+                messageDiv.textContent = text;
+            } else if (type === 'user') {
+                messageDiv.className = 'max-w-[85%] self-end bg-gradient-to-br from-red-500 to-orange-500 px-4 py-3 rounded-2xl rounded-tr-sm text-sm';
+                messageDiv.textContent = text;
+            }
+            
+            conversation.appendChild(messageDiv);
+            conversation.scrollTop = conversation.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const conversation = document.getElementById('conversation');
+            const indicator = document.createElement('div');
+            indicator.id = 'typing-indicator';
+            indicator.className = 'flex items-center gap-2 px-4 py-3 bg-civic-surface rounded-2xl rounded-tl-sm max-w-[85%] self-start';
+            indicator.innerHTML = `
+                <div class="flex gap-1">
+                    <span class="w-2 h-2 bg-white/40 rounded-full animate-bounce" style="animation-delay: 0s;"></span>
+                    <span class="w-2 h-2 bg-white/40 rounded-full animate-bounce" style="animation-delay: 0.2s;"></span>
+                    <span class="w-2 h-2 bg-white/40 rounded-full animate-bounce" style="animation-delay: 0.4s;"></span>
+                </div>
+            `;
+            conversation.appendChild(indicator);
+            conversation.scrollTop = conversation.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        function getFallbackResponse(text, messageCount) {
+            const lowerText = text.toLowerCase();
+            
+            if (lowerText.includes('fire') || lowerText.includes('burning')) {
+                currentClassification = 'fire';
+                return "Fire emergency noted. Fire brigade is being dispatched. What is your exact location?";
+            } else if (lowerText.includes('medical') || lowerText.includes('heart') || lowerText.includes('hurt') || lowerText.includes('injured')) {
+                currentClassification = 'medical';
+                return "Medical emergency. Ambulance is being dispatched. What is your location?";
+            } else if (lowerText.includes('robbery') || lowerText.includes('attack') || lowerText.includes('crime') || lowerText.includes('police')) {
+                currentClassification = 'police';
+                return "Police are being dispatched. Are you in a safe location? What is your address?";
+            } else if (lowerText.includes('street') || lowerText.includes('road') || lowerText.includes('building') || lowerText.includes('address')) {
+                return "Location received. Emergency services are on their way. ETA 5 minutes. Stay on the line.";
+            } else if (messageCount > 3) {
+                return "Help is on the way. Please stay calm and don't hang up until emergency services arrive.";
+            } else {
+                return "I understand. What type of emergency is this - medical, fire, or police? And what is your location?";
+            }
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Initialize
+        initSpeechRecognition();
+
+        // Motion.js animation on load
+        window.addEventListener('load', () => {
+            animate('.container > *', { opacity: [0, 1] }, { duration: 1.5, easing: 'linear' });
+        });
+    </script>
+</body>
+
+</html>

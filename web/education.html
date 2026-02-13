@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,386 +9,292 @@
     <link rel="icon" type="image/png" sizes="64x64" href="public/CivicLogo.png">
     <link rel="icon" type="image/png" sizes="96x96" href="public/CivicLogo.png">
     <link rel="apple-touch-icon" sizes="180x180" href="public/CivicLogo.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/motion@latest/dist/motion.js"></script>
-    <script>
-        const { animate, scroll } = Motion
-    </script>
+    <script>const { animate, stagger, inView, scroll } = Motion;</script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'civic-dark': '#0a0e1a',
-                        'civic-surface': '#0f1420',
-                        'civic-card': '#141b2d',
+                        'civic-dark': '#08060f',
+                        'civic-surface': '#0e0b18',
+                        'civic-card': '#13102a',
                     },
-                    backdropBlur: {
-                        'xl': '20px',
-                    }
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
                 }
             }
         }
     </script>
     <style>
-        .glass-bg {
-            background: rgba(10, 14, 26, 0.5);
+        *, *::before, *::after { box-sizing: border-box; }
+        * { -webkit-font-smoothing: antialiased; }
+        html { scroll-behavior: smooth; }
+        body { background: #08060f; font-feature-settings: "cv02","cv03","cv04","cv11"; overflow-x: hidden; }
+
+        #particle-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+        .ambient-purple { background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.05) 40%, transparent 70%); }
+        .ambient-side { background: radial-gradient(ellipse 40% 60% at 100% 30%, rgba(168,85,247,0.08) 0%, transparent 70%); }
+        .ambient-bottom { background: radial-gradient(ellipse 60% 40% at 30% 100%, rgba(99,102,241,0.06) 0%, transparent 70%); }
+
+        .glass-nav {
+            background: rgba(8,6,15,0.72);
+            backdrop-filter: blur(20px) saturate(1.8);
+            -webkit-backdrop-filter: blur(20px) saturate(1.8);
+            border-bottom: 1px solid rgba(139,92,246,0.08);
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        .card-3d-inner {
+            background: linear-gradient(160deg, rgba(19,16,42,0.95) 0%, rgba(14,11,24,0.98) 100%);
+            border: 1px solid rgba(139,92,246,0.12);
+            box-shadow: 0 0 0 1px rgba(139,92,246,0.04) inset, 0 4px 24px rgba(0,0,0,0.4), 0 0 80px rgba(139,92,246,0.06);
+            transition: transform 0.4s cubic-bezier(.22,1,.36,1), box-shadow 0.4s ease;
+        }
+        .card-3d-inner:hover {
+            box-shadow: 0 0 0 1px rgba(139,92,246,0.08) inset, 0 8px 40px rgba(0,0,0,0.5), 0 0 120px rgba(139,92,246,0.1);
+        }
+
+        .input-glow:focus {
+            border-color: rgba(139,92,246,0.5) !important;
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.1), 0 0 20px rgba(139,92,246,0.1);
+        }
+
+        .btn-purple {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+            box-shadow: 0 2px 12px rgba(139,92,246,0.3), 0 0 40px rgba(139,92,246,0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-purple:hover { box-shadow: 0 4px 20px rgba(139,92,246,0.5), 0 0 60px rgba(139,92,246,0.2); transform: translateY(-2px); }
+        .btn-purple:active { transform: translateY(0); }
+
+        .robot-float { animation: robotFloat 4s ease-in-out infinite; }
+        @keyframes robotFloat {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
         }
 
         .spinner {
-            border: 3px solid rgba(139, 92, 246, 0.3);
+            border: 3px solid rgba(139,92,246,0.2);
             border-top: 3px solid #8b5cf6;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
+            width: 50px; height: 50px;
+            animation: spin 0.8s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .orbit-ring { position: absolute; border-radius: 50%; border: 1px solid rgba(139,92,246,0.08); }
+        .orbit-ring-1 { width: 300px; height: 300px; top: -50px; left: -80px; animation: orbitSpin 30s linear infinite; }
+        .orbit-ring-2 { width: 500px; height: 500px; top: -150px; left: -180px; animation: orbitSpin 45s linear infinite reverse; }
+        .orbit-ring-3 { width: 200px; height: 200px; bottom: -30px; right: -60px; animation: orbitSpin 20s linear infinite; }
+        @keyframes orbitSpin { to { transform: rotate(360deg); } }
+
+        .float-shape { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(1px); }
+        .reveal { opacity: 0; transform: translateY(24px); }
+
+        .carousel-track { display: flex; gap: 16px; transition: transform 0.5s cubic-bezier(.22,1,.36,1); }
+        .carousel-card {
+            min-width: 220px;
+            background: rgba(19,16,42,0.8);
+            border: 1px solid rgba(139,92,246,0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .carousel-card:hover { border-color: rgba(139,92,246,0.3); transform: translateY(-4px) scale(1.02); box-shadow: 0 8px 32px rgba(139,92,246,0.15); }
+        @keyframes progress { from { width: 0%; } to { width: 90%; } }
     </style>
 </head>
 
-<body class="bg-civic-dark text-white font-sans leading-relaxed min-h-screen overflow-x-hidden">
-    <!-- Fixed Top Spotlight Effect -->
-    <div class="fixed top-0 left-0 w-full h-[400px] pointer-events-none z-0"
-        style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.18) 10%, rgba(255, 255, 255, 0.12) 20%, rgba(255, 255, 255, 0.08) 35%, rgba(255, 255, 255, 0.04) 55%, rgba(255, 255, 255, 0.01) 75%, transparent 100%); filter: blur(60px);">
-    </div>
+<body class="text-white font-sans leading-relaxed min-h-screen">
+    <canvas id="particle-canvas"></canvas>
+    <div class="fixed inset-0 pointer-events-none z-[1] ambient-purple"></div>
+    <div class="fixed inset-0 pointer-events-none z-[1] ambient-side"></div>
+    <div class="fixed inset-0 pointer-events-none z-[1] ambient-bottom"></div>
 
-    <!-- Right Side Spotlight -->
-    <div class="fixed top-[30%] right-[-10%] w-[800px] h-[800px] pointer-events-none z-0"
-        style="background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 15%, rgba(255, 255, 255, 0.1) 30%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.02) 70%, transparent 100%); filter: blur(80px);">
-    </div>
-
-    <!-- Header - Premium Glassmorphism -->
-    <header class="fixed top-0 left-0 right-0 z-50 glass-bg backdrop-blur-xl border-b border-white/[0.06]">
-        <nav class="flex justify-between items-center py-4 px-10 max-w-[1400px] mx-auto">
-            <a href="landing.html" class="flex items-center gap-3 text-lg font-semibold text-white no-underline group">
-                <img src="public/CivicLogo.png" alt="CivicAId Logo"
-                    class="w-10 h-10 object-contain transition-transform group-hover:scale-110">
-                <span class="group-hover:text-blue-400 transition-colors">CivicAId</span>
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass-nav">
+        <nav class="flex items-center justify-between h-16 px-6 lg:px-10 max-w-[1280px] mx-auto">
+            <a href="landing.html" class="flex items-center gap-2.5 no-underline shrink-0 group">
+                <img src="public/CivicLogo.png" alt="CivicAId" class="w-8 h-8 object-contain transition-transform group-hover:scale-110 group-hover:rotate-12">
+                <span class="text-[0.9375rem] font-semibold text-white">CivicAId</span>
             </a>
-            <div class="flex items-center gap-8">
-                <a href="landing.html"
-                    class="text-white/70 no-underline text-sm font-medium hover:text-white transition-colors">Home</a>
-                <a href="https://github.com/adi3433/CIVIC-AID-STARTUP-" target="_blank"
-                    class="text-white/70 no-underline text-sm font-medium hover:text-white transition-colors">GitHub</a>
+            <div class="flex items-center gap-6">
+                <a href="landing.html" class="text-white/50 text-sm font-medium hover:text-white transition-colors no-underline">Home</a>
+                <a href="https://github.com/adi3433/CIVIC-AID-STARTUP-" target="_blank" class="text-white/50 text-sm font-medium hover:text-white transition-colors no-underline">GitHub</a>
+                <div class="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400">
+                    <span class="w-1.5 h-1.5 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(139,92,246,0.6)] animate-pulse"></span>
+                    Education AI
+                </div>
             </div>
         </nav>
     </header>
 
-    <main class="relative z-10 pt-28 px-6 pb-12">
-        <div class="max-w-[800px] mx-auto">
-            <!-- Hero Section -->
-            <div class="text-center mb-8">
-                <span
-                    class="inline-block text-xs font-medium text-white/60 bg-white/5 border border-white/[0.08] px-3 py-1.5 rounded tracking-wide mb-4">📊
-                    AI EDUCATION SUITE</span>
-                <h1 class="text-4xl font-bold leading-tight text-white mb-3 tracking-tight">AI Presentation Generator
-                </h1>
-                <p class="text-sm text-white/60 leading-relaxed">Generates complete 7-slide educational presentations in
-                    seconds</p>
-            </div>
+    <main class="relative z-10 pt-28 pb-20">
+        <div class="max-w-[1100px] mx-auto px-6">
+            <!-- Hero -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+                <div>
+                    <div class="reveal inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6" style="background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.12);">
+                        <span class="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></span>
+                        <span class="text-[0.6875rem] font-medium tracking-wide text-purple-400/80 uppercase">AI Education Suite</span>
+                    </div>
+                    <h1 class="reveal text-[clamp(2rem,4.5vw,3.25rem)] font-extrabold tracking-[-0.035em] leading-[1.1] text-white mb-5">
+                        AI Presentation<br><span class="bg-gradient-to-r from-purple-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent">Generator</span>
+                    </h1>
+                    <p class="reveal text-base text-white/50 leading-relaxed mb-8 max-w-[440px]">Generates complete 7-slide educational presentations in seconds. Powered by 14 parallel AI agents.</p>
+                    <div class="reveal flex items-center gap-4 text-[0.75rem] text-white/30">
+                        <span class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>~15s Generation</span>
+                        <span class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>AI Images</span>
+                        <span class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>PPTX Export</span>
+                    </div>
+                </div>
+                <div class="reveal flex justify-center lg:justify-end relative">
+                    <div class="relative w-[340px] h-[280px]">
+                        <div class="orbit-ring orbit-ring-1"></div>
+                        <div class="orbit-ring orbit-ring-2"></div>
+                        <div class="orbit-ring orbit-ring-3"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="relative" style="transform: perspective(800px) rotateY(-12deg) rotateX(5deg);">
+                                <div class="w-[240px] h-[160px] rounded-xl bg-gradient-to-br from-purple-900/60 to-indigo-900/40 border border-purple-500/20 shadow-2xl p-4 relative" style="transform: translateZ(40px);">
+                                    <div class="w-full h-3 bg-purple-500/20 rounded mb-2"></div>
+                                    <div class="w-3/4 h-2 bg-purple-500/10 rounded mb-3"></div>
+                                    <div class="flex gap-2">
+                                        <div class="w-1/2 h-16 bg-gradient-to-br from-purple-500/15 to-indigo-500/10 rounded"></div>
+                                        <div class="space-y-1.5 flex-1">
+                                            <div class="w-full h-1.5 bg-white/5 rounded"></div>
+                                            <div class="w-4/5 h-1.5 bg-white/5 rounded"></div>
+                                            <div class="w-3/5 h-1.5 bg-white/5 rounded"></div>
+                                            <div class="w-full h-1.5 bg-white/5 rounded"></div>
+                                        </div>
+                                    </div>
+                                    <div class="absolute -bottom-2 -right-2 w-6 h-6 rounded-full bg-purple-500/30 animate-pulse"></div>
+                                </div>
+                                <div class="absolute top-3 left-3 w-[240px] h-[160px] rounded-xl bg-purple-900/20 border border-purple-500/10" style="transform: translateZ(20px);"></div>
+                                <div class="absolute top-6 left-6 w-[240px] h-[160px] rounded-xl bg-purple-900/10 border border-purple-500/5" style="transform: translateZ(0px);"></div>
+                            </div>
+                        </div>
+                        <div class="absolute -bottom-4 -right-4 text-5xl robot-float" style="filter: drop-shadow(0 0 20px rgba(139,92,246,0.3));">🤖</div>
+                        <div class="float-shape w-2 h-2 bg-purple-400/40 top-4 right-12" style="animation: robotFloat 3s ease-in-out infinite 0.5s;"></div>
+                        <div class="float-shape w-1.5 h-1.5 bg-indigo-400/30 bottom-8 left-8" style="animation: robotFloat 4s ease-in-out infinite 1s;"></div>
+                        <div class="float-shape w-1 h-1 bg-violet-400/50 top-12 left-4" style="animation: robotFloat 3.5s ease-in-out infinite 1.5s;"></div>
+                    </div>
+                </div>
+            </section>
 
             <!-- Generator Card -->
-            <div
-                class="bg-civic-card/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl p-8">
-
-                <!-- Form Container -->
-                <div id="form-container">
-                    <div class="space-y-6">
-                        <!-- Topic -->
-                        <div>
-                            <label for="topic" class="block text-sm font-medium text-white/70 mb-2">Presentation Topic
-                                <span class="text-red-400">*</span></label>
-                            <input type="text" id="topic" placeholder="e.g. Solar System Basics, History of Rome"
-                                class="w-full bg-civic-surface border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all">
+            <section class="max-w-[700px] mx-auto mb-20">
+                <div class="card-3d-inner rounded-2xl overflow-hidden" id="generator-card">
+                    <div class="px-8 pt-8 pb-4">
+                        <h2 class="text-xl font-bold text-white mb-1 flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl flex items-center justify-center bg-purple-500/10 border border-purple-500/15">
+                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                            </div>
+                            Generator Card
+                        </h2>
+                        <p class="text-sm text-white/40 ml-12">Create AI-powered presentations instantly</p>
+                    </div>
+                    <div class="px-8 pb-8">
+                        <div id="form-container" class="space-y-5">
+                            <div>
+                                <label for="topic" class="block text-sm font-medium text-white/60 mb-2">Presentation Topic <span class="text-purple-400">*</span></label>
+                                <input type="text" id="topic" placeholder="e.g. Solar System Basics, History of Rome" class="input-glow w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/30 focus:outline-none transition-all">
+                            </div>
+                            <div>
+                                <label for="grade" class="block text-sm font-medium text-white/60 mb-2">Target Grade Level <span class="text-purple-400">*</span></label>
+                                <select id="grade" class="input-glow w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none transition-all cursor-pointer appearance-none" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22rgba(255,255,255,0.4)%22 stroke-width=%222%22%3E%3Cpolyline points=%226 9 12 15 18 9%22/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 16px center;">
+                                    <option value="1st Grade" style="background:#13102a">1st Grade</option>
+                                    <option value="3rd Grade" style="background:#13102a">3rd Grade</option>
+                                    <option value="5th Grade" selected style="background:#13102a">5th Grade</option>
+                                    <option value="8th Grade" style="background:#13102a">8th Grade</option>
+                                    <option value="High School" style="background:#13102a">High School</option>
+                                    <option value="University" style="background:#13102a">University</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="source" class="block text-sm font-medium text-white/60 mb-2">Source Material URL <span class="text-white/30">(Optional)</span></label>
+                                <input type="url" id="source" placeholder="https://example.com/article.pdf" class="input-glow w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/30 focus:outline-none transition-all">
+                                <p class="text-xs text-white/30 mt-2">Provide a document link for AI analysis</p>
+                            </div>
+                            <button id="generate-btn" onclick="generatePPT()" class="btn-purple w-full text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 text-[0.9375rem]">
+                                <span>Generate Presentation</span>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            </button>
                         </div>
-
-                        <!-- Grade Level -->
-                        <div>
-                            <label for="grade" class="block text-sm font-medium text-white/70 mb-2">Target Grade Level
-                                <span class="text-red-400">*</span></label>
-                            <select id="grade"
-                                class="w-full bg-civic-surface border border-white/10 rounded-xl px-4 py-3 text-white focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer">
-                                <option value="1st Grade">1st Grade</option>
-                                <option value="3rd Grade">3rd Grade</option>
-                                <option value="5th Grade" selected>5th Grade</option>
-                                <option value="8th Grade">8th Grade</option>
-                                <option value="High School">High School</option>
-                                <option value="University">University</option>
-                            </select>
+                        <div id="loading" class="hidden text-center py-12">
+                            <div class="spinner mx-auto mb-6"></div>
+                            <h3 class="text-xl font-bold mb-2">Generating Presentation...</h3>
+                            <p class="text-white/50 mb-4">Orchestrating 14 parallel AI agents to build slides & images.</p>
+                            <p class="text-sm text-purple-400">Estimated time: ~15-30 seconds</p>
+                            <div class="mt-6 w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full" style="animation: progress 20s ease-out forwards;"></div>
+                            </div>
                         </div>
-
-                        <!-- Source URL -->
-                        <div>
-                            <label for="source" class="block text-sm font-medium text-white/70 mb-2">Source Material URL
-                                (Optional)</label>
-                            <input type="url" id="source" placeholder="https://example.com/article.pdf"
-                                class="w-full bg-civic-surface border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all">
-                            <p class="text-xs text-white/40 mt-2">Provide a link to a document for the AI to analyze
-                                (optional).</p>
+                        <div id="result" class="hidden">
+                            <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-6 text-center">
+                                <div class="text-4xl mb-3">🎉</div>
+                                <h3 class="text-xl font-bold text-green-400 mb-2">Presentation Ready!</h3>
+                                <p id="result-title" class="font-semibold text-lg mb-1"></p>
+                                <p class="text-sm text-white/50 mb-6">Generated <span id="slide-count">8</span> slides with custom AI imagery.</p>
+                                <a href="#" id="download-link" target="_blank" class="inline-block bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-xl transition-all hover:shadow-lg hover:shadow-green-500/30 hover:-translate-y-0.5">Download PPTX File</a>
+                            </div>
+                            <button onclick="resetForm()" class="w-full mt-5 bg-transparent border border-white/10 text-white/50 hover:text-white hover:border-purple-500/30 py-3 px-6 rounded-xl transition-all">Create Another</button>
                         </div>
-
-                        <!-- Generate Button -->
-                        <button id="generate-btn" onclick="generatePPT()"
-                            class="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-600 text-white font-semibold py-4 px-6 rounded-xl transition-all hover:shadow-lg hover:shadow-purple-500/50 hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                            <span>✨ Generate Presentation</span>
-                        </button>
                     </div>
                 </div>
+            </section>
 
-                <!-- Loading State -->
-                <div id="loading" class="hidden text-center py-12">
-                    <div class="spinner mx-auto mb-6"></div>
-                    <h3 class="text-xl font-bold mb-2">Generating Presentation...</h3>
-                    <p class="text-white/60 mb-4">Orchestrating 14 parallel AI agents to build slides & images.</p>
-                    <p class="text-sm text-purple-400">Estimated time: ~15-30 seconds</p>
-                </div>
-
-                <!-- Result State -->
-                <div id="result" class="hidden">
-                    <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-6 text-center">
-                        <h3 class="text-xl font-bold text-green-400 mb-3">🎉 Presentation Ready!</h3>
-                        <p id="result-title" class="font-semibold text-lg mb-1">Solar System Basics</p>
-                        <p class="text-sm text-white/60 mb-6">
-                            Generated <span id="slide-count">8</span> slides with custom AI imagery.
-                        </p>
-                        <a href="#" id="download-link" target="_blank"
-                            class="inline-block bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-xl transition-all hover:shadow-lg hover:-translate-y-0.5">
-                            Download PPTX File
-                        </a>
+            <!-- Recent Creations -->
+            <section class="mb-12">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Recent Creations</h2>
+                        <p class="text-sm text-white/40">AI-generated presentations showcase</p>
                     </div>
-
-                    <button onclick="resetForm()"
-                        class="w-full mt-5 bg-transparent border border-white/10 text-white/60 hover:text-white hover:border-white/30 py-3 px-6 rounded-xl transition-all">
-                        Create Another
-                    </button>
+                    <div class="flex gap-2">
+                        <button onclick="scrollCarousel(-1)" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all text-white/60 hover:text-white"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg></button>
+                        <button onclick="scrollCarousel(1)" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all text-white/60 hover:text-white"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></button>
+                    </div>
                 </div>
-            </div>
+                <div class="overflow-hidden rounded-xl">
+                    <div class="carousel-track" id="carousel-track">
+                        <div class="carousel-card"><div class="h-32 bg-gradient-to-br from-purple-600/30 to-indigo-600/20 flex items-center justify-center"><div class="text-center"><div class="text-3xl mb-1">🌍</div><div class="text-xs font-bold text-purple-300">AI Presentation<br>Generator</div></div></div><div class="p-3"><p class="text-xs text-white/50">Solar System Overview</p></div></div>
+                        <div class="carousel-card"><div class="h-32 bg-gradient-to-br from-violet-600/30 to-pink-600/20 flex items-center justify-center"><div class="text-center"><div class="text-3xl mb-1">📊</div><div class="text-xs font-bold text-violet-300">Presentation<br>Masterclass</div></div></div><div class="p-3"><p class="text-xs text-white/50">Data Visualization 101</p></div></div>
+                        <div class="carousel-card"><div class="h-32 bg-gradient-to-br from-indigo-600/30 to-cyan-600/20 flex items-center justify-center"><div class="text-center"><div class="text-3xl mb-1">🧬</div><div class="text-xs font-bold text-indigo-300">Genetics<br>Deep Dive</div></div></div><div class="p-3"><p class="text-xs text-white/50">DNA & Heredity Basics</p></div></div>
+                        <div class="carousel-card"><div class="h-32 bg-gradient-to-br from-fuchsia-600/30 to-purple-600/20 flex items-center justify-center"><div class="text-center"><div class="text-3xl mb-1">🏛️</div><div class="text-xs font-bold text-fuchsia-300">History of<br>Ancient Rome</div></div></div><div class="p-3"><p class="text-xs text-white/50">Roman Empire Timeline</p></div></div>
+                        <div class="carousel-card"><div class="h-32 bg-gradient-to-br from-blue-600/30 to-indigo-600/20 flex items-center justify-center"><div class="text-center"><div class="text-3xl mb-1">🔬</div><div class="text-xs font-bold text-blue-300">Chemistry<br>Fundamentals</div></div></div><div class="p-3"><p class="text-xs text-white/50">Periodic Table Intro</p></div></div>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="relative z-10 text-center py-8 text-white/40 text-sm">
-        <p>Powered by CivicAId Education • Deepseek R1 + Qwen + Llama 3.3</p>
+    <footer class="relative z-10 text-center py-8 text-white/30 text-sm border-t border-white/[0.04]">
+        <p>Powered by CivicAId Education &bull; Deepseek R1 + Qwen + Llama 3.3</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
     <script>
-        // WEBHOOK URL provided by user
-        // WEBHOOK URL provided by user (Production Endpoint)
-        const WEBHOOK_URL = 'https://whiteknight001.app.n8n.cloud/webhook/civicaid-ppt-generator';
+        // ── Particle System ──
+        (function(){const c=document.getElementById('particle-canvas'),x=c.getContext('2d');let p=[];const C=['rgba(139,92,246,','rgba(168,85,247,','rgba(99,102,241,','rgba(129,140,248,'];function r(){c.width=window.innerWidth;c.height=window.innerHeight}window.addEventListener('resize',r);r();class P{constructor(){this.reset()}reset(){this.x=Math.random()*c.width;this.y=Math.random()*c.height;this.s=Math.random()*2.5+0.5;this.sx=(Math.random()-0.5)*0.4;this.sy=(Math.random()-0.5)*0.3;this.c=C[Math.floor(Math.random()*C.length)];this.o=Math.random()*0.4+0.1;this.p=Math.random()*Math.PI*2;this.ps=Math.random()*0.02+0.005}update(){this.x+=this.sx;this.y+=this.sy;this.p+=this.ps;if(this.x<0||this.x>c.width||this.y<0||this.y>c.height)this.reset()}draw(){const o=this.o*(0.6+Math.sin(this.p)*0.4);x.beginPath();x.arc(this.x,this.y,this.s,0,Math.PI*2);x.fillStyle=this.c+o+')';x.fill()}}for(let i=0;i<80;i++)p.push(new P());function d(){for(let i=0;i<p.length;i++)for(let j=i+1;j<p.length;j++){const dx=p[i].x-p[j].x,dy=p[i].y-p[j].y,di=Math.sqrt(dx*dx+dy*dy);if(di<150){x.beginPath();x.strokeStyle=`rgba(139,92,246,${0.06*(1-di/150)})`;x.lineWidth=0.5;x.moveTo(p[i].x,p[i].y);x.lineTo(p[j].x,p[j].y);x.stroke()}}}function l(){x.clearRect(0,0,c.width,c.height);p.forEach(i=>{i.update();i.draw()});d();requestAnimationFrame(l)}l()})();
 
-        async function generatePPT() {
-            const topic = document.getElementById('topic').value.trim();
-            const grade = document.getElementById('grade').value;
-            const source = document.getElementById('source').value.trim();
+        // ── 3D Card Tilt ──
+        const card=document.getElementById('generator-card');
+        if(card){card.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-0.5,y=(e.clientY-r.top)/r.height-0.5;card.style.transform=`perspective(1200px) rotateY(${x*8}deg) rotateX(${-y*6}deg) scale(1.01)`});card.addEventListener('mouseleave',()=>{card.style.transform='perspective(1200px) rotateY(0deg) rotateX(0deg) scale(1)'})}
 
-            if (!topic) {
-                alert('Please enter a presentation topic.');
-                return;
-            }
+        // ── Carousel ──
+        let cp=0;function scrollCarousel(d){const t=document.getElementById('carousel-track'),m=t.scrollWidth-t.parentElement.clientWidth;cp=Math.max(0,Math.min(cp+d*240,m));t.style.transform=`translateX(-${cp}px)`}
 
-            // UI Updates
-            document.getElementById('form-container').style.display = 'none';
-            document.getElementById('loading').classList.remove('hidden');
+        // ── Reveal ──
+        window.addEventListener('load',()=>{document.querySelectorAll('.reveal').forEach((el,i)=>{inView(el,()=>{animate(el,{opacity:[0,1],y:[24,0]},{duration:0.85,delay:0.1*(i%6),easing:[0.22,1,0.36,1]})},{amount:0.15})})});
 
-            try {
-                // Prepare Payload
-                const payload = {
-                    topic: topic,
-                    target_grade: grade
-                };
-                if (source) {
-                    payload.source_document_url = source;
-                }
-
-                // Call n8n Webhook
-                const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Server Error (${response.status})`);
-                }
-
-                const data = await response.json();
-                console.log("n8n Response:", data);
-
-                let slides = [];
-                if (Array.isArray(data)) {
-                    slides = data;
-                } else if (data.slides) {
-                    slides = data.slides;
-                } else if (data.output && Array.isArray(data.output)) {
-                    slides = data.output;
-                } else {
-                    // Fallback: try raw data
-                    slides = data;
-                }
-
-                if (!slides || slides.length === 0) {
-                    throw new Error('No slides returned from AI.');
-                }
-
-                await createAndDownloadPPT(topic, grade, slides);
-
-            } catch (error) {
-                console.error('Generation Error:', error);
-                alert('Failed to generate presentation: ' + error.message);
-                resetForm();
-            }
-        }
-
-        async function createAndDownloadPPT(topic, grade, slides) {
-            try {
-                const pres = new PptxGenJS();
-                pres.layout = 'LAYOUT_16x9';
-                pres.title = topic;
-
-                // 1. Title Slide (Dark Theme)
-                let slide = pres.addSlide();
-                slide.background = { color: '111827' };
-                slide.addText(topic, { x: 1, y: 2, w: '80%', fontSize: 44, color: 'FFFFFF', bold: true, align: 'center' });
-                slide.addText(`Grade: ${grade}`, { x: 1, y: 3.5, w: '80%', fontSize: 24, color: 'CCCCCC', align: 'center' });
-                slide.addText('Generated by CivicAid AI', { x: 1, y: 6.5, w: '80%', fontSize: 14, color: '8b5cf6', align: 'center' });
-
-                // 2. Content Slides
-                for (let i = 0; i < slides.length; i++) {
-                    const s = slides[i];
-                    let slide = pres.addSlide();
-                    slide.background = { color: 'FFFFFF' };
-
-                    // Title Bar
-                    slide.addShape(pres.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 1.2, fill: '1e293b' });
-                    slide.addText(s.title || `Slide ${i + 1}`, { x: 0.5, y: 0.2, w: '90%', fontSize: 24, color: 'FFFFFF', bold: true });
-
-                    // Content (Bullets)
-                    let bulletsArray = s.bullet_points || s.bullets || [];
-                    let bullets = [];
-                    if (Array.isArray(bulletsArray)) {
-                        bullets = bulletsArray.map(b => ({ text: b, options: { fontSize: 16, breakLine: true, bullet: true, paraSpaceBefore: 10 } }));
-                    } else if (typeof bulletsArray === 'string') {
-                        bullets = [{ text: bulletsArray, options: { fontSize: 16, bullet: true } }];
-                    }
-                    slide.addText(bullets, { x: 0.5, y: 1.5, w: 5.5, h: 5.0, color: '333333', valign: 'top' });
-
-                    // IMAGE HANDLING (Safe Manual Fetch & Fallback)
-                    let imageData = null;
-
-                    // 1. Try URL Fetch Manually (to catch errors before passing to PptxGenJS)
-                    if (s.image_url && s.image_url.startsWith('http')) {
-                        // Prioritize local server proxy (most reliable), fallback to third-party proxies
-                        const proxies = [
-                            { name: 'Local Server', gen: (u) => `/api/proxy_image?url=${encodeURIComponent(u)}` },
-                            { name: 'corsproxy.io', gen: (u) => 'https://corsproxy.io/?' + encodeURIComponent(u) },
-                            { name: 'allorigins.win', gen: (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}` }
-                        ];
-
-                        for (let p of proxies) {
-                            try {
-                                const proxyUrl = p.gen(s.image_url);
-                                console.log(`Slide ${i + 1}: Trying proxy ${p.name}...`);
-                                const resp = await fetch(proxyUrl);
-                                if (resp.ok) {
-                                    const blob = await resp.blob();
-                                    imageData = await new Promise((resolve) => {
-                                        const r = new FileReader();
-                                        r.onloadend = () => resolve(r.result);
-                                        r.readAsDataURL(blob);
-                                    });
-                                    if (imageData) {
-                                        console.log(`Slide ${i + 1}: Success with ${p.name}`);
-                                        break;
-                                    }
-                                } else {
-                                    console.warn(`Slide ${i + 1}: ${p.name} failed with status ${resp.status}`);
-                                }
-                            } catch (e) {
-                                console.warn(`Slide ${i + 1}: ${p.name} fetch error:`, e);
-                            }
-                        }
-                    }
-
-                    // 2. Try n8n Base64 if URL failed or wasn't provided
-                    if (!imageData && s.image_base64 && typeof s.image_base64 === 'string' && s.image_base64.length > 50) {
-                        try {
-                            let cleanBase64 = s.image_base64.trim().replace(/\s/g, '');
-                            if (!cleanBase64.startsWith('data:image')) {
-                                cleanBase64 = 'data:image/png;base64,' + cleanBase64;
-                            }
-                            imageData = cleanBase64;
-                        } catch (e) {
-                            console.warn(`Slide ${i + 1}: Base64 processing failed.`);
-                        }
-                    }
-
-                    // 3. Add to Slide (Safety check)
-                    if (imageData) {
-                        try {
-                            slide.addImage({ data: imageData, x: 6.2, y: 1.5, w: 3.5, h: 3.5 });
-                        } catch (addErr) {
-                            console.error(`Slide ${i + 1}: PptxGenJS addImage Error:`, addErr);
-                            slide.addText("[Image Rendering Error]", { x: 6.5, y: 3, color: 'FF0000', fontSize: 12 });
-                        }
-                    } else {
-                        slide.addText("No Image Available", { x: 6.5, y: 3, color: 'CCCCCC', fontSize: 12, align: 'center' });
-                    }
-                }
-
-                // Save File (Wait for all slides to be ready)
-                try {
-                    await pres.writeFile({ fileName: `CivicAid_${topic.replace(/[^a-z0-9]/gi, '_')}.pptx` });
-                    showResult(slides.length, topic);
-                } catch (saveErr) {
-                    console.error("Save Error:", saveErr);
-                    throw saveErr; // Re-throw to main catch
-                }
-
-            } catch (err) {
-                console.error("PPT Generation Error:", err);
-                alert("Failed to build PPT file: " + err.message);
-                resetForm();
-            }
-        }
-
-        function showResult(count, title) {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('result').classList.remove('hidden');
-
-            document.getElementById('result-title').textContent = title;
-            document.getElementById('slide-count').textContent = count;
-
-            const btn = document.getElementById('download-link');
-            btn.textContent = "Presentation Downloaded! (Click to Retry)";
-            btn.href = "#";
-            btn.onclick = () => location.reload();
-        }
-
-        function resetForm() {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('result').classList.add('hidden');
-            document.getElementById('form-container').style.display = 'block';
-        }
-
-        // Motion.js animation on load
-        window.addEventListener('load', () => {
-            // Simple fade in if Motion logic is present, else standard
-            if (typeof animate !== 'undefined') {
-                animate('.max-w-\\[800px\\] > *', { opacity: [0, 1] }, { duration: 1.5, easing: 'linear' });
-            }
-        });
+        // ── PPT Logic ──
+        const WEBHOOK_URL='https://whiteknight001.app.n8n.cloud/webhook/civicaid-ppt-generator';
+        async function generatePPT(){const topic=document.getElementById('topic').value.trim(),grade=document.getElementById('grade').value,source=document.getElementById('source').value.trim();if(!topic){alert('Please enter a presentation topic.');return}document.getElementById('form-container').style.display='none';document.getElementById('loading').classList.remove('hidden');try{const payload={topic,target_grade:grade};if(source)payload.source_document_url=source;const response=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!response.ok)throw new Error(`Server Error (${response.status})`);const data=await response.json();let slides=[];if(Array.isArray(data))slides=data;else if(data.slides)slides=data.slides;else if(data.output&&Array.isArray(data.output))slides=data.output;else slides=data;if(!slides||slides.length===0)throw new Error('No slides returned from AI.');await createAndDownloadPPT(topic,grade,slides)}catch(error){console.error('Generation Error:',error);alert('Failed: '+error.message);resetForm()}}
+        async function createAndDownloadPPT(topic,grade,slides){try{const pres=new PptxGenJS();pres.layout='LAYOUT_16x9';pres.title=topic;let slide=pres.addSlide();slide.background={color:'111827'};slide.addText(topic,{x:1,y:2,w:'80%',fontSize:44,color:'FFFFFF',bold:true,align:'center'});slide.addText(`Grade: ${grade}`,{x:1,y:3.5,w:'80%',fontSize:24,color:'CCCCCC',align:'center'});slide.addText('Generated by CivicAid AI',{x:1,y:6.5,w:'80%',fontSize:14,color:'8b5cf6',align:'center'});for(let i=0;i<slides.length;i++){const s=slides[i];let slide=pres.addSlide();slide.background={color:'FFFFFF'};slide.addShape(pres.ShapeType.rect,{x:0,y:0,w:'100%',h:1.2,fill:'1e293b'});slide.addText(s.title||`Slide ${i+1}`,{x:0.5,y:0.2,w:'90%',fontSize:24,color:'FFFFFF',bold:true});let ba=s.bullet_points||s.bullets||[],b=[];if(Array.isArray(ba))b=ba.map(v=>({text:v,options:{fontSize:16,breakLine:true,bullet:true,paraSpaceBefore:10}}));else if(typeof ba==='string')b=[{text:ba,options:{fontSize:16,bullet:true}}];slide.addText(b,{x:0.5,y:1.5,w:5.5,h:5.0,color:'333333',valign:'top'});let img=null;if(s.image_url&&s.image_url.startsWith('http')){const px=[{n:'Local',g:u=>`/api/proxy_image?url=${encodeURIComponent(u)}`},{n:'corsproxy',g:u=>'https://corsproxy.io/?'+encodeURIComponent(u)},{n:'allorigins',g:u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`}];for(let p of px){try{const r=await fetch(p.g(s.image_url));if(r.ok){const bl=await r.blob();img=await new Promise(res=>{const rd=new FileReader();rd.onloadend=()=>res(rd.result);rd.readAsDataURL(bl)});if(img)break}}catch(e){}}}if(!img&&s.image_base64&&typeof s.image_base64==='string'&&s.image_base64.length>50){let cl=s.image_base64.trim().replace(/\s/g,'');if(!cl.startsWith('data:image'))cl='data:image/png;base64,'+cl;img=cl}if(img){try{slide.addImage({data:img,x:6.2,y:1.5,w:3.5,h:3.5})}catch(e){slide.addText("[Image Error]",{x:6.5,y:3,color:'FF0000',fontSize:12})}}else{slide.addText("No Image",{x:6.5,y:3,color:'CCCCCC',fontSize:12,align:'center'})}}await pres.writeFile({fileName:`CivicAid_${topic.replace(/[^a-z0-9]/gi,'_')}.pptx`});showResult(slides.length,topic)}catch(err){console.error("PPT Error:",err);alert("Failed: "+err.message);resetForm()}}
+        function showResult(c,t){document.getElementById('loading').classList.add('hidden');document.getElementById('result').classList.remove('hidden');document.getElementById('result-title').textContent=t;document.getElementById('slide-count').textContent=c;const b=document.getElementById('download-link');b.textContent="Presentation Downloaded! (Click to Retry)";b.href="#";b.onclick=()=>location.reload()}
+        function resetForm(){document.getElementById('loading').classList.add('hidden');document.getElementById('result').classList.add('hidden');document.getElementById('form-container').style.display='block'}
     </script>
 </body>
-
 </html>

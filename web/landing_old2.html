@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CivicAid — Operational AI agents for governments and enterprises. Emergency dispatch, citizen engagement, compliance automation.">
+    <title>CivicAid — Operational AI for Real-World Systems</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="public/CivicLogo.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="public/CivicLogo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="public/CivicLogo.png">
+
+    <!-- Inter — the typeface of modern software -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind (CDN for rapid iteration — swap for build-step in prod) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Motion One — lightweight Framer-Motion-style animation lib -->
+    <script src="https://cdn.jsdelivr.net/npm/motion@latest/dist/motion.js"></script>
+    <script>const { animate, stagger, inView, scroll } = Motion;</script>
+
+    <!-- ──────────────────────────────────────────────
+         DESIGN SYSTEM CONFIG
+         Palette: deep charcoal base, emerald accent,
+         muted cool grays, high-contrast white text.
+         Inspired by Vercel / Linear / Palantir.
+    ────────────────────────────────────────────── -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                    colors: {
+                        surface: {
+                            0:   '#08090c',
+                            50:  '#0c0e13',
+                            100: '#111318',
+                            200: '#16181f',
+                            300: '#1c1f27',
+                            400: '#24272f',
+                        },
+                        accent: {
+                            DEFAULT: '#10b981',
+                            dim:     '#0d9668',
+                            bright:  '#34d399',
+                            muted:   'rgba(16,185,129,0.12)',
+                        },
+                    },
+                    borderRadius: {
+                        '2xl': '16px',
+                        '3xl': '20px',
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ── BASE RESET ── */
+        *, *::before, *::after { box-sizing: border-box; }
+        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 5rem;
+        }
+
+        body {
+            background: #08090c;
+            font-feature-settings: "cv02","cv03","cv04","cv11";
+            overflow-x: hidden;
+        }
+
+        /* ── AMBIENT LIGHT ──
+           Radial gradients simulate a soft overhead
+           light source — adds depth without distraction */
+        .ambient-top {
+            background: radial-gradient(
+                70% 50% at 50% 0%,
+                rgba(16,185,129,0.06) 0%,
+                transparent 100%
+            );
+        }
+        .ambient-side {
+            background: radial-gradient(
+                40% 60% at 100% 30%,
+                rgba(16,185,129,0.035) 0%,
+                transparent 100%
+            );
+        }
+
+        /* ── GLASSMORPHISM HEADER ── */
+        .glass-nav {
+            background: rgba(8,9,12,0.72);
+            backdrop-filter: blur(20px) saturate(1.8);
+            -webkit-backdrop-filter: blur(20px) saturate(1.8);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        /* ── CARD SYSTEM ──
+           Layered border + inset highlight + outer shadow
+           creates a sense of physical elevation */
+        .card {
+            background: linear-gradient(
+                180deg,
+                rgba(28,31,39,0.85) 0%,
+                rgba(22,24,31,0.90) 100%
+            );
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.03) inset,
+                0 2px 4px rgba(0,0,0,0.3),
+                0 8px 24px rgba(0,0,0,0.2);
+            transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s cubic-bezier(.22,1,.36,1);
+        }
+        .card:hover {
+            border-color: rgba(255,255,255,0.12);
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.06) inset,
+                0 4px 12px rgba(0,0,0,0.35),
+                0 16px 48px rgba(0,0,0,0.25);
+            transform: translateY(-3px);
+        }
+
+        /* ── BUTTONS ── */
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 0 16px rgba(16,185,129,0.18);
+            transition: all 0.25s ease;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 28px rgba(16,185,129,0.32);
+            transform: translateY(-1px);
+        }
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-ghost {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.85);
+            font-weight: 500;
+            transition: all 0.25s ease;
+        }
+        .btn-ghost:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.18);
+        }
+
+        /* ── STATUS PILL ── */
+        .pill-live {
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.22);
+            color: #34d399;
+            font-size: 0.6875rem;
+            letter-spacing: 0.04em;
+        }
+        .pill-live .dot {
+            width: 5px; height: 5px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: livePulse 2.4s ease-in-out infinite;
+        }
+        @keyframes livePulse {
+            0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+            50%     { opacity:.6; box-shadow: 0 0 0 4px rgba(16,185,129,0); }
+        }
+
+        /* ── SECTION DIVIDER ── */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06) 50%, transparent);
+        }
+
+        /* ── HERO VISUALIZATION ──
+           Abstract node-graph / constellation effect
+           using pure CSS. Suggests AI networks without
+           being literal or cartoonish. */
+        .hero-visual {
+            position: relative;
+            width: 100%;
+            max-width: 520px;
+            aspect-ratio: 4/3;
+        }
+        .hero-visual .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(16,185,129,0.1);
+        }
+        .hero-visual .ring-1 {
+            width: 72%; height: 72%;
+            top: 14%; left: 14%;
+            animation: ringRotate 45s linear infinite;
+        }
+        .hero-visual .ring-2 {
+            width: 48%; height: 48%;
+            top: 26%; left: 26%;
+            border-color: rgba(16,185,129,0.07);
+            animation: ringRotate 32s linear infinite reverse;
+        }
+        .hero-visual .ring-3 {
+            width: 28%; height: 28%;
+            top: 36%; left: 36%;
+            border-color: rgba(16,185,129,0.15);
+            animation: ringRotate 22s linear infinite;
+        }
+        @keyframes ringRotate {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        .hero-visual .node {
+            position: absolute;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 12px rgba(16,185,129,0.45);
+        }
+        .hero-visual .node-center {
+            width: 10px; height: 10px;
+            top: calc(50% - 5px); left: calc(50% - 5px);
+            box-shadow: 0 0 24px rgba(16,185,129,0.55), 0 0 48px rgba(16,185,129,0.15);
+        }
+        .hero-visual .node-1 { top: 14%; left: 50%; animation: nodeFloat 6s ease-in-out infinite; }
+        .hero-visual .node-2 { top: 50%; left: 86%; animation: nodeFloat 5s ease-in-out infinite 1s; }
+        .hero-visual .node-3 { top: 83%; left: 55%; animation: nodeFloat 7s ease-in-out infinite 0.5s; }
+        .hero-visual .node-4 { top: 55%; left: 14%; animation: nodeFloat 5.5s ease-in-out infinite 1.5s; }
+        .hero-visual .node-5 { top: 22%; left: 27%; animation: nodeFloat 6.5s ease-in-out infinite 0.8s; }
+        .hero-visual .node-6 { top: 73%; left: 29%; animation: nodeFloat 5.8s ease-in-out infinite 2s; }
+        @keyframes nodeFloat {
+            0%,100% { transform: translateY(0) scale(1); opacity: 0.75; }
+            50%     { transform: translateY(-6px) scale(1.15); opacity: 1; }
+        }
+
+        /* ── STEP NUMBER BADGE ── */
+        .step-num {
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            background: rgba(16,185,129,0.08);
+            border: 1px solid rgba(16,185,129,0.18);
+            color: #34d399;
+            font-weight: 700;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        /* ── REVEAL HELPER (JS-driven) ── */
+        .reveal { opacity: 0; transform: translateY(24px); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .nav-links { display: none !important; }
+            .hero-visual { max-width: 300px; margin: 0 auto; }
+        }
+    </style>
+</head>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     BODY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<body class="text-white font-sans leading-relaxed">
+
+    <!-- Ambient lighting layers -->
+    <div class="fixed inset-0 pointer-events-none z-0 ambient-top"></div>
+    <div class="fixed inset-0 pointer-events-none z-0 ambient-side"></div>
+
+    <!-- ═══════════════════════════════════════
+         HEADER
+    ═══════════════════════════════════════ -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass-nav">
+        <nav class="flex items-center justify-between h-16 px-6 lg:px-10 max-w-[1280px] mx-auto" role="navigation" aria-label="Primary">
+            <a href="landing.html" class="flex items-center gap-2.5 no-underline shrink-0" aria-label="CivicAid Home">
+                <img src="public/CivicLogo.png" alt="" class="w-7 h-7 object-contain" aria-hidden="true">
+                <span class="text-[0.9375rem] font-semibold tracking-[-0.01em] text-white">CivicAid</span>
+            </a>
+            <div class="nav-links flex items-center gap-1">
+                <a href="#agents"   class="px-3 py-2 text-[0.8125rem] font-medium text-white/50 hover:text-white rounded-md hover:bg-white/[0.04] no-underline transition-colors">Agents</a>
+                <a href="#how"      class="px-3 py-2 text-[0.8125rem] font-medium text-white/50 hover:text-white rounded-md hover:bg-white/[0.04] no-underline transition-colors">How It Works</a>
+                <a href="#why"      class="px-3 py-2 text-[0.8125rem] font-medium text-white/50 hover:text-white rounded-md hover:bg-white/[0.04] no-underline transition-colors">Why CivicAid</a>
+                <a href="https://github.com/adi3433/CIVIC-AID-STARTUP-" target="_blank" rel="noopener" class="px-3 py-2 text-[0.8125rem] font-medium text-white/50 hover:text-white rounded-md hover:bg-white/[0.04] no-underline transition-colors">GitHub</a>
+                <div class="w-px h-4 bg-white/10 mx-2.5" aria-hidden="true"></div>
+                <a href="bot_builder.html" class="btn-primary px-4 py-[0.4375rem] rounded-lg text-[0.8125rem] no-underline inline-flex items-center gap-1.5">
+                    Request Demo
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="relative z-10">
+
+        <!-- ═══════════════════════════════════════
+             SECTION 1 — HERO
+        ═══════════════════════════════════════ -->
+        <section class="relative pt-36 pb-28 lg:pt-44 lg:pb-36 px-6 lg:px-10 overflow-hidden">
+            <div class="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+                <!-- Copy -->
+                <div class="max-w-[560px]">
+                    <div class="reveal inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8"
+                         style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);">
+                        <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
+                        <span class="text-[0.6875rem] font-medium tracking-wide text-white/50 uppercase">Operational AI Agents</span>
+                    </div>
+
+                    <h1 class="reveal text-[clamp(2.25rem,5vw,3.75rem)] font-extrabold tracking-[-0.035em] leading-[1.08] text-white mb-6">
+                        Intelligence<br>that operates.
+                    </h1>
+
+                    <p class="reveal text-base lg:text-lg text-white/50 leading-relaxed mb-10 max-w-[480px]">
+                        Deploy purpose-built AI agents for emergency response, public services, and enterprise workflows. Built for governments. Ready for scale.
+                    </p>
+
+                    <div class="reveal flex flex-wrap items-center gap-3 mb-14">
+                        <a href="bot_builder.html" class="btn-primary px-6 py-3 rounded-xl text-sm no-underline inline-flex items-center gap-2">
+                            Request Demo
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                        </a>
+                        <a href="#agents" class="btn-ghost px-6 py-3 rounded-xl text-sm no-underline">
+                            Explore Agents
+                        </a>
+                    </div>
+
+                    <div class="reveal flex flex-wrap items-center gap-x-6 gap-y-2 text-[0.6875rem] text-white/35">
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            Compliance-ready
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            End-to-end encrypted
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Deployed globally
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Abstract AI visualization -->
+                <div class="reveal flex justify-center lg:justify-end">
+                    <div class="hero-visual" aria-hidden="true">
+                        <div class="ring ring-1"></div>
+                        <div class="ring ring-2"></div>
+                        <div class="ring ring-3"></div>
+                        <div class="node node-center"></div>
+                        <div class="node node-1"></div>
+                        <div class="node node-2"></div>
+                        <div class="node node-3"></div>
+                        <div class="node node-4"></div>
+                        <div class="node node-5"></div>
+                        <div class="node node-6"></div>
+                        <svg class="absolute inset-0 w-full h-full" viewBox="0 0 520 390" fill="none" style="opacity:0.12">
+                            <line x1="260" y1="195" x2="260" y2="55"  stroke="#10b981" stroke-width="0.5"/>
+                            <line x1="260" y1="195" x2="447" y2="195" stroke="#10b981" stroke-width="0.5"/>
+                            <line x1="260" y1="195" x2="286" y2="324" stroke="#10b981" stroke-width="0.5"/>
+                            <line x1="260" y1="195" x2="73"  y2="215" stroke="#10b981" stroke-width="0.5"/>
+                            <line x1="260" y1="195" x2="140" y2="86"  stroke="#10b981" stroke-width="0.5"/>
+                            <line x1="260" y1="195" x2="151" y2="285" stroke="#10b981" stroke-width="0.5"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ═══════════════════════════════════════
+             SECTION 2 — TRUST STRIP
+        ═══════════════════════════════════════ -->
+        <div class="divider"></div>
+        <section class="py-14 px-6 lg:px-10">
+            <div class="max-w-[1280px] mx-auto">
+                <div class="reveal flex flex-wrap items-center justify-center gap-x-12 gap-y-6 text-[0.8125rem]">
+                    <span class="flex items-center gap-2.5 font-medium text-white/40">
+                        <svg class="w-5 h-5 text-accent/60" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 4.5H21"/></svg>
+                        Built for Government
+                    </span>
+                    <span class="flex items-center gap-2.5 font-medium text-white/40">
+                        <svg class="w-5 h-5 text-accent/60" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                        SOC 2 Type II
+                    </span>
+                    <span class="flex items-center gap-2.5 font-medium text-white/40">
+                        <svg class="w-5 h-5 text-accent/60" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"/></svg>
+                        99.99% Uptime SLA
+                    </span>
+                    <span class="flex items-center gap-2.5 font-medium text-white/40">
+                        <svg class="w-5 h-5 text-accent/60" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+                        Sub-200ms Latency
+                    </span>
+                    <span class="flex items-center gap-2.5 font-medium text-white/40">
+                        <svg class="w-5 h-5 text-accent/60" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Multi-region Deploy
+                    </span>
+                </div>
+            </div>
+        </section>
+        <div class="divider"></div>
+
+
+        <!-- ═══════════════════════════════════════
+             SECTION 3 — AI AGENT PLATFORM
+        ═══════════════════════════════════════ -->
+        <section id="agents" class="py-28 px-6 lg:px-10">
+            <div class="max-w-[1280px] mx-auto">
+                <div class="text-center mb-20">
+                    <p class="reveal text-[0.6875rem] font-semibold tracking-[0.12em] uppercase text-accent mb-4">Platform</p>
+                    <h2 class="reveal text-3xl md:text-[2.75rem] font-bold tracking-[-0.03em] text-white mb-5">Modular AI Agent Platform</h2>
+                    <p class="reveal text-base text-white/45 max-w-xl mx-auto leading-relaxed">
+                        Purpose-built agents for distinct operational domains. Each module deploys independently and integrates natively.
+                    </p>
+                </div>
+
+                <!-- Agent cards — 2x2 grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-[960px] mx-auto">
+
+                    <!-- Emergency Dispatch -->
+                    <article class="card rounded-2xl p-8 reveal group" tabindex="0">
+                        <div class="flex items-start justify-between mb-7">
+                            <div class="w-11 h-11 rounded-xl flex items-center justify-center bg-red-500/[0.08] border border-red-500/[0.15] group-hover:bg-red-500/[0.12] transition-colors">
+                                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                            </div>
+                            <div class="pill-live inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-medium">
+                                <span class="dot"></span> LIVE
+                            </div>
+                        </div>
+                        <h3 class="text-lg font-semibold text-white mb-2 tracking-[-0.01em]">Emergency Dispatch</h3>
+                        <p class="text-sm text-white/45 leading-relaxed mb-6">
+                            AI-powered call routing with real-time voice recognition, intelligent triage, and automated service allocation for emergency response systems.
+                        </p>
+                        <a href="dispatch.html" class="inline-flex items-center gap-2 text-sm font-medium text-red-400 hover:text-red-300 no-underline transition-colors group/link">
+                            Launch Agent
+                            <svg class="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                        </a>
+                    </article>
+
+                    <!-- WhatsApp Bot Builder -->
+                    <article class="card rounded-2xl p-8 reveal group" tabindex="0">
+                        <div class="flex items-start justify-between mb-7">
+                            <div class="w-11 h-11 rounded-xl flex items-center justify-center bg-accent/[0.08] border border-accent/[0.15] group-hover:bg-accent/[0.12] transition-colors">
+                                <svg class="w-5 h-5 text-accent-bright" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                            </div>
+                            <div class="pill-live inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-medium">
+                                <span class="dot"></span> LIVE
+                            </div>
+                        </div>
+                        <h3 class="text-lg font-semibold text-white mb-2 tracking-[-0.01em]">WhatsApp Bot Builder</h3>
+                        <p class="text-sm text-white/45 leading-relaxed mb-6">
+                            Deploy conversational agents for citizen engagement, service delivery, and automated case management. No-code configuration with n8n workflows.
+                        </p>
+                        <a href="bot_builder.html" class="inline-flex items-center gap-2 text-sm font-medium text-accent-bright hover:text-accent no-underline transition-colors group/link">
+                            Launch Agent
+                            <svg class="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                        </a>
+                    </article>
+
+                    <!-- LeadGen AI -->
+                    <article class="card rounded-2xl p-8 reveal group" tabindex="0">
+                        <div class="flex items-start justify-between mb-7">
+                            <div class="w-11 h-11 rounded-xl flex items-center justify-center bg-blue-500/[0.08] border border-blue-500/[0.15] group-hover:bg-blue-500/[0.12] transition-colors">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+                            </div>
+                            <div class="pill-live inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-medium">
+                                <span class="dot"></span> LIVE
+                            </div>
+                        </div>
+                        <h3 class="text-lg font-semibold text-white mb-2 tracking-[-0.01em]">LeadGen AI</h3>
+                        <p class="text-sm text-white/45 leading-relaxed mb-6">
+                            Predictive lead scoring and case analysis using RAG architecture. Automates qualification, surfaces high-value prospects, and drives pipeline.
+                        </p>
+                        <a href="leadgen.html" class="inline-flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300 no-underline transition-colors group/link">
+                            Launch Agent
+                            <svg class="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                        </a>
+                    </article>
+
+                    <!-- Education Suite -->
+                    <article class="card rounded-2xl p-8 reveal group" tabindex="0">
+                        <div class="flex items-start justify-between mb-7">
+                            <div class="w-11 h-11 rounded-xl flex items-center justify-center bg-purple-500/[0.08] border border-purple-500/[0.15] group-hover:bg-purple-500/[0.12] transition-colors">
+                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5"/></svg>
+                            </div>
+                            <div class="pill-live inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-medium">
+                                <span class="dot"></span> LIVE
+                            </div>
+                        </div>
+                        <h3 class="text-lg font-semibold text-white mb-2 tracking-[-0.01em]">Education Suite</h3>
+                        <p class="text-sm text-white/45 leading-relaxed mb-6">
+                            AI-generated training materials, policy documents, and learning resources. Automated PPTX creation with structured educational content at scale.
+                        </p>
+                        <a href="education.html" class="inline-flex items-center gap-2 text-sm font-medium text-purple-400 hover:text-purple-300 no-underline transition-colors group/link">
+                            Launch Agent
+                            <svg class="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                        </a>
+                    </article>
+                </div>
+
+                <!-- System Status — compact strip -->
+                <div class="reveal mt-14 mx-auto max-w-[960px]">
+                    <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl px-8 py-5" style="background: rgba(22,24,31,0.6); border: 1px solid rgba(255,255,255,0.04);">
+                        <div class="flex items-center gap-2.5 text-[0.8125rem] font-medium text-white/60">
+                            <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            All Systems Operational
+                        </div>
+                        <div class="flex items-center gap-5 text-[0.75rem] text-white/35">
+                            <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-accent" id="whatsapp-status"></span>WhatsApp</span>
+                            <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-accent" id="dispatch-status"></span>Dispatch</span>
+                            <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-accent" id="leadgen-status"></span>LeadGen</span>
+                            <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-accent" id="education-status"></span>Education</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ═══════════════════════════════════════
+             SECTION 4 — HOW IT WORKS
+        ═══════════════════════════════════════ -->
+        <div class="divider"></div>
+        <section id="how" class="py-28 px-6 lg:px-10">
+            <div class="max-w-[1280px] mx-auto">
+                <div class="text-center mb-20">
+                    <p class="reveal text-[0.6875rem] font-semibold tracking-[0.12em] uppercase text-accent mb-4">How It Works</p>
+                    <h2 class="reveal text-3xl md:text-[2.75rem] font-bold tracking-[-0.03em] text-white mb-5">Deploy in three steps</h2>
+                    <p class="reveal text-base text-white/45 max-w-xl mx-auto leading-relaxed">
+                        From configuration to production in minutes, not months.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[960px] mx-auto">
+                    <div class="reveal flex flex-col items-start gap-5 p-8 rounded-2xl" style="background: rgba(22,24,31,0.4); border: 1px solid rgba(255,255,255,0.04);">
+                        <div class="step-num">1</div>
+                        <div>
+                            <h3 class="text-base font-semibold text-white mb-2">Configure</h3>
+                            <p class="text-sm text-white/40 leading-relaxed">Select an agent module, define your domain parameters, and set operational rules through the no-code console.</p>
+                        </div>
+                    </div>
+                    <div class="reveal flex flex-col items-start gap-5 p-8 rounded-2xl" style="background: rgba(22,24,31,0.4); border: 1px solid rgba(255,255,255,0.04);">
+                        <div class="step-num">2</div>
+                        <div>
+                            <h3 class="text-base font-semibold text-white mb-2">Deploy</h3>
+                            <p class="text-sm text-white/40 leading-relaxed">Push to production with a single command. Each agent runs in its own isolated environment with full observability.</p>
+                        </div>
+                    </div>
+                    <div class="reveal flex flex-col items-start gap-5 p-8 rounded-2xl" style="background: rgba(22,24,31,0.4); border: 1px solid rgba(255,255,255,0.04);">
+                        <div class="step-num">3</div>
+                        <div>
+                            <h3 class="text-base font-semibold text-white mb-2">Operate</h3>
+                            <p class="text-sm text-white/40 leading-relaxed">Monitor performance, audit decisions, and scale horizontally. Agents learn and improve from every interaction.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ═══════════════════════════════════════
+             SECTION 5 — WHY CIVICAID
+        ═══════════════════════════════════════ -->
+        <div class="divider"></div>
+        <section id="why" class="py-28 px-6 lg:px-10">
+            <div class="max-w-[1280px] mx-auto">
+                <div class="text-center mb-20">
+                    <p class="reveal text-[0.6875rem] font-semibold tracking-[0.12em] uppercase text-accent mb-4">Why CivicAid</p>
+                    <h2 class="reveal text-3xl md:text-[2.75rem] font-bold tracking-[-0.03em] text-white mb-5">Not a chatbot.<br>An operational system.</h2>
+                    <p class="reveal text-base text-white/45 max-w-xl mx-auto leading-relaxed">
+                        General-purpose AI breaks down in high-stakes environments. CivicAid agents are purpose-built for the systems that matter.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-[1080px] mx-auto">
+                    <div class="reveal p-6 rounded-2xl" style="background: rgba(22,24,31,0.3); border: 1px solid rgba(255,255,255,0.04);">
+                        <div class="w-9 h-9 rounded-lg flex items-center justify-center bg-accent/[0.08] border border-accent/[0.12] mb-5">
+                            <svg class="w-[18px] h-[18px] text-accent" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+                        </div>
+                        <h3 class="text-sm font-semibold text-white mb-1.5">Vertical AI Agents</h3>
+                        <p class="text-[0.8125rem] text-white/40 leading-relaxed">Built for specific operational domains, not generic conversation.</p>
+                    </div>
+                    <div class="reveal p-6 rounded-2xl" style="background: rgba(22,24,31,0.3); border: 1px solid rgba(255,255,255,0.04);">
+                        <div class="w-9 h-9 rounded-lg flex items-center justify-center bg-accent/[0.08] border border-accent/[0.12] mb-5">
+                            <svg class="w-[18px] h-[18px] text-accent" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>
+                        </div>
+                        <h3 class="text-sm font-semibold text-white mb-1.5">Real-World Deployment</h3>
+                        <p class="text-[0.8125rem] text-white/40 leading-relaxed">Proven in production, not just demos. Handles actual operational load.</p>
+                    </div>
+                    <div class="reveal p-6 rounded-2xl" style="background: rgba(22,24,31,0.3); border: 1px solid rgba(255,255,255,0.04);">
+                        <div class="w-9 h-9 rounded-lg flex items-center justify-center bg-accent/[0.08] border border-accent/[0.12] mb-5">
+                            <svg class="w-[18px] h-[18px] text-accent" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg>
+                        </div>
+                        <h3 class="text-sm font-semibold text-white mb-1.5">Local-First Architecture</h3>
+                        <p class="text-[0.8125rem] text-white/40 leading-relaxed">Deploy on-premise or in sovereign clouds. Data never leaves your jurisdiction.</p>
+                    </div>
+                    <div class="reveal p-6 rounded-2xl" style="background: rgba(22,24,31,0.3); border: 1px solid rgba(255,255,255,0.04);">
+                        <div class="w-9 h-9 rounded-lg flex items-center justify-center bg-accent/[0.08] border border-accent/[0.12] mb-5">
+                            <svg class="w-[18px] h-[18px] text-accent" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>
+                        </div>
+                        <h3 class="text-sm font-semibold text-white mb-1.5">Scales Globally</h3>
+                        <p class="text-[0.8125rem] text-white/40 leading-relaxed">Start with one agent, expand to an entire operational platform across regions.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ═══════════════════════════════════════
+             SECTION 6 — CLOSING CTA
+        ═══════════════════════════════════════ -->
+        <div class="divider"></div>
+        <section class="py-32 px-6 lg:px-10 relative overflow-hidden">
+            <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(60% 50% at 50% 50%, rgba(16,185,129,0.05), transparent);"></div>
+            <div class="max-w-[640px] mx-auto text-center relative">
+                <h2 class="reveal text-3xl md:text-[2.75rem] font-bold tracking-[-0.03em] text-white mb-5 leading-tight">
+                    Build the future of<br>public intelligence.
+                </h2>
+                <p class="reveal text-base text-white/45 leading-relaxed mb-10 max-w-md mx-auto">
+                    Join the agencies and enterprises deploying CivicAid to transform how governments serve citizens.
+                </p>
+                <div class="reveal flex flex-wrap items-center justify-center gap-3">
+                    <a href="bot_builder.html" class="btn-primary px-8 py-3.5 rounded-xl text-sm no-underline inline-flex items-center gap-2">
+                        Request Demo
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </a>
+                    <a href="https://github.com/adi3433/CIVIC-AID-STARTUP-" target="_blank" rel="noopener" class="btn-ghost px-8 py-3.5 rounded-xl text-sm no-underline inline-flex items-center gap-2">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        View on GitHub
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+
+    <!-- ═══════════════════════════════════════
+         FOOTER
+    ═══════════════════════════════════════ -->
+    <div class="divider"></div>
+    <footer class="py-10 px-6 lg:px-10">
+        <div class="max-w-[1280px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <img src="public/CivicLogo.png" alt="" class="w-5 h-5 object-contain" aria-hidden="true">
+                <span class="text-[0.8125rem] font-semibold text-white/70">CivicAid</span>
+            </div>
+            <p class="text-[0.75rem] text-white/30">&copy; 2026 CivicAid Technologies. All rights reserved.</p>
+        </div>
+    </footer>
+
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         SCRIPTS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <script>
+    (function() {
+        'use strict';
+
+        /* ── HEALTH CHECK ── */
+        async function checkStatus(port, elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            try {
+                const res = await fetch(`http://localhost:${port}/health`, {
+                    mode: 'cors',
+                    signal: AbortSignal.timeout(2500)
+                });
+                el.style.background = res.ok ? '#10b981' : '#ef4444';
+            } catch {
+                el.style.background = '#3f3f46';
+            }
+        }
+
+        function pollAll() {
+            checkStatus(5001, 'whatsapp-status');
+            checkStatus(5002, 'dispatch-status');
+            checkStatus(5003, 'leadgen-status');
+            checkStatus(5004, 'education-status');
+        }
+
+        /* ── SCROLL-BASED REVEAL ANIMATIONS ──
+           Uses Motion One's inView for performant,
+           GPU-accelerated reveals. Each .reveal element
+           fades up when it enters the viewport. */
+        function initRevealAnimations() {
+            const els = document.querySelectorAll('.reveal');
+            els.forEach((el, i) => {
+                inView(el, () => {
+                    animate(
+                        el,
+                        { opacity: [0, 1], y: [24, 0] },
+                        {
+                            duration: 0.85,
+                            delay: 0.08 * (i % 6),
+                            easing: [0.22, 1, 0.36, 1]
+                        }
+                    );
+                }, { amount: 0.15 });
+            });
+        }
+
+        /* ── CARD HOVER MICRO-INTERACTIONS ── */
+        function initCardInteractions() {
+            document.querySelectorAll('.card').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    animate(card, { y: -3 }, { duration: 0.3, easing: [0.22, 1, 0.36, 1] });
+                });
+                card.addEventListener('mouseleave', () => {
+                    animate(card, { y: 0 }, { duration: 0.4, easing: [0.22, 1, 0.36, 1] });
+                });
+            });
+        }
+
+        /* ── HERO VISUAL PARALLAX ──
+           Subtle mouse-follow parallax on the
+           hero visualization. Adds depth. */
+        function initHeroParallax() {
+            const visual = document.querySelector('.hero-visual');
+            if (!visual) return;
+            document.addEventListener('mousemove', (e) => {
+                const x = (e.clientX / window.innerWidth - 0.5) * 12;
+                const y = (e.clientY / window.innerHeight - 0.5) * 8;
+                visual.style.transform = `translate(${x}px, ${y}px)`;
+                visual.style.transition = 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+            });
+        }
+
+        /* ── INIT ── */
+        window.addEventListener('load', () => {
+            pollAll();
+            initRevealAnimations();
+            initCardInteractions();
+            initHeroParallax();
+        });
+
+        setInterval(pollAll, 12000);
+    })();
+    </script>
+
+</body>
+</html>

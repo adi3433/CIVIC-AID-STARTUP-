@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,77 +9,119 @@
     <link rel="icon" type="image/png" sizes="64x64" href="public/CivicLogo.png">
     <link rel="icon" type="image/png" sizes="96x96" href="public/CivicLogo.png">
     <link rel="apple-touch-icon" sizes="180x180" href="public/CivicLogo.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/motion@latest/dist/motion.js"></script>
-    <script>
-    const { animate, scroll } = Motion
-    </script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'civic-dark': '#0a0e1a',
-                        'civic-surface': '#0f1420',
-                        'civic-card': '#141b2d',
+                        'civic-dark': '#100608',
+                        'civic-surface': '#1a0a0d',
+                        'civic-card': '#241015',
                     },
-                    backdropBlur: {
-                        'xl': '20px',
-                    }
+                    fontFamily: { sans: ['Inter','system-ui','sans-serif'] },
                 }
             }
         }
     </script>
     <style>
-        .glass-bg {
-            background: rgba(10, 14, 26, 0.5);
+        *,*::before,*::after{box-sizing:border-box}*{-webkit-font-smoothing:antialiased}
+        html{scroll-behavior:smooth}body{background:#100608;font-feature-settings:"cv02","cv03","cv04","cv11";overflow-x:hidden}
+
+        #particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+        .ambient-red{background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(239,68,68,0.12) 0%,rgba(239,68,68,0.04) 40%,transparent 70%)}
+        .ambient-side{background:radial-gradient(ellipse 40% 60% at 100% 30%,rgba(249,115,22,0.07) 0%,transparent 70%)}
+        .ambient-bottom{background:radial-gradient(ellipse 60% 40% at 20% 100%,rgba(220,38,38,0.05) 0%,transparent 70%)}
+
+        .glass-nav{background:rgba(16,6,8,0.75);backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);border-bottom:1px solid rgba(239,68,68,0.08)}
+
+        .card-glass{
+            background:linear-gradient(160deg,rgba(36,16,21,0.95) 0%,rgba(26,10,13,0.98) 100%);
+            border:1px solid rgba(239,68,68,0.1);
+            box-shadow:0 0 0 1px rgba(239,68,68,0.03) inset,0 4px 24px rgba(0,0,0,0.4),0 0 80px rgba(239,68,68,0.04);
+            transition:transform 0.4s cubic-bezier(.22,1,.36,1),box-shadow 0.4s ease;
         }
-        @keyframes waveAnimation {
-            0%, 100% { height: 20px; }
-            50% { height: 40px; }
+
+        .status-gradient{background:linear-gradient(135deg,#ef4444 0%,#f97316 50%,#dc2626 100%)}
+        .status-gradient-idle{background:linear-gradient(135deg,rgba(239,68,68,0.3) 0%,rgba(249,115,22,0.2) 100%)}
+
+        .input-glow:focus{border-color:rgba(239,68,68,0.5)!important;box-shadow:0 0 0 3px rgba(239,68,68,0.1),0 0 20px rgba(239,68,68,0.08)}
+
+        .call-btn{
+            background:linear-gradient(135deg,#ef4444 0%,#f97316 100%);
+            box-shadow:0 0 30px rgba(239,68,68,0.3),0 0 60px rgba(239,68,68,0.1);
+            transition:all 0.3s ease;
+            animation:callPulse 2s ease-in-out infinite;
         }
-        .waveform-bar {
-            animation: waveAnimation 1s ease-in-out infinite;
+        .call-btn:hover{box-shadow:0 0 40px rgba(239,68,68,0.5),0 0 80px rgba(239,68,68,0.2);transform:scale(1.1)}
+        @keyframes callPulse{0%,100%{box-shadow:0 0 30px rgba(239,68,68,0.3),0 0 60px rgba(239,68,68,0.1)}50%{box-shadow:0 0 40px rgba(239,68,68,0.5),0 0 80px rgba(239,68,68,0.2)}}
+
+        @keyframes waveAnimation{0%,100%{height:20px}50%{height:40px}}
+        .waveform-bar{animation:waveAnimation 1s ease-in-out infinite}
+
+        .orbit-ring{position:absolute;border-radius:50%;border:1px solid rgba(239,68,68,0.06)}
+        .orbit-ring-1{width:250px;height:250px;top:-30px;left:-50px;animation:orbitSpin 30s linear infinite}
+        .orbit-ring-2{width:400px;height:400px;top:-120px;left:-150px;animation:orbitSpin 45s linear infinite reverse}
+        @keyframes orbitSpin{to{transform:rotate(360deg)}}
+
+        .siren-glow{animation:sirenGlow 2s ease-in-out infinite alternate}
+        @keyframes sirenGlow{0%{filter:drop-shadow(0 0 15px rgba(239,68,68,0.4))}100%{filter:drop-shadow(0 0 25px rgba(249,115,22,0.5))}}
+
+        .pulse-ring{
+            position:absolute;border-radius:50%;border:2px solid rgba(239,68,68,0.2);
+            animation:pulseRing 2s ease-out infinite;
         }
+        .pulse-ring-2{animation-delay:0.7s}
+        .pulse-ring-3{animation-delay:1.4s}
+        @keyframes pulseRing{0%{transform:scale(0.8);opacity:1}100%{transform:scale(2);opacity:0}}
+
+        .reveal{opacity:0;transform:translateY(24px)}
     </style>
 </head>
+<body class="text-white font-sans leading-relaxed min-h-screen">
+    <canvas id="particle-canvas"></canvas>
+    <div class="fixed inset-0 pointer-events-none z-[1] ambient-red"></div>
+    <div class="fixed inset-0 pointer-events-none z-[1] ambient-side"></div>
+    <div class="fixed inset-0 pointer-events-none z-[1] ambient-bottom"></div>
 
-<body class="bg-civic-dark text-white font-sans leading-relaxed min-h-screen overflow-x-hidden">
-    <!-- Fixed Top Spotlight Effect -->
-    <div class="fixed top-0 left-0 w-full h-[400px] pointer-events-none z-0" style="background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.18) 10%, rgba(255, 255, 255, 0.12) 20%, rgba(255, 255, 255, 0.08) 35%, rgba(255, 255, 255, 0.04) 55%, rgba(255, 255, 255, 0.01) 75%, transparent 100%); filter: blur(60px);"></div>
-    
-    <!-- Right Side Spotlight -->
-    <div class="fixed top-[30%] right-[-10%] w-[800px] h-[800px] pointer-events-none z-0" style="background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 15%, rgba(255, 255, 255, 0.1) 30%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.02) 70%, transparent 100%); filter: blur(80px);"></div>
-
-    <!-- Header - Premium Glassmorphism -->
-    <header class="fixed top-0 left-0 right-0 z-50 glass-bg backdrop-blur-xl border-b border-white/[0.06]">
-        <nav class="flex justify-between items-center py-4 px-10 max-w-[1400px] mx-auto">
-            <a href="landing.html" class="flex items-center gap-3 text-lg font-semibold text-white no-underline group">
-                <img src="public/CivicLogo.png" alt="CivicAId Logo" class="w-10 h-10 object-contain transition-transform group-hover:scale-110">
-                <span class="group-hover:text-blue-400 transition-colors">CivicAId</span>
+    <header class="fixed top-0 left-0 right-0 z-50 glass-nav">
+        <nav class="flex items-center justify-between h-16 px-6 lg:px-10 max-w-[1280px] mx-auto">
+            <a href="landing.html" class="flex items-center gap-2.5 no-underline shrink-0 group">
+                <img src="public/CivicLogo.png" alt="CivicAId" class="w-8 h-8 object-contain transition-transform group-hover:scale-110">
+                <span class="text-[0.9375rem] font-semibold text-white">CivicAId</span>
             </a>
-            <div class="flex items-center gap-8">
-                <a href="landing.html" class="text-white/70 no-underline text-sm font-medium hover:text-white transition-colors">Home</a>
-                <a href="https://github.com/adi3433/CIVIC-AID-STARTUP-" target="_blank" class="text-white/70 no-underline text-sm font-medium hover:text-white transition-colors">GitHub</a>
+            <div class="flex items-center gap-6">
+                <a href="landing.html" class="text-white/50 text-sm font-medium hover:text-white transition-colors no-underline">Home</a>
+                <a href="https://github.com/adi3433/CIVIC-AID-STARTUP-" target="_blank" class="text-white/50 text-sm font-medium hover:text-white transition-colors no-underline">GitHub</a>
+                <div class="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400">
+                    <span class="w-1.5 h-1.5 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse"></span>
+                    Emergency AI
+                </div>
             </div>
         </nav>
     </header>
 
-    <main class="relative z-10 pt-28 px-6 pb-12">
-        <div class="max-w-[500px] mx-auto">
-            <!-- Hero Section -->
-            <div class="text-center mb-8">
-                <span class="inline-block text-xs font-medium text-white/60 bg-white/5 border border-white/[0.08] px-3 py-1.5 rounded tracking-wide mb-4">🚨 EMERGENCY RESPONSE AI</span>
-                <h1 class="text-4xl font-bold leading-tight text-white mb-3 tracking-tight">Emergency Dispatch</h1>
-                <p class="text-sm text-white/60 leading-relaxed">AI-powered emergency call handling and response</p>
+    <main class="relative z-10 pt-28 pb-20">
+        <div class="max-w-[550px] mx-auto px-6">
+            <!-- Hero -->
+            <div class="text-center mb-10">
+                <div class="reveal inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6" style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.12);">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                    <span class="text-[0.6875rem] font-medium tracking-wide text-red-400/80 uppercase">Emergency Response AI</span>
+                </div>
+                <h1 class="reveal text-[clamp(2rem,4.5vw,3rem)] font-extrabold tracking-[-0.035em] leading-[1.1] text-white mb-4">
+                    Emergency<br><span class="bg-gradient-to-r from-red-400 via-orange-400 to-amber-400 bg-clip-text text-transparent">Dispatch</span>
+                </h1>
+                <p class="reveal text-base text-white/50 leading-relaxed">AI-powered emergency call handling and response</p>
             </div>
 
             <!-- Dispatch Card -->
-            <div class="bg-civic-card/60 backdrop-blur-xl border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl">
+            <div class="card-glass rounded-2xl overflow-hidden reveal" id="dispatch-card">
                 <!-- Status Bar -->
-                <div class="bg-gradient-to-r from-red-500 to-orange-500 px-5 py-4 flex justify-between items-center">
+                <div class="status-gradient px-5 py-4 flex justify-between items-center">
                     <span class="font-semibold text-sm" id="status-text">Dispatch Center</span>
                     <div class="flex items-center gap-2 text-xs">
                         <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
@@ -90,90 +131,77 @@
 
                 <!-- Idle State -->
                 <div class="p-10 text-center" id="idle-state">
-                    <div class="text-6xl mb-6">📞</div>
+                    <div class="relative inline-block mb-8">
+                        <!-- Pulse rings behind phone icon -->
+                        <div class="pulse-ring w-32 h-32 -top-4 -left-4"></div>
+                        <div class="pulse-ring pulse-ring-2 w-32 h-32 -top-4 -left-4"></div>
+                        <div class="pulse-ring pulse-ring-3 w-32 h-32 -top-4 -left-4"></div>
+                        <div class="text-6xl siren-glow relative z-10">📞</div>
+                    </div>
                     <h2 class="text-2xl font-bold mb-3">Start Emergency Call</h2>
-                    <p class="text-white/60 mb-8">Press the button below to connect with our AI dispatcher</p>
-                    <button onclick="initiateCall()" class="w-24 h-24 rounded-full bg-gradient-to-br from-red-500 to-orange-500 text-4xl hover:scale-110 transition-transform shadow-lg hover:shadow-red-500/50">
+                    <p class="text-white/50 mb-8">Press the button below to connect with our AI dispatcher</p>
+                    <button onclick="initiateCall()" class="call-btn w-24 h-24 rounded-full text-4xl mx-auto flex items-center justify-center border-0 cursor-pointer">
                         📞
                     </button>
                 </div>
 
                 <!-- Connected State -->
                 <div class="hidden" id="connected-state">
-                    <!-- Conversation Area -->
                     <div class="p-5 overflow-y-auto flex flex-col gap-3 min-h-[300px] max-h-[400px]" id="conversation"></div>
-
-                    <!-- Waveform -->
                     <div class="hidden justify-center items-end gap-1 h-16 px-5" id="waveform">
-                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0s;"></div>
-                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0.1s;"></div>
-                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0.2s;"></div>
-                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0.3s;"></div>
-                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0.4s;"></div>
-                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0.5s;"></div>
-                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0.6s;"></div>
-                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay: 0.7s;"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay:0s"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay:0.1s"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay:0.2s"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay:0.3s"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay:0.4s"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay:0.5s"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay:0.6s"></div>
+                        <div class="waveform-bar w-1 bg-red-500 rounded-full" style="animation-delay:0.7s"></div>
                     </div>
-
-                    <!-- Input Area -->
-                    <div class="p-5 border-t border-white/[0.08]">
+                    <div class="p-5 border-t border-white/[0.06]">
                         <div class="flex gap-3 mb-3">
-                            <button id="mic-btn" onclick="toggleRecording()" class="w-12 h-12 rounded-full bg-civic-surface hover:bg-red-500/20 border border-white/10 text-2xl flex items-center justify-center transition-all">🎤</button>
-                            <input type="text" id="text-input" class="flex-1 bg-civic-surface border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:border-red-500/50 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all" placeholder="Type your emergency..." onkeypress="handleKeyPress(event)">
+                            <button id="mic-btn" onclick="toggleRecording()" class="w-12 h-12 rounded-full bg-white/[0.03] hover:bg-red-500/20 border border-white/10 text-2xl flex items-center justify-center transition-all">🎤</button>
+                            <input type="text" id="text-input" class="input-glow flex-1 bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none transition-all" placeholder="Type your emergency..." onkeypress="handleKeyPress(event)">
                             <button id="send-btn" onclick="sendMessage()" disabled class="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-orange-500 disabled:opacity-50 disabled:cursor-not-allowed text-xl flex items-center justify-center transition-all hover:scale-110">➤</button>
                         </div>
                         <div class="text-center">
-                            <button onclick="endCall()" class="w-16 h-16 rounded-full bg-red-600 hover:bg-red-700 text-2xl transition-all hover:scale-110 shadow-lg">✕</button>
+                            <button onclick="endCall()" class="w-16 h-16 rounded-full bg-red-600 hover:bg-red-700 text-2xl transition-all hover:scale-110 shadow-lg shadow-red-500/20 border-0 cursor-pointer text-white">✕</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- New Call Button (after call ends) -->
+            <!-- New Call Button -->
             <div class="hidden mt-6 text-center" id="new-call-section">
-                <button onclick="initiateCall()" class="bg-civic-card/60 backdrop-blur-xl border border-white/10 text-white px-8 py-4 rounded-xl font-semibold hover:border-red-500/50 transition-all">
+                <button onclick="initiateCall()" class="card-glass text-white px-8 py-4 rounded-xl font-semibold hover:border-red-500/30 transition-all border border-white/10 cursor-pointer">
                     📞 New Emergency Call
                 </button>
             </div>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="relative z-10 text-center py-8 text-white/40 text-sm">
-        <p>&copy; 2024 CivicAId. AI-Powered Emergency Response System.</p>
+    <footer class="relative z-10 text-center py-8 text-white/30 text-sm border-t border-white/[0.04]">
+        <p>&copy; 2026 CivicAId. AI-Powered Emergency Response System.</p>
     </footer>
 
     <script>
-        let isRecording = false;
-        let recognition = null;
-        let messageCount = 0;
-        let currentClassification = null;
+        // ── Particle System (Red/Orange) ──
+        (function(){const c=document.getElementById('particle-canvas'),x=c.getContext('2d');let p=[];const C=['rgba(239,68,68,','rgba(249,115,22,','rgba(220,38,38,','rgba(251,146,60,'];function r(){c.width=window.innerWidth;c.height=window.innerHeight}window.addEventListener('resize',r);r();class P{constructor(){this.reset()}reset(){this.x=Math.random()*c.width;this.y=Math.random()*c.height;this.s=Math.random()*2.5+0.5;this.sx=(Math.random()-0.5)*0.35;this.sy=(Math.random()-0.5)*0.25;this.c=C[Math.floor(Math.random()*C.length)];this.o=Math.random()*0.3+0.08;this.p=Math.random()*Math.PI*2;this.ps=Math.random()*0.02+0.005}update(){this.x+=this.sx;this.y+=this.sy;this.p+=this.ps;if(this.x<0||this.x>c.width||this.y<0||this.y>c.height)this.reset()}draw(){const o=this.o*(0.6+Math.sin(this.p)*0.4);x.beginPath();x.arc(this.x,this.y,this.s,0,Math.PI*2);x.fillStyle=this.c+o+')';x.fill()}}for(let i=0;i<60;i++)p.push(new P());function d(){for(let i=0;i<p.length;i++)for(let j=i+1;j<p.length;j++){const dx=p[i].x-p[j].x,dy=p[i].y-p[j].y,di=Math.sqrt(dx*dx+dy*dy);if(di<130){x.beginPath();x.strokeStyle=`rgba(239,68,68,${0.04*(1-di/130)})`;x.lineWidth=0.5;x.moveTo(p[i].x,p[i].y);x.lineTo(p[j].x,p[j].y);x.stroke()}}}function l(){x.clearRect(0,0,c.width,c.height);p.forEach(i=>{i.update();i.draw()});d();requestAnimationFrame(l)}l()})();
 
-        // Initialize Speech Recognition
+        const {animate, inView} = Motion;
+
+        // 3D tilt on dispatch card
+        const dc=document.getElementById('dispatch-card');
+        if(dc){dc.addEventListener('mousemove',e=>{const r=dc.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-0.5,y=(e.clientY-r.top)/r.height-0.5;dc.style.transform=`perspective(1200px) rotateY(${x*6}deg) rotateX(${-y*4}deg)`});dc.addEventListener('mouseleave',()=>{dc.style.transform='perspective(1200px) rotateY(0deg) rotateX(0deg)'})}
+
+        let isRecording = false, recognition = null, messageCount = 0, currentClassification = null;
+
         function initSpeechRecognition() {
             if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                recognition = new SpeechRecognition();
-                recognition.continuous = false;
-                recognition.interimResults = false;
-                recognition.lang = 'en-US';
-
-                recognition.onresult = (event) => {
-                    const transcript = event.results[0][0].transcript;
-                    document.getElementById('text-input').value = transcript;
-                    sendMessage();
-                };
-
-                recognition.onerror = (event) => {
-                    console.error('Speech recognition error:', event.error);
-                    stopRecording();
-                };
-
-                recognition.onend = () => {
-                    stopRecording();
-                };
-            } else {
-                console.warn('Speech recognition not supported');
+                const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SR(); recognition.continuous = false; recognition.interimResults = false; recognition.lang = 'en-US';
+                recognition.onresult = (e) => { document.getElementById('text-input').value = e.results[0][0].transcript; sendMessage(); };
+                recognition.onerror = () => stopRecording(); recognition.onend = () => stopRecording();
             }
         }
 
@@ -183,18 +211,10 @@
             document.getElementById('new-call-section').classList.add('hidden');
             document.getElementById('status-text').textContent = 'Connected';
             document.getElementById('status-label').textContent = 'Active Call';
-            
-            messageCount = 0;
-            currentClassification = null;
-            
+            messageCount = 0; currentClassification = null;
+            document.getElementById('conversation').innerHTML = '';
             addMessage('system', 'Call connected to Emergency Dispatch AI');
-            setTimeout(() => {
-                addMessage('assistant', 'Emergency Dispatch. What is your emergency?');
-                speakText('Emergency Dispatch. What is your emergency?');
-            }, 500);
-            
-            // Animation
-            animate('.container > *', { opacity: [0, 1] }, { duration: 1.5, easing: 'linear' });
+            setTimeout(() => { addMessage('assistant', 'Emergency Dispatch. What is your emergency?'); speakText('Emergency Dispatch. What is your emergency?'); }, 500);
         }
 
         function endCall() {
@@ -203,177 +223,72 @@
             document.getElementById('new-call-section').classList.remove('hidden');
             document.getElementById('status-text').textContent = 'Call Ended';
             document.getElementById('status-label').textContent = 'Offline';
-            
             addMessage('system', 'Call ended. Emergency services have been notified.');
-            
-            if (isRecording) {
-                stopRecording();
-            }
+            if (isRecording) stopRecording();
         }
 
-        function toggleRecording() {
-            if (!recognition) {
-                alert('Speech recognition is not supported in your browser');
-                return;
-            }
+        function toggleRecording() { if (!recognition) { alert('Speech recognition not supported'); return; } isRecording ? stopRecording() : startRecording(); }
+        function startRecording() { isRecording = true; document.getElementById('mic-btn').classList.add('bg-red-500'); document.getElementById('waveform').classList.remove('hidden'); document.getElementById('waveform').classList.add('flex'); recognition.start(); }
+        function stopRecording() { isRecording = false; document.getElementById('mic-btn').classList.remove('bg-red-500'); document.getElementById('waveform').classList.add('hidden'); document.getElementById('waveform').classList.remove('flex'); if (recognition) recognition.stop(); }
 
-            if (isRecording) {
-                stopRecording();
-            } else {
-                startRecording();
-            }
-        }
-
-        function startRecording() {
-            isRecording = true;
-            document.getElementById('mic-btn').classList.add('bg-red-500');
-            document.getElementById('waveform').classList.remove('hidden');
-            document.getElementById('waveform').classList.add('flex');
-            recognition.start();
-        }
-
-        function stopRecording() {
-            isRecording = false;
-            document.getElementById('mic-btn').classList.remove('bg-red-500');
-            document.getElementById('waveform').classList.add('hidden');
-            document.getElementById('waveform').classList.remove('flex');
-            if (recognition) {
-                recognition.stop();
-            }
-        }
-
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-            document.getElementById('send-btn').disabled = !event.target.value.trim();
-        }
-
-        document.getElementById('text-input').addEventListener('input', (e) => {
-            document.getElementById('send-btn').disabled = !e.target.value.trim();
-        });
+        function handleKeyPress(event) { if (event.key === 'Enter') sendMessage(); document.getElementById('send-btn').disabled = !event.target.value.trim(); }
+        document.addEventListener('DOMContentLoaded', () => { document.getElementById('text-input')?.addEventListener('input', (e) => { document.getElementById('send-btn').disabled = !e.target.value.trim(); }); });
 
         async function sendMessage() {
-            const input = document.getElementById('text-input');
-            const text = input.value.trim();
-            
-            if (!text) return;
-            
-            input.value = '';
-            document.getElementById('send-btn').disabled = true;
-            
-            addMessage('user', text);
-            messageCount++;
-            
-            showTypingIndicator();
-            
+            const input = document.getElementById('text-input'), text = input.value.trim();
+            if (!text) return; input.value = ''; document.getElementById('send-btn').disabled = true;
+            addMessage('user', text); messageCount++; showTypingIndicator();
             try {
-                const response = await fetch('/api/dispatch/process', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text, messageCount, classification: currentClassification })
-                });
-                
-                const data = await response.json();
-                
-                hideTypingIndicator();
-                
-                if (data.classification && !currentClassification) {
-                    currentClassification = data.classification;
-                }
-                
-                addMessage('assistant', data.response);
-                speakText(data.response);
+                const response = await fetch('/api/dispatch/process', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text, messageCount, classification: currentClassification }) });
+                const data = await response.json(); hideTypingIndicator();
+                if (data.classification && !currentClassification) currentClassification = data.classification;
+                addMessage('assistant', data.response); speakText(data.response);
             } catch (error) {
-                console.error('Error:', error);
-                hideTypingIndicator();
-                
-                const fallbackResponse = getFallbackResponse(text, messageCount);
-                addMessage('assistant', fallbackResponse);
-                speakText(fallbackResponse);
+                console.error('Error:', error); hideTypingIndicator();
+                const fallback = getFallbackResponse(text, messageCount);
+                addMessage('assistant', fallback); speakText(fallback);
             }
         }
 
         function addMessage(type, text) {
-            const conversation = document.getElementById('conversation');
-            const messageDiv = document.createElement('div');
-            
-            if (type === 'system') {
-                messageDiv.className = 'text-center text-xs text-white/40 py-2';
-                messageDiv.textContent = text;
-            } else if (type === 'assistant') {
-                messageDiv.className = 'max-w-[85%] self-start bg-civic-surface px-4 py-3 rounded-2xl rounded-tl-sm text-sm';
-                messageDiv.textContent = text;
-            } else if (type === 'user') {
-                messageDiv.className = 'max-w-[85%] self-end bg-gradient-to-br from-red-500 to-orange-500 px-4 py-3 rounded-2xl rounded-tr-sm text-sm';
-                messageDiv.textContent = text;
-            }
-            
-            conversation.appendChild(messageDiv);
-            conversation.scrollTop = conversation.scrollHeight;
+            const conv = document.getElementById('conversation'), div = document.createElement('div');
+            if (type === 'system') { div.className = 'text-center text-xs text-white/30 py-2'; div.textContent = text; }
+            else if (type === 'assistant') { div.className = 'max-w-[85%] self-start bg-white/[0.03] border border-white/[0.06] px-4 py-3 rounded-2xl rounded-tl-sm text-sm'; div.textContent = text; }
+            else if (type === 'user') { div.className = 'max-w-[85%] self-end bg-gradient-to-br from-red-500 to-orange-500 px-4 py-3 rounded-2xl rounded-tr-sm text-sm'; div.textContent = text; }
+            conv.appendChild(div); conv.scrollTop = conv.scrollHeight;
+            // Animate in
+            div.style.opacity = '0'; div.style.transform = 'translateY(8px)';
+            requestAnimationFrame(() => { div.style.transition = 'all 0.3s ease'; div.style.opacity = '1'; div.style.transform = 'translateY(0)'; });
         }
 
         function showTypingIndicator() {
-            const conversation = document.getElementById('conversation');
-            const indicator = document.createElement('div');
-            indicator.id = 'typing-indicator';
-            indicator.className = 'flex items-center gap-2 px-4 py-3 bg-civic-surface rounded-2xl rounded-tl-sm max-w-[85%] self-start';
-            indicator.innerHTML = `
-                <div class="flex gap-1">
-                    <span class="w-2 h-2 bg-white/40 rounded-full animate-bounce" style="animation-delay: 0s;"></span>
-                    <span class="w-2 h-2 bg-white/40 rounded-full animate-bounce" style="animation-delay: 0.2s;"></span>
-                    <span class="w-2 h-2 bg-white/40 rounded-full animate-bounce" style="animation-delay: 0.4s;"></span>
-                </div>
-            `;
-            conversation.appendChild(indicator);
-            conversation.scrollTop = conversation.scrollHeight;
+            const conv = document.getElementById('conversation'), ind = document.createElement('div');
+            ind.id = 'typing-indicator'; ind.className = 'flex items-center gap-2 px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-2xl rounded-tl-sm max-w-[85%] self-start';
+            ind.innerHTML = '<div class="flex gap-1"><span class="w-2 h-2 bg-red-400/50 rounded-full animate-bounce" style="animation-delay:0s"></span><span class="w-2 h-2 bg-red-400/50 rounded-full animate-bounce" style="animation-delay:0.2s"></span><span class="w-2 h-2 bg-red-400/50 rounded-full animate-bounce" style="animation-delay:0.4s"></span></div>';
+            conv.appendChild(ind); conv.scrollTop = conv.scrollHeight;
+        }
+        function hideTypingIndicator() { const ind = document.getElementById('typing-indicator'); if (ind) ind.remove(); }
+
+        function getFallbackResponse(text, mc) {
+            const lt = text.toLowerCase();
+            if (lt.includes('fire') || lt.includes('burning')) { currentClassification = 'fire'; return "Fire emergency noted. Fire brigade is being dispatched. What is your exact location?"; }
+            else if (lt.includes('medical') || lt.includes('heart') || lt.includes('hurt') || lt.includes('injured')) { currentClassification = 'medical'; return "Medical emergency. Ambulance is being dispatched. What is your location?"; }
+            else if (lt.includes('robbery') || lt.includes('attack') || lt.includes('crime') || lt.includes('police')) { currentClassification = 'police'; return "Police are being dispatched. Are you in a safe location? What is your address?"; }
+            else if (lt.includes('street') || lt.includes('road') || lt.includes('building') || lt.includes('address')) return "Location received. Emergency services are on their way. ETA 5 minutes.";
+            else if (mc > 3) return "Help is on the way. Please stay calm and don't hang up.";
+            else return "I understand. What type of emergency - medical, fire, or police? And what is your location?";
         }
 
-        function hideTypingIndicator() {
-            const indicator = document.getElementById('typing-indicator');
-            if (indicator) {
-                indicator.remove();
-            }
-        }
+        function speakText(text) { if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(text); u.rate = 1.0; u.pitch = 1.0; window.speechSynthesis.speak(u); } }
 
-        function getFallbackResponse(text, messageCount) {
-            const lowerText = text.toLowerCase();
-            
-            if (lowerText.includes('fire') || lowerText.includes('burning')) {
-                currentClassification = 'fire';
-                return "Fire emergency noted. Fire brigade is being dispatched. What is your exact location?";
-            } else if (lowerText.includes('medical') || lowerText.includes('heart') || lowerText.includes('hurt') || lowerText.includes('injured')) {
-                currentClassification = 'medical';
-                return "Medical emergency. Ambulance is being dispatched. What is your location?";
-            } else if (lowerText.includes('robbery') || lowerText.includes('attack') || lowerText.includes('crime') || lowerText.includes('police')) {
-                currentClassification = 'police';
-                return "Police are being dispatched. Are you in a safe location? What is your address?";
-            } else if (lowerText.includes('street') || lowerText.includes('road') || lowerText.includes('building') || lowerText.includes('address')) {
-                return "Location received. Emergency services are on their way. ETA 5 minutes. Stay on the line.";
-            } else if (messageCount > 3) {
-                return "Help is on the way. Please stay calm and don't hang up until emergency services arrive.";
-            } else {
-                return "I understand. What type of emergency is this - medical, fire, or police? And what is your location?";
-            }
-        }
-
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 1.0;
-                utterance.pitch = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        // Initialize
         initSpeechRecognition();
 
-        // Motion.js animation on load
+        // ── Reveal ──
         window.addEventListener('load', () => {
-            animate('.container > *', { opacity: [0, 1] }, { duration: 1.5, easing: 'linear' });
+            document.querySelectorAll('.reveal').forEach((el, i) => {
+                inView(el, () => { animate(el, { opacity: [0, 1], y: [24, 0] }, { duration: 0.85, delay: 0.1 * (i % 6), easing: [0.22, 1, 0.36, 1] }); }, { amount: 0.15 });
+            });
         });
     </script>
 </body>
-
 </html>

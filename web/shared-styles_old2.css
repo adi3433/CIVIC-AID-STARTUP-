@@ -1,0 +1,79 @@
+/* Shared CivicAid Design System Styles */
+/* These styles complement Tailwind CSS for consistent theming across all pages */
+
+:root {
+    --civic-dark: #0a0e1a;
+    --civic-surface: #0f1420;
+    --civic-card: #141b2d;
+    --teal-primary: #1FA3A3;
+    --teal-hover: #1a8e8e;
+    --teal-active: #177878;
+}
+
+/* Glassmorphism Effect */
+.glass-bg {
+    background: rgba(10, 14, 26, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+/* Gradient Backgrounds */
+.dashboard-gradient {
+    background: linear-gradient(145deg, rgba(20, 27, 45, 0.95), rgba(15, 20, 35, 0.98));
+}
+
+/* Icon Glow Effects */
+.icon-glow-teal {
+    background: radial-gradient(circle at center, rgba(31, 163, 163, 0.25) 0%, rgba(31, 163, 163, 0.08) 70%);
+    box-shadow: 0 0 20px rgba(31, 163, 163, 0.3), inset 0 0 12px rgba(31, 163, 163, 0.2);
+}
+
+.icon-glow-green {
+    background: radial-gradient(circle at center, rgba(37, 211, 102, 0.25) 0%, rgba(37, 211, 102, 0.08) 70%);
+    box-shadow: 0 0 20px rgba(37, 211, 102, 0.3), inset 0 0 12px rgba(37, 211, 102, 0.2);
+}
+
+.icon-glow-red {
+    background: radial-gradient(circle at center, rgba(239, 68, 68, 0.25) 0%, rgba(239, 68, 68, 0.08) 70%);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3), inset 0 0 12px rgba(239, 68, 68, 0.2);
+}
+
+.icon-glow-blue {
+    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.25) 0%, rgba(59, 130, 246, 0.08) 70%);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), inset 0 0 12px rgba(59, 130, 246, 0.2);
+}
+
+.icon-glow-purple {
+    background: radial-gradient(circle at center, rgba(139, 92, 246, 0.25) 0%, rgba(139, 92, 246, 0.08) 70%);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), inset 0 0 12px rgba(139, 92, 246, 0.2);
+}
+
+/* Spotlight Effects */
+.spotlight-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 400px;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.18) 10%, rgba(255, 255, 255, 0.12) 20%, rgba(255, 255, 255, 0.08) 35%, rgba(255, 255, 255, 0.04) 55%, rgba(255, 255, 255, 0.01) 75%, transparent 100%);
+    filter: blur(60px);
+}
+
+.spotlight-right {
+    position: fixed;
+    top: 30%;
+    right: -10%;
+    width: 800px;
+    height: 800px;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 15%, rgba(255, 255, 255, 0.1) 30%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.02) 70%, transparent 100%);
+    filter: blur(80px);
+}
+
+/* Animation Initial States */
+.fade-in-element {
+    opacity: 0;
+}
