@@ -18,7 +18,7 @@ bash scripts/run_all_demos.sh
 
 | Module | Port | Owner | Description | Tech Stack |
 |--------|------|-------|-------------|------------|
-| WhatsApp | 5001 | Adithyan | Modular WhatsApp Bot Generator | Python/Flask |
+| WhatsApp & overall compiler | 5001 | Adithyan | Modular WhatsApp Bot Generator | Python/Flask |
 | Dispatch | 5002 | Lestlin | AI-powered emergency dispatch | Next.js + Python |
 | LeadGen | 5003 | Lestlin | RAG-based case analysis | Python/Flask |
 | Education | 5004 | Basil | PPT/PDF generator | Python/Flask |
